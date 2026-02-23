@@ -9,7 +9,11 @@ import logging
 
 import httpx
 
-from biomcp.constants import SUKL_API_URL
+from biomcp.czech.sukl.client import (
+    SUKL_DLP_V1,
+    SUKL_HTTP_TIMEOUT,
+    fetch_drug_detail as _fetch_drug_detail,
+)
 from biomcp.http_client import (
     cache_response,
     generate_cache_key,
@@ -18,37 +22,12 @@ from biomcp.http_client import (
 
 logger = logging.getLogger(__name__)
 
-_SUKL_DLP_V1 = f"{SUKL_API_URL.rstrip('/api')}/v1"
 _CACHE_TTL = 60 * 60 * 24 * 7  # 1 week
-
-
-async def _fetch_drug_detail(sukl_code: str) -> dict | None:
-    """Fetch drug detail from DLP API."""
-    url = f"{_SUKL_DLP_V1}/lecive-pripravky/{sukl_code}"
-    cache_key = generate_cache_key("GET", url, {})
-
-    cached = get_cached_response(cache_key)
-    if cached:
-        return json.loads(cached)
-
-    try:
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            resp = await client.get(url)
-            if resp.status_code == 404:
-                return None
-            resp.raise_for_status()
-            data = resp.json()
-    except httpx.HTTPError:
-        logger.warning("Failed to fetch drug detail for %s", sukl_code)
-        return None
-
-    cache_response(cache_key, json.dumps(data), _CACHE_TTL)
-    return data
 
 
 async def _fetch_composition(sukl_code: str) -> list[dict]:
     """Fetch drug composition (active substances)."""
-    url = f"{_SUKL_DLP_V1}/slozeni/{sukl_code}"
+    url = f"{SUKL_DLP_V1}/slozeni/{sukl_code}"
     cache_key = generate_cache_key("GET", url, {})
 
     cached = get_cached_response(cache_key)
@@ -56,7 +35,7 @@ async def _fetch_composition(sukl_code: str) -> list[dict]:
         return json.loads(cached)
 
     try:
-        async with httpx.AsyncClient(timeout=30.0) as client:
+        async with httpx.AsyncClient(timeout=SUKL_HTTP_TIMEOUT) as client:
             resp = await client.get(url)
             if resp.status_code == 404:
                 return []
@@ -74,7 +53,7 @@ async def _fetch_doc_metadata(
     sukl_code: str, typ: str | None = None
 ) -> list[dict]:
     """Fetch document metadata for a drug."""
-    url = f"{_SUKL_DLP_V1}/dokumenty-metadata/{sukl_code}"
+    url = f"{SUKL_DLP_V1}/dokumenty-metadata/{sukl_code}"
     params = {"typ": typ} if typ else {}
     cache_key = generate_cache_key("GET", url, params)
 
@@ -83,7 +62,7 @@ async def _fetch_doc_metadata(
         return json.loads(cached)
 
     try:
-        async with httpx.AsyncClient(timeout=30.0) as client:
+        async with httpx.AsyncClient(timeout=SUKL_HTTP_TIMEOUT) as client:
             resp = await client.get(url, params=params)
             if resp.status_code == 404:
                 return []
@@ -100,7 +79,7 @@ async def _fetch_doc_metadata(
 
 def _build_doc_url(sukl_code: str, doc_type: str) -> str:
     """Build document download URL."""
-    return f"{_SUKL_DLP_V1}/dokumenty/{sukl_code}/{doc_type}"
+    return f"{SUKL_DLP_V1}/dokumenty/{sukl_code}/{doc_type}"
 
 
 def _composition_to_substances(

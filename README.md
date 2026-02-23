@@ -61,6 +61,14 @@ BioMCP integrates with multiple biomedical data sources:
   - **Drug Adverse Events (FAERS)** - Post-market drug safety reports
   - **Drug Labels (SPL)** - Official prescribing information
   - **Device Events (MAUDE)** - Medical device adverse events, with genomic device filtering
+  - **Drug Approvals** - FDA drug approval history
+  - **Drug Recalls** - FDA drug recall enforcement reports
+  - **Drug Shortages** - Current drug shortage information
+
+### Analysis & Prediction Sources
+
+- **AlphaGenome** - Google DeepMind variant effect predictions (requires API key)
+- **Enrichr** - Gene set enrichment analysis from Ma'ayan Lab (pathway, ontology, cell type)
 
 ### Czech Healthcare Sources / České zdravotnické zdroje
 
@@ -83,7 +91,7 @@ BioMCP integrates with multiple biomedical data sources:
 
 ## Available MCP Tools
 
-BioMCP provides 38 specialized tools for biomedical research (24 global + 14 Czech healthcare):
+BioMCP provides 50 specialized tools for biomedical research (36 global + 14 Czech healthcare):
 
 ### Core Tools (3)
 
@@ -187,16 +195,16 @@ fetch(domain="variant", id="rs113488022")
 - **Trials**: `detail` can be "protocol", "locations", "outcomes", "references", or "all"
 - **Variants**: Always returns full details
 
-### Individual Tools (35)
+### Individual Tools (47)
 
-For users who prefer direct access to specific functionality, BioMCP also provides 35 individual tools (21 global + 14 Czech):
+For users who prefer direct access to specific functionality, BioMCP also provides 47 individual tools (33 global + 14 Czech):
 
 #### Article Tools (2)
 
 - **article_searcher**: Search PubMed/PubTator3 and preprints
 - **article_getter**: Fetch detailed article information (supports PMID and DOI)
 
-#### Trial Tools (5)
+#### Trial Tools (6)
 
 - **trial_searcher**: Search ClinicalTrials.gov or NCI CTS API (via source parameter)
 - **trial_getter**: Fetch all trial details from either source
@@ -224,6 +232,26 @@ For users who prefer direct access to specific functionality, BioMCP also provid
 - **gene_getter**: Get real-time gene information from MyGene.info
 - **disease_getter**: Get disease definitions and synonyms from MyDisease.info
 - **drug_getter**: Get drug/chemical information from MyChem.info
+
+#### OpenFDA Tools (12)
+
+- **openfda_adverse_searcher**: Search FDA adverse event reports (FAERS)
+- **openfda_adverse_getter**: Get adverse event report details
+- **openfda_label_searcher**: Search FDA drug labels (SPL)
+- **openfda_label_getter**: Get drug label details
+- **openfda_device_searcher**: Search medical device adverse events (MAUDE)
+- **openfda_device_getter**: Get device event details
+- **openfda_approval_searcher**: Search FDA drug approvals
+- **openfda_approval_getter**: Get drug approval details
+- **openfda_recall_searcher**: Search FDA drug recalls
+- **openfda_recall_getter**: Get drug recall details
+- **openfda_shortage_searcher**: Search FDA drug shortages
+- **openfda_shortage_getter**: Get drug shortage details
+
+#### Genomic Analysis Tools (2)
+
+- **alphagenome_predictor**: Predict variant effects using Google DeepMind AlphaGenome (requires API key)
+- **enrichr_analyzer**: Gene set enrichment analysis via Enrichr (pathway, ontology, cell type enrichment)
 
 **Note**: All individual tools that search by gene automatically include cBioPortal summaries when the `include_cbioportal` parameter is True (default). Trial searches can expand disease conditions with synonyms when `expand_synonyms` is True (default).
 

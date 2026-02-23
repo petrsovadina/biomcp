@@ -1888,7 +1888,7 @@ async def _unified_search(  # noqa: C901
 
             # Get the appropriate handler for formatting
             handler_class = get_domain_handler(
-                domain.rstrip("s")
+                domain.removesuffix("s")
             )  # Remove trailing 's'
 
             # Process and format each result

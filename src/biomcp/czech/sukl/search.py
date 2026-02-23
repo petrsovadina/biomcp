@@ -9,8 +9,12 @@ import logging
 
 import httpx
 
-from biomcp.constants import SUKL_API_URL
 from biomcp.czech.diacritics import normalize_query
+from biomcp.czech.sukl.client import (
+    SUKL_DLP_V1,
+    SUKL_HTTP_TIMEOUT,
+    fetch_drug_detail as _fetch_drug_detail,
+)
 from biomcp.http_client import (
     cache_response,
     generate_cache_key,
@@ -19,9 +23,7 @@ from biomcp.http_client import (
 
 logger = logging.getLogger(__name__)
 
-_SUKL_DLP_V1 = f"{SUKL_API_URL.rstrip('/api')}/v1"
 _DRUG_LIST_CACHE_TTL = 60 * 60 * 24  # 24 hours
-_DRUG_DETAIL_CACHE_TTL = 60 * 60 * 24 * 7  # 1 week
 
 
 async def _fetch_drug_list(
@@ -30,16 +32,18 @@ async def _fetch_drug_list(
     """Fetch list of SUKL codes from DLP API."""
     cache_key = generate_cache_key(
         "GET",
-        f"{_SUKL_DLP_V1}/lecive-pripravky",
+        f"{SUKL_DLP_V1}/lecive-pripravky",
         {"typSeznamu": typ_seznamu, "uvedeneCeny": "false"},
     )
     cached = get_cached_response(cache_key)
     if cached:
         return json.loads(cached)
 
-    async with httpx.AsyncClient(timeout=30.0) as client:
+    async with httpx.AsyncClient(
+        timeout=SUKL_HTTP_TIMEOUT
+    ) as client:
         resp = await client.get(
-            f"{_SUKL_DLP_V1}/lecive-pripravky",
+            f"{SUKL_DLP_V1}/lecive-pripravky",
             params={
                 "typSeznamu": typ_seznamu,
                 "uvedeneCeny": "false",
@@ -50,34 +54,6 @@ async def _fetch_drug_list(
 
     cache_response(cache_key, json.dumps(codes), _DRUG_LIST_CACHE_TTL)
     return codes
-
-
-async def _fetch_drug_detail(
-    sukl_code: str,
-    use_cache: bool = True,
-) -> dict | None:
-    """Fetch drug detail from DLP API by SUKL code."""
-    url = f"{_SUKL_DLP_V1}/lecive-pripravky/{sukl_code}"
-    cache_key = generate_cache_key("GET", url, {})
-
-    if use_cache:
-        cached = get_cached_response(cache_key)
-        if cached:
-            return json.loads(cached)
-
-    try:
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            resp = await client.get(url)
-            if resp.status_code == 404:
-                return None
-            resp.raise_for_status()
-            data = resp.json()
-    except httpx.HTTPError:
-        logger.warning("Failed to fetch drug detail for %s", sukl_code)
-        return None
-
-    cache_response(cache_key, json.dumps(data), _DRUG_DETAIL_CACHE_TTL)
-    return data
 
 
 def _matches_query(detail: dict, normalized_q: str) -> bool:

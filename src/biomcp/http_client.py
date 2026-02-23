@@ -1,4 +1,5 @@
 import csv
+import hashlib
 import json
 import os
 import ssl
@@ -52,20 +53,17 @@ def get_cache() -> Cache:
 
 
 def generate_cache_key(method: str, url: str, params: dict) -> str:
-    """Generate cache key using Python's built-in hash function for speed."""
-    # Handle simple cases without params
+    """Generate a deterministic cache key using hashlib."""
     if not params:
         return f"{method.upper()}:{url}"
 
-    # Use Python's built-in hash with a fixed seed for consistency
-    # This is much faster than SHA256 for cache keys
     params_str = json.dumps(params, sort_keys=True, separators=(",", ":"))
     key_source = f"{method.upper()}:{url}:{params_str}"
 
-    # Use Python's hash function with a fixed seed for deterministic results
-    # Convert to positive hex string for compatibility
-    hash_value = hash(key_source)
-    return f"{hash_value & 0xFFFFFFFFFFFFFFFF:016x}"
+    hash_value = hashlib.md5(  # noqa: S324
+        key_source.encode()
+    ).hexdigest()
+    return hash_value
 
 
 def cache_response(cache_key: str, content: str, ttl: int):

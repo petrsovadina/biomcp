@@ -35,6 +35,28 @@ from biomcp.variants.search import _variant_searcher
 logger = logging.getLogger(__name__)
 
 
+def _handle_cts_bucket_error(
+    error: Exception, suggestions: str
+) -> str | None:
+    """Handle NCI CTS API bucket limit errors.
+
+    Returns a user-friendly message if the error is a bucket
+    limit error, otherwise returns None to allow re-raising.
+    """
+    error_msg = str(error)
+    if (
+        "too_many_buckets_exception" in error_msg
+        or "75000" in error_msg
+    ):
+        return (
+            "\u26a0\ufe0f **Search Too Broad**\n\n"
+            "The NCI API cannot process this search "
+            "because it returns too many results.\n\n"
+            f"{suggestions}"
+        )
+    return None
+
+
 # Article Tools
 @mcp_app.tool()
 @track_performance("biomcp.article_searcher")
@@ -1026,22 +1048,20 @@ async def nci_organization_searcher(
         )
         return format_organization_results(results)
     except CTSAPIError as e:
-        # Check for Elasticsearch bucket limit error
-        error_msg = str(e)
-        if "too_many_buckets_exception" in error_msg or "75000" in error_msg:
-            return (
-                "⚠️ **Search Too Broad**\n\n"
-                "The NCI API cannot process this search because it returns too many results.\n\n"
-                "**To fix this, try:**\n"
-                "1. **Always use city AND state together** for location searches\n"
-                "2. Add an organization name (even partial) to narrow results\n"
-                "3. Use multiple filters together (name + location, or name + type)\n\n"
-                "**Examples that work:**\n"
-                "- `nci_organization_searcher(city='Cleveland', state='OH')`\n"
-                "- `nci_organization_searcher(name='Cleveland Clinic')`\n"
-                "- `nci_organization_searcher(name='cancer', city='Boston', state='MA')`\n"
-                "- `nci_organization_searcher(organization_type='Academic', city='Houston', state='TX')`"
-            )
+        msg = _handle_cts_bucket_error(
+            e,
+            "**To fix this, try:**\n"
+            "1. **Always use city AND state together** for location searches\n"
+            "2. Add an organization name (even partial) to narrow results\n"
+            "3. Use multiple filters together (name + location, or name + type)\n\n"
+            "**Examples that work:**\n"
+            "- `nci_organization_searcher(city='Cleveland', state='OH')`\n"
+            "- `nci_organization_searcher(name='Cleveland Clinic')`\n"
+            "- `nci_organization_searcher(name='cancer', city='Boston', state='MA')`\n"
+            "- `nci_organization_searcher(organization_type='Academic', city='Houston', state='TX')`",
+        )
+        if msg:
+            return msg
         raise
 
 
@@ -1158,21 +1178,19 @@ async def nci_intervention_searcher(
         )
         return format_intervention_results(results)
     except CTSAPIError as e:
-        # Check for Elasticsearch bucket limit error
-        error_msg = str(e)
-        if "too_many_buckets_exception" in error_msg or "75000" in error_msg:
-            return (
-                "⚠️ **Search Too Broad**\n\n"
-                "The NCI API cannot process this search because it returns too many results.\n\n"
-                "**Try adding more specific filters:**\n"
-                "- Add an intervention name (even partial)\n"
-                "- Specify an intervention type (e.g., 'Drug', 'Device')\n"
-                "- Search for a specific drug or therapy name\n\n"
-                "**Example searches that work better:**\n"
-                "- Search for 'pembrolizumab' instead of all drugs\n"
-                "- Search for 'CAR-T' to find CAR-T cell therapies\n"
-                "- Filter by type: Drug, Device, Procedure, etc."
-            )
+        msg = _handle_cts_bucket_error(
+            e,
+            "**Try adding more specific filters:**\n"
+            "- Add an intervention name (even partial)\n"
+            "- Specify an intervention type (e.g., 'Drug', 'Device')\n"
+            "- Search for a specific drug or therapy name\n\n"
+            "**Example searches that work better:**\n"
+            "- Search for 'pembrolizumab' instead of all drugs\n"
+            "- Search for 'CAR-T' to find CAR-T cell therapies\n"
+            "- Filter by type: Drug, Device, Procedure, etc.",
+        )
+        if msg:
+            return msg
         raise
 
 
@@ -1284,21 +1302,19 @@ async def nci_biomarker_searcher(
         )
         return format_biomarker_results(results)
     except CTSAPIError as e:
-        # Check for Elasticsearch bucket limit error
-        error_msg = str(e)
-        if "too_many_buckets_exception" in error_msg or "75000" in error_msg:
-            return (
-                "⚠️ **Search Too Broad**\n\n"
-                "The NCI API cannot process this search because it returns too many results.\n\n"
-                "**Try adding more specific filters:**\n"
-                "- Add a biomarker name (even partial)\n"
-                "- Specify a gene symbol\n"
-                "- Add an assay type (e.g., 'IHC', 'NGS')\n\n"
-                "**Example searches that work:**\n"
-                "- `nci_biomarker_searcher(name='PD-L1')`\n"
-                "- `nci_biomarker_searcher(gene='EGFR', biomarker_type='mutation')`\n"
-                "- `nci_biomarker_searcher(assay_type='IHC')`"
-            )
+        msg = _handle_cts_bucket_error(
+            e,
+            "**Try adding more specific filters:**\n"
+            "- Add a biomarker name (even partial)\n"
+            "- Specify a gene symbol\n"
+            "- Add an assay type (e.g., 'IHC', 'NGS')\n\n"
+            "**Example searches that work:**\n"
+            "- `nci_biomarker_searcher(name='PD-L1')`\n"
+            "- `nci_biomarker_searcher(gene='EGFR', biomarker_type='mutation')`\n"
+            "- `nci_biomarker_searcher(assay_type='IHC')`",
+        )
+        if msg:
+            return msg
         raise
 
 
@@ -1371,21 +1387,19 @@ async def nci_disease_searcher(
         )
         return format_disease_results(results)
     except CTSAPIError as e:
-        # Check for Elasticsearch bucket limit error
-        error_msg = str(e)
-        if "too_many_buckets_exception" in error_msg or "75000" in error_msg:
-            return (
-                "⚠️ **Search Too Broad**\n\n"
-                "The NCI API cannot process this search because it returns too many results.\n\n"
-                "**Try adding more specific filters:**\n"
-                "- Add a disease name (even partial)\n"
-                "- Specify a disease category\n"
-                "- Use more specific search terms\n\n"
-                "**Example searches that work:**\n"
-                "- `nci_disease_searcher(name='melanoma')`\n"
-                "- `nci_disease_searcher(name='lung', category='maintype')`\n"
-                "- `nci_disease_searcher(name='NSCLC')`"
-            )
+        msg = _handle_cts_bucket_error(
+            e,
+            "**Try adding more specific filters:**\n"
+            "- Add a disease name (even partial)\n"
+            "- Specify a disease category\n"
+            "- Use more specific search terms\n\n"
+            "**Example searches that work:**\n"
+            "- `nci_disease_searcher(name='melanoma')`\n"
+            "- `nci_disease_searcher(name='lung', category='maintype')`\n"
+            "- `nci_disease_searcher(name='NSCLC')`",
+        )
+        if msg:
+            return msg
         raise
 
 

@@ -87,7 +87,7 @@ DEFAULT_CACHE_TIMEOUT = 60 * 60 * 24 * 7  # 1 week in seconds
 SYSTEM_PAGE_SIZE = (
     10  # Default page size for all searches (reduced for token efficiency)
 )
-DEFAULT_PAGE_SIZE = 10  # Default page size for unified search
+DEFAULT_PAGE_SIZE = SYSTEM_PAGE_SIZE  # Alias for unified search
 MIN_PAGE_SIZE = 1
 MAX_PAGE_SIZE = 100
 DEFAULT_PAGE_NUMBER = 1

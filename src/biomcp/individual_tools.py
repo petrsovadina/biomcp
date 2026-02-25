@@ -583,17 +583,21 @@ async def variant_searcher(
         offset=(page - 1) * page_size if page > 1 else 0,
     )
 
-    # Add cBioPortal summary if searching by gene
-    if include_cbioportal and gene:
-        cbioportal_summary = await get_variant_cbioportal_summary(gene)
-        if cbioportal_summary:
-            result = cbioportal_summary + "\n\n" + result
+    # Fetch cBioPortal + OncoKB summaries in parallel
+    if gene and (include_cbioportal or include_oncokb):
+        tasks = {}
+        if include_cbioportal:
+            tasks["cbio"] = get_variant_cbioportal_summary(gene)
+        if include_oncokb:
+            tasks["oncokb"] = get_oncokb_summary_for_genes([gene])
 
-    # Add OncoKB summary if searching by gene
-    if include_oncokb and gene:
-        oncokb_summary = await get_oncokb_summary_for_genes([gene])
-        if oncokb_summary:
-            result = oncokb_summary + "\n\n" + result
+        summaries = await asyncio.gather(*tasks.values())
+        summary_map = dict(zip(tasks.keys(), summaries, strict=False))
+
+        if cbio := summary_map.get("cbio"):
+            result = cbio + "\n\n" + result
+        if oncokb := summary_map.get("oncokb"):
+            result = oncokb + "\n\n" + result
 
     return result
 

@@ -4,6 +4,7 @@ Uses SUKL DLP API v1 (prehledy.sukl.cz) with diskcache for
 response caching and offline fallback.
 """
 
+import asyncio
 import json
 import logging
 
@@ -118,12 +119,22 @@ async def _sukl_drug_search(
         )
 
     normalized_q = normalize_query(query)
-    matches = []
 
-    for code in codes:
-        detail = await _fetch_drug_detail(code)
-        if detail and _matches_query(detail, normalized_q):
-            matches.append(_detail_to_summary(detail))
+    # Fetch details concurrently with bounded parallelism
+    sem = asyncio.Semaphore(10)
+
+    async def _fetch_one(code: str):
+        async with sem:
+            return await _fetch_drug_detail(code)
+
+    details = await asyncio.gather(
+        *(_fetch_one(c) for c in codes)
+    )
+    matches = [
+        _detail_to_summary(d)
+        for d in details
+        if d and _matches_query(d, normalized_q)
+    ]
 
     total = len(matches)
     start = (page - 1) * page_size

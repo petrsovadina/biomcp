@@ -7,8 +7,8 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from ..utils.cbio_http_adapter import CBioHTTPAdapter
 from .cancer_types import MAX_STUDIES_PER_GENE, get_cancer_keywords
+from .cbio_core import CBioPortalCoreClient
 
 logger = logging.getLogger(__name__)
 
@@ -43,11 +43,11 @@ class CBioPortalVariantData(BaseModel):
     )
 
 
-class CBioPortalExternalClient:
-    """Refactored cBioPortal client using centralized HTTP."""
+class CBioPortalExternalClient(CBioPortalCoreClient):
+    """cBioPortal client for variant-specific AA change lookups."""
 
     def __init__(self) -> None:
-        self.http_adapter = CBioHTTPAdapter()
+        super().__init__()
         self._study_cache: dict[str, dict[str, Any]] = {}
 
     async def get_variant_data(
@@ -72,7 +72,7 @@ class CBioPortalExternalClient:
             logger.info(f"Extracted gene={gene}, aa_change={aa_change}")
 
             # Get gene ID
-            gene_id = await self._get_gene_id(gene)
+            gene_id = await self.get_gene_id(gene)
             if not gene_id:
                 return None
 
@@ -105,35 +105,8 @@ class CBioPortalExternalClient:
             )
             return None
 
-    async def _get_gene_id(self, gene: str) -> int | None:
-        """Get Entrez gene ID from gene symbol.
-
-        Args:
-            gene: Gene symbol (e.g., "BRAF")
-
-        Returns:
-            Entrez gene ID if found, None otherwise
-        """
-        gene_data, gene_error = await self.http_adapter.get(
-            f"/genes/{gene}",
-            endpoint_key="cbioportal_genes",
-            cache_ttl=3600,  # 1 hour
-        )
-
-        if gene_error or not gene_data:
-            logger.warning(f"Failed to fetch gene info for {gene}")
-            return None
-
-        gene_id = gene_data.get("entrezGeneId")
-        if not gene_id:
-            logger.warning(f"No entrezGeneId in gene response: {gene_data}")
-            return None
-
-        logger.info(f"Got entrezGeneId: {gene_id}")
-        return gene_id
-
     async def _get_mutation_profiles(self, gene: str) -> list[dict[str, Any]]:
-        """Get relevant mutation profiles for a gene.
+        """Get relevant mutation profiles filtered by cancer keywords.
 
         Args:
             gene: Gene symbol to find profiles for
@@ -141,31 +114,17 @@ class CBioPortalExternalClient:
         Returns:
             List of mutation profile dictionaries filtered by cancer relevance
         """
-        profiles, prof_error = await self.http_adapter.get(
-            "/molecular-profiles",
-            endpoint_key="cbioportal_molecular_profiles",
-            cache_ttl=3600,  # 1 hour
+        all_profiles = await self.get_mutation_profiles(
+            params=None, cache_ttl=3600
         )
 
-        if prof_error or not profiles:
-            logger.warning("Failed to fetch molecular profiles")
-            return []
-
-        # Get cancer keywords from configuration
         cancer_keywords = get_cancer_keywords(gene)
-
-        # Collect mutation profiles to query
         mutation_profiles: list[dict[str, Any]] = []
-        if not isinstance(profiles, list):
-            return []
 
-        for p in profiles:
-            if (
-                isinstance(p, dict)
-                and p.get("molecularAlterationType") == "MUTATION_EXTENDED"
-            ):
+        for p in all_profiles:
+            if p.get("molecularAlterationType") == "MUTATION_EXTENDED":
                 study_id = p.get("studyId", "").lower()
-                if any(keyword in study_id for keyword in cancer_keywords):
+                if any(kw in study_id for kw in cancer_keywords):
                     mutation_profiles.append(p)
                     if len(mutation_profiles) >= MAX_STUDIES_PER_GENE:
                         break
@@ -178,36 +137,16 @@ class CBioPortalExternalClient:
     async def _fetch_mutations(
         self, gene_id: int, mutation_profiles: list[dict[str, Any]]
     ) -> list[dict[str, Any]]:
-        """Fetch mutations for a gene from mutation profiles.
-
-        Args:
-            gene_id: Entrez gene ID
-            mutation_profiles: List of molecular profile dictionaries
-
-        Returns:
-            List of mutation records from cBioPortal
-        """
-        profile_ids = [p["molecularProfileId"] for p in mutation_profiles]
-        logger.info(f"Querying {len(profile_ids)} profiles for mutations")
-
-        mutations_data, mut_error = await self.http_adapter.post(
-            "/mutations/fetch",
-            data={
-                "entrezGeneIds": [gene_id],
-                "molecularProfileIds": profile_ids,
-            },
-            endpoint_key="cbioportal_mutations",
-            cache_ttl=1800,  # 30 minutes
+        """Fetch mutations for a gene from mutation profiles."""
+        profile_ids = [
+            p["molecularProfileId"] for p in mutation_profiles
+        ]
+        logger.info(
+            f"Querying {len(profile_ids)} profiles for mutations"
         )
-
-        if mut_error or not mutations_data:
-            logger.warning(f"Failed to fetch mutations: {mut_error}")
-            return []
-
-        if not isinstance(mutations_data, list):
-            return []
-
-        return mutations_data
+        return await self.fetch_mutations_batch(
+            gene_id, profile_ids
+        )
 
     def _filter_mutations_by_aa_change(
         self, mutations_data: list[dict[str, Any]], aa_change: str

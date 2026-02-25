@@ -6,16 +6,15 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from ..utils.cbio_http_adapter import CBioHTTPAdapter
 from ..utils.gene_validator import is_valid_gene_symbol, sanitize_gene_symbol
 from ..utils.request_cache import request_cache
 from .cancer_types import get_cancer_keywords
+from .cbio_core import CBioPortalCoreClient
 
 logger = logging.getLogger(__name__)
 
 # Cache for frequently accessed data
 _cancer_type_cache: dict[str, dict[str, Any]] = {}
-_gene_panel_cache: dict[str, list[str]] = {}
 
 
 class GeneHotspot(BaseModel):
@@ -41,11 +40,11 @@ class CBioPortalSearchSummary(BaseModel):
     top_studies: list[str] = Field(default_factory=list)
 
 
-class CBioPortalSearchClient:
-    """Client for cBioPortal search operations."""
+class CBioPortalSearchClient(CBioPortalCoreClient):
+    """Client for cBioPortal gene-level search operations."""
 
     def __init__(self):
-        self.http_adapter = CBioHTTPAdapter()
+        super().__init__()
 
     @request_cache(ttl=900)  # Cache for 15 minutes
     async def get_gene_search_summary(
@@ -68,16 +67,7 @@ class CBioPortalSearchClient:
         gene = sanitize_gene_symbol(gene)
 
         try:
-            # Get gene info first
-            gene_data, error = await self.http_adapter.get(
-                f"/genes/{gene}", endpoint_key="cbioportal_genes"
-            )
-            if error or not gene_data:
-                logger.warning(f"Gene {gene} not found in cBioPortal")
-                return None
-
-            gene_id = gene_data.get("entrezGeneId")
-
+            gene_id = await self.get_gene_id(gene)
             if not gene_id:
                 return None
 
@@ -178,23 +168,20 @@ class CBioPortalSearchClient:
     ) -> list[dict[str, Any]]:
         """Get molecular profiles relevant to the gene."""
         try:
-            # Get all mutation profiles
-            all_profiles, error = await self.http_adapter.get(
-                "/molecular-profiles",
-                params={"molecularAlterationType": "MUTATION_EXTENDED"},
-                endpoint_key="cbioportal_molecular_profiles",
-                cache_ttl=3600,  # Cache for 1 hour
+            all_profiles = await self.get_mutation_profiles(
+                cache_ttl=3600
             )
-
-            if error or not all_profiles:
+            if not all_profiles:
                 return []
 
-            # Filter by cancer keywords
-            relevant_profiles = []
-            for profile in all_profiles:
-                study_id = profile.get("studyId", "").lower()
-                if any(keyword in study_id for keyword in cancer_keywords):
-                    relevant_profiles.append(profile)
+            relevant_profiles = [
+                p
+                for p in all_profiles
+                if any(
+                    kw in p.get("studyId", "").lower()
+                    for kw in cancer_keywords
+                )
+            ]
 
             # Sort by sample count (larger studies first)
             # Note: We'd need to fetch study details for actual sample counts

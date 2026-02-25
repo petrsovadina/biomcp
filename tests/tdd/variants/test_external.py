@@ -35,6 +35,13 @@ class TestTCGAClient:
                         "cosmic_id": ["COSM476"],
                         "gene_aa_change": ["BRAF V600E"],
                         "genomic_dna_change": "chr7:g.140453136A>T",
+                        "consequence": [
+                            {
+                                "transcript": {
+                                    "consequence_type": "missense_variant"
+                                }
+                            }
+                        ],
                     }
                 ]
             }

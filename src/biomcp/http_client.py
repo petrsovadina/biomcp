@@ -254,18 +254,36 @@ async def request_api(
     # Validate endpoint
     _validate_endpoint(endpoint_key)
 
-    # Apply rate limiting if domain is specified
-    if domain:
-        async with domain_limiter.limit(domain):
-            pass  # Rate limit acquired
-
     # Prepare request
     verify = get_ssl_context(tls_version) if tls_version else True
     params, headers = _prepare_request_params(request)
     retry_config = _get_retry_config(enable_retry, domain)
 
-    # Short-circuit if caching disabled
-    if cache_ttl == 0:
+    async def _execute_request():
+        # Short-circuit if caching disabled
+        if cache_ttl == 0:
+            status, content = await call_http(
+                method,
+                url,
+                params,
+                verify=verify,
+                retry_config=retry_config,
+                headers=headers,
+            )
+            return parse_response(
+                status, content, response_model_type
+            )
+
+        # Handle caching
+        cache_key = generate_cache_key(method, url, params)
+        cached_content = get_cached_response(cache_key)
+
+        if cached_content:
+            return parse_response(
+                200, cached_content, response_model_type
+            )
+
+        # Make HTTP request if not cached
         status, content = await call_http(
             method,
             url,
@@ -274,31 +292,22 @@ async def request_api(
             retry_config=retry_config,
             headers=headers,
         )
-        return parse_response(status, content, response_model_type)
+        parsed_response = parse_response(
+            status, content, response_model_type
+        )
 
-    # Handle caching
-    cache_key = generate_cache_key(method, url, params)
-    cached_content = get_cached_response(cache_key)
+        # Cache if successful response
+        if status == 200:
+            cache_response(cache_key, content, cache_ttl)
 
-    if cached_content:
-        return parse_response(200, cached_content, response_model_type)
+        return parsed_response
 
-    # Make HTTP request if not cached
-    status, content = await call_http(
-        method,
-        url,
-        params,
-        verify=verify,
-        retry_config=retry_config,
-        headers=headers,
-    )
-    parsed_response = parse_response(status, content, response_model_type)
+    # Apply rate limiting if domain is specified
+    if domain:
+        async with domain_limiter.limit(domain):
+            return await _execute_request()
 
-    # Cache if successful response
-    if status == 200:
-        cache_response(cache_key, content, cache_ttl)
-
-    return parsed_response
+    return await _execute_request()
 
 
 def parse_response(

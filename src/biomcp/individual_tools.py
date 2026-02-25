@@ -4,6 +4,7 @@ This module provides the original 9 individual tools that offer direct access
 to specific search and fetch functionality, complementing the unified tools.
 """
 
+import asyncio
 import logging
 from typing import Annotated, Literal
 
@@ -342,37 +343,15 @@ async def trial_getter(
     - trial_outcomes_getter: Primary/secondary outcomes and results
     - trial_references_getter: Publications and references
     """
-    results = []
-
-    # Get all sections
-    protocol = await _trial_protocol(
-        call_benefit="Fetch comprehensive trial details for analysis",
-        nct_id=nct_id,
+    benefit = "Fetch comprehensive trial details for analysis"
+    protocol, locations, outcomes, references = await asyncio.gather(
+        _trial_protocol(call_benefit=benefit, nct_id=nct_id),
+        _trial_locations(call_benefit=benefit, nct_id=nct_id),
+        _trial_outcomes(call_benefit=benefit, nct_id=nct_id),
+        _trial_references(call_benefit=benefit, nct_id=nct_id),
     )
-    if protocol:
-        results.append(protocol)
 
-    locations = await _trial_locations(
-        call_benefit="Fetch comprehensive trial details for analysis",
-        nct_id=nct_id,
-    )
-    if locations:
-        results.append(locations)
-
-    outcomes = await _trial_outcomes(
-        call_benefit="Fetch comprehensive trial details for analysis",
-        nct_id=nct_id,
-    )
-    if outcomes:
-        results.append(outcomes)
-
-    references = await _trial_references(
-        call_benefit="Fetch comprehensive trial details for analysis",
-        nct_id=nct_id,
-    )
-    if references:
-        results.append(references)
-
+    results = [r for r in [protocol, locations, outcomes, references] if r]
     return (
         "\n\n".join(results)
         if results
@@ -575,11 +554,23 @@ async def variant_searcher(
 
     Search by various identifiers or filter by clinical/functional criteria.
     """
+    # Map generic hgvs to hgvsp/hgvsc based on notation format
+    effective_hgvsp = hgvsp
+    effective_hgvsc = hgvsc
+    if hgvs:
+        if hgvs.startswith("p.") or "p." in hgvs:
+            effective_hgvsp = effective_hgvsp or hgvs
+        elif hgvs.startswith("c.") or "c." in hgvs:
+            effective_hgvsc = effective_hgvsc or hgvs
+        else:
+            # Genomic HGVS — use as rsid-style direct query
+            rsid = rsid or hgvs
+
     result = await _variant_searcher(
         call_benefit="Direct variant database search for genetic analysis",
         gene=gene,
-        hgvsp=hgvsp,
-        hgvsc=hgvsc,
+        hgvsp=effective_hgvsp,
+        hgvsc=effective_hgvsc,
         rsid=rsid,
         region=region,
         significance=significance,

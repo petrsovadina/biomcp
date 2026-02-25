@@ -117,7 +117,7 @@ class TCGAClient:
                         "value": [search_value],
                     },
                 }),
-                "fields": "cosmic_id,genomic_dna_change,gene_aa_change,ssm_id",
+                "fields": "cosmic_id,genomic_dna_change,gene_aa_change,ssm_id,consequence.transcript.consequence_type",
                 "format": "json",
                 "size": "5",  # Get a few in case of multiple matches
             }
@@ -142,6 +142,15 @@ class TCGAClient:
             hit = hits[0]
             ssm_id = hit.get("ssm_id")
             cosmic_id = hit.get("cosmic_id")
+
+            # Extract consequence_type from API response
+            consequence_type = None
+            consequences = hit.get("consequence", [])
+            if consequences and isinstance(consequences, list):
+                transcript = consequences[0].get("transcript", {})
+                consequence_type = transcript.get(
+                    "consequence_type"
+                )
 
             # For gene_aa_change searches, verify we have the right variant
             if search_field == "gene_aa_change":
@@ -185,7 +194,7 @@ class TCGAClient:
                     cosmic_id=cosmic_id_str,
                     tumor_types=[],
                     affected_cases=0,
-                    consequence_type="missense_variant",  # Most COSMIC variants are missense
+                    consequence_type=consequence_type,
                 )
 
             # Process occurrence data
@@ -228,7 +237,7 @@ class TCGAClient:
                 cosmic_id=cosmic_id_str,
                 tumor_types=tumor_types,
                 affected_cases=total_cases,
-                consequence_type="missense_variant",  # Default for now
+                consequence_type=consequence_type,
             )
 
         except (KeyError, ValueError, TypeError, IndexError) as e:

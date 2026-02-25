@@ -1,6 +1,6 @@
 # MCP Tools Reference
 
-BioMCP provides 50 specialized tools for biomedical and Czech healthcare research through the Model Context Protocol (MCP). This reference covers all available tools, their parameters, and usage patterns.
+BioMCP provides 51 specialized tools for biomedical and Czech healthcare research through the Model Context Protocol (MCP). This reference covers all available tools, their parameters, and usage patterns.
 
 ## Related Guides
 

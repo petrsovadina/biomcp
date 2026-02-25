@@ -5,6 +5,39 @@ All notable changes to the BioMCP project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **Czech Healthcare Integration** - 14 MCP tools for Czech healthcare data:
+  - **SUKL** (5 tools): Drug search, details, SmPC, PIL, availability
+  - **MKN-10** (3 tools): Diagnosis search, details, category browser
+  - **NRPZS** (2 tools): Healthcare provider search and details
+  - **SZV** (2 tools): Procedure code search and details
+  - **VZP** (2 tools): Insurance codebook search and details
+  - Diacritics-transparent search (léky = leky)
+  - Comprehensive Czech and English documentation
+- **Performance Metrics Tool** - `get_performance_metrics` for operational
+  monitoring (request counts, response times, error rates)
+
+### Fixed
+
+- **Documentation** - Updated tool counts from "38+" to correct "51" across
+  all documentation files
+- **CLAUDE.md** - Removed resolved SUKL `rstrip` bug from Known Issues
+
+### Changed
+
+- **Constitution** - Updated to v1.1.0: added Czech data sources to
+  Principle III, Czech namespace to Principle II, internationalization
+  to Technical Constraints
+
+### Known Issues
+
+- NRPZS, SZV/NZIP, VZP external APIs return 404 (may have changed or
+  been retired). Unit tests pass with mocks; modules retained per
+  constitution degradation policy.
+
 ## [0.6.7] - 2025-08-13
 
 ### Fixed

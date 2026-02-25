@@ -240,7 +240,7 @@ class TestSuklAvailabilityInternals:
 
         cached_data = {"kodSukl": "0000123", "nazev": "Test"}
         with patch(
-            "biomcp.czech.sukl.availability.get_cached_response",
+            "biomcp.czech.sukl.client.get_cached_response",
             return_value=json.dumps(cached_data),
         ):
             result = await _fetch_drug_detail("0000123")

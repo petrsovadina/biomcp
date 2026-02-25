@@ -12,6 +12,8 @@ import httpx
 from biomcp.czech.sukl.client import (
     SUKL_DLP_V1,
     SUKL_HTTP_TIMEOUT,
+)
+from biomcp.czech.sukl.client import (
     fetch_drug_detail as _fetch_drug_detail,
 )
 from biomcp.http_client import (

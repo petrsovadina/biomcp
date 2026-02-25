@@ -30,7 +30,7 @@
         <span>Google OAuth authentication</span>
       </div>
       <div class="feature-item">
-        <strong>🛠️ 38+ Tools</strong>
+        <strong>🛠️ 51 Tools</strong>
         <span>Full suite of biomedical + Czech healthcare tools</span>
       </div>
     </div>
@@ -176,7 +176,7 @@ Use with Claude Desktop for conversational biomedical research with sequential t
 
 ### Built for AI Integration
 
-- 38 specialized MCP tools (24 global + 14 Czech)
+- 51 specialized MCP tools (37 global + 14 Czech)
 - Sequential thinking for complex analysis
 - Streaming responses for real-time updates
 - Context preservation across queries

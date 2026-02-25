@@ -91,7 +91,7 @@ BioMCP integrates with multiple biomedical data sources:
 
 ## Available MCP Tools
 
-BioMCP provides 50 specialized tools for biomedical research (36 global + 14 Czech healthcare):
+BioMCP provides 51 specialized tools for biomedical research (37 global + 14 Czech healthcare):
 
 ### Core Tools (3)
 
@@ -195,9 +195,9 @@ fetch(domain="variant", id="rs113488022")
 - **Trials**: `detail` can be "protocol", "locations", "outcomes", "references", or "all"
 - **Variants**: Always returns full details
 
-### Individual Tools (47)
+### Individual Tools (48)
 
-For users who prefer direct access to specific functionality, BioMCP also provides 47 individual tools (33 global + 14 Czech):
+For users who prefer direct access to specific functionality, BioMCP also provides 48 individual tools (34 global + 14 Czech):
 
 #### Article Tools (2)
 

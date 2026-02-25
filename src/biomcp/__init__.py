@@ -13,6 +13,7 @@ from . import query_router
 from . import router
 from . import thinking_tool
 from . import individual_tools
+from . import metrics_handler
 from . import cbioportal_helper
 from . import czech
 
@@ -28,6 +29,7 @@ __all__ = [
     "individual_tools",
     "logger",
     "mcp_app",
+    "metrics_handler",
     "query_parser",
     "query_router",
     "render",

@@ -1,20 +1,22 @@
 <!--
 Sync Impact Report
 ===================
-Version change: N/A (template) -> 1.0.0
-Modified principles: N/A (initial creation)
+Version change: 1.0.0 -> 1.1.0 (MINOR)
+Modified principles:
+  - Principle II: Modular Domain Architecture — expanded to include Czech
+    healthcare submodule pattern under czech/ namespace
+  - Principle III: Authoritative Data Sources — added Czech healthcare
+    APIs (SUKL, MKN-10, NRPZS, SZV, VZP); added degradation policy for
+    non-functional external APIs
 Added sections:
-  - Core Principles (5): MCP Protocol First, Modular Domain Architecture,
-    Authoritative Data Sources, CLI & MCP Dual Access, Testing Rigor
-  - Technical Constraints
-  - Development Workflow
-  - Governance
-Removed sections: N/A
+  - Technical Constraints: internationalization (ensure_ascii=False)
+Removed sections: None
 Templates requiring updates:
-  - .specify/templates/plan-template.md: ✅ compatible (Constitution Check section exists)
-  - .specify/templates/spec-template.md: ✅ compatible (no changes needed)
-  - .specify/templates/tasks-template.md: ✅ compatible (no changes needed)
-Follow-up TODOs: None
+  - .specify/templates/plan-template.md: ✅ compatible
+  - .specify/templates/spec-template.md: ✅ compatible
+  - .specify/templates/tasks-template.md: ✅ compatible
+Follow-up TODOs:
+  - Verify NRPZS, SZV/NZIP, VZP API status and decide retain/remove
 -->
 
 # BioMCP Constitution
@@ -37,30 +39,47 @@ MCP compliance ensures interoperability with any MCP-compatible client
 
 Each biomedical domain (articles, trials, variants, genes, diseases,
 drugs, biomarkers, organizations, interventions, openfda) MUST be
-implemented as an independent module under `src/biomcp/`. Modules MUST
-NOT import from sibling domain modules directly. Shared functionality
-MUST live in top-level utility modules (`http_client.py`,
-`cbioportal_helper.py`, `exceptions.py`, etc.). New domains MUST follow
-the existing pattern: `__init__.py` + domain-specific files (search,
-getter, fetch).
+implemented as an independent module under `src/biomcp/`. Czech
+healthcare domains (sukl, mkn, nrpzs, szv, vzp) MUST be organized
+under the `src/biomcp/czech/` namespace with tool registrations
+centralized in `czech/czech_tools.py`. Modules MUST NOT import from
+sibling domain modules directly. Shared functionality MUST live in
+top-level utility modules (`http_client.py`, `cbioportal_helper.py`,
+`exceptions.py`, etc.). New domains MUST follow the existing pattern:
+`__init__.py` + domain-specific files (search, getter, fetch).
 
 **Rationale**: Independent modules enable parallel development, isolated
 testing, and clear ownership. Adding a new data source MUST NOT require
-modifying existing domain modules.
+modifying existing domain modules. The `czech/` namespace groups
+locale-specific modules while maintaining the same isolation guarantees.
 
 ### III. Authoritative Data Sources
 
 BioMCP MUST integrate only with established, authoritative biomedical
-databases and APIs (PubMed, ClinicalTrials.gov, NCI, MyVariant.info,
-MyGene.info, MyDisease.info, MyChem.info, cBioPortal, OncoKB, OpenFDA,
-TCGA/GDC, Ensembl). Every external API endpoint MUST be documented in
+and healthcare databases and APIs:
+
+- **Global**: PubMed, ClinicalTrials.gov, NCI, MyVariant.info,
+  MyGene.info, MyDisease.info, MyChem.info, cBioPortal, OncoKB,
+  OpenFDA, TCGA/GDC, Ensembl
+- **Czech healthcare**: SUKL (drug registry), MKN-10 (ICD-10 CZ),
+  NRPZS (provider registry), SZV (procedure codes), VZP (insurance
+  codebooks)
+
+Every external API endpoint MUST be documented in
 `THIRD_PARTY_ENDPOINTS.md`. Data returned to the user MUST be attributed
 to its source. BioMCP MUST NOT fabricate, interpolate, or infer
 biomedical data that is not present in the source response.
 
+When an external API becomes non-functional (returns persistent 404 or
+is retired), the affected tools MUST remain in the codebase with unit
+tests (mocked) passing. The situation MUST be documented in CLAUDE.md
+Known Issues. A decision to remove the tools MUST go through a PR with
+maintainer approval.
+
 **Rationale**: Biomedical data accuracy is safety-critical. Incorrect
 variant annotations or trial eligibility data can have real-world
-clinical consequences.
+clinical consequences. Czech healthcare data enables local clinical
+decision support for Czech-speaking users.
 
 ### IV. CLI & MCP Dual Access
 
@@ -103,6 +122,9 @@ reliable CI while still validating real API behavior in dedicated runs.
   (recommended for deployment)
 - **External API tokens**: MUST be optional; core functionality MUST
   work without authentication (higher rate limits MAY require tokens)
+- **Internationalization**: All JSON serialization MUST use
+  `ensure_ascii=False` to preserve Czech diacritics and other non-ASCII
+  characters
 
 ## Development Workflow
 
@@ -140,4 +162,4 @@ decisions. It supersedes ad-hoc conventions and informal agreements.
 - Violations MUST be documented and justified in PR description
 - Complexity beyond the minimum required MUST be justified
 
-**Version**: 1.0.0 | **Ratified**: 2026-02-17 | **Last Amended**: 2026-02-17
+**Version**: 1.1.0 | **Ratified**: 2026-02-17 | **Last Amended**: 2026-02-25

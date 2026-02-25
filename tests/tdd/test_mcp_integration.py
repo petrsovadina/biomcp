@@ -17,8 +17,8 @@ class TestMCPIntegration:
         # Get the registered tools
         tools = await mcp_app.list_tools()
 
-        # Should have 50 tools (2 unified + 1 think + 33 individual including OpenFDA and Enrichr + 14 Czech)
-        assert len(tools) == 50
+        # Should have 51 tools (2 unified + 1 think + 1 metrics + 33 individual including OpenFDA and Enrichr + 14 Czech)
+        assert len(tools) == 51
 
         # Check tool names
         tool_names = [tool.name for tool in tools]
@@ -41,6 +41,8 @@ class TestMCPIntegration:
         assert "gene_getter" in tool_names
         assert "drug_getter" in tool_names
         assert "disease_getter" in tool_names
+        # Metrics tool
+        assert "get_performance_metrics" in tool_names
         # OpenFDA tools
         assert "openfda_adverse_searcher" in tool_names
         assert "openfda_adverse_getter" in tool_names

@@ -3,7 +3,7 @@
 import logging
 from typing import Any
 
-from ..constants import NCI_INTERVENTIONS_URL
+from ..constants import NCI_INTERVENTIONS_URL, compute_skip
 from ..integrations.cts_api import CTSAPIError, make_cts_request
 from ..utils import parse_or_query
 
@@ -314,7 +314,7 @@ async def search_interventions_with_or(
 
     # Apply pagination to combined results
     if page_size:
-        start_idx = (page - 1) * page_size
+        start_idx = compute_skip(page, page_size)
         end_idx = start_idx + page_size
         paginated_interventions = unique_interventions[start_idx:end_idx]
     else:

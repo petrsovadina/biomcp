@@ -7,6 +7,7 @@ from collections.abc import Coroutine
 from typing import Any
 
 from .. import render
+from ..constants import compute_skip
 from .preprints import search_preprints
 from .search import PubmedRequest, search_articles
 
@@ -217,8 +218,7 @@ async def search_articles_unified(  # noqa: C901
             reverse=True,
         )
 
-        # Apply pagination after deduplication and sorting
-        offset = (page - 1) * limit
+        offset = compute_skip(page, limit)
         unique_articles = unique_articles[offset : offset + limit]
 
         if unique_articles and not output_json:

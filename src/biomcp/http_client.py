@@ -6,6 +6,7 @@ import ssl
 from io import StringIO
 from ssl import PROTOCOL_TLS_CLIENT, SSLContext, TLSVersion
 from typing import Literal, TypeVar
+from urllib.parse import urlparse
 
 import certifi
 from diskcache import Cache
@@ -34,6 +35,13 @@ from .retry import (
 from .utils.endpoint_registry import get_registry
 
 T = TypeVar("T", bound=BaseModel)
+
+_DEFAULT_BREAKER_CONFIG = CircuitBreakerConfig(
+    failure_threshold=DEFAULT_FAILURE_THRESHOLD,
+    recovery_timeout=DEFAULT_RECOVERY_TIMEOUT,
+    success_threshold=DEFAULT_SUCCESS_THRESHOLD,
+    expected_exception=(ConnectionError, TimeoutError),
+)
 
 
 class RequestError(BaseModel):
@@ -108,21 +116,10 @@ async def call_http(
     """
 
     async def _make_request() -> tuple[int, str]:
-        # Extract domain from URL for metrics tagging
-        from urllib.parse import urlparse
-
         parsed = urlparse(url)
         host = parsed.hostname or "unknown"
 
-        # Apply circuit breaker for the host
-        breaker_config = CircuitBreakerConfig(
-            failure_threshold=DEFAULT_FAILURE_THRESHOLD,
-            recovery_timeout=DEFAULT_RECOVERY_TIMEOUT,
-            success_threshold=DEFAULT_SUCCESS_THRESHOLD,
-            expected_exception=(ConnectionError, TimeoutError),
-        )
-
-        @circuit_breaker(f"http_{host}", breaker_config)
+        @circuit_breaker(f"http_{host}", _DEFAULT_BREAKER_CONFIG)
         async def _execute_with_breaker():
             async with Timer(
                 "http_request", tags={"method": method, "host": host}

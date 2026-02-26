@@ -360,7 +360,7 @@ sequenceDiagram
     Client->>Transport: tool_call("sukl_drug_searcher", {query: "ibuprofen"})
     Transport->>FastMCP: Odeslani na registrovany nastroj
     FastMCP->>Tool: sukl_drug_searcher(query="ibuprofen")
-    Tool->>Metrics: Start casovace (czechmedmcp.sukl_drug_searcher)
+    Tool->>Metrics: Start casovace (biomcp.sukl_drug_searcher)
 
     Tool->>Service: _sukl_drug_search("ibuprofen", page=1, page_size=10)
     Service->>Service: _fetch_drug_list()
@@ -578,35 +578,35 @@ Vsechny nastroje jsou definovany v `src/biomcp/czech/czech_tools.py` a organizov
 
 | Nazev nastroje | Parametry | Popis | Klic metriky |
 |----------------|-----------|-------|--------------|
-| `sukl_drug_searcher` | `query: str`, `page: int=1`, `page_size: int=10` | Vyhledavani v ceskem registru leciv podle nazvu, latky nebo ATC kodu | `czechmedmcp.sukl_drug_searcher` |
-| `sukl_drug_getter` | `sukl_code: str` | Ziskani kompletniho detailu leku ze SUKL podle 7mistneho kodu | `czechmedmcp.sukl_drug_getter` |
-| `sukl_spc_getter` | `sukl_code: str` | Ziskani Souhrnu udaju o pripravku (SmPC / SPC) | `czechmedmcp.sukl_spc_getter` |
-| `sukl_pil_getter` | `sukl_code: str` | Ziskani Pribaloveho informacniho letaku (PIL) | `czechmedmcp.sukl_pil_getter` |
-| `sukl_availability_checker` | `sukl_code: str` | Overeni aktualni dostupnosti leku na trhu / stavu distribuce | `czechmedmcp.sukl_availability_checker` |
+| `sukl_drug_searcher` | `query: str`, `page: int=1`, `page_size: int=10` | Vyhledavani v ceskem registru leciv podle nazvu, latky nebo ATC kodu | `biomcp.sukl_drug_searcher` |
+| `sukl_drug_getter` | `sukl_code: str` | Ziskani kompletniho detailu leku ze SUKL podle 7mistneho kodu | `biomcp.sukl_drug_getter` |
+| `sukl_spc_getter` | `sukl_code: str` | Ziskani Souhrnu udaju o pripravku (SmPC / SPC) | `biomcp.sukl_spc_getter` |
+| `sukl_pil_getter` | `sukl_code: str` | Ziskani Pribaloveho informacniho letaku (PIL) | `biomcp.sukl_pil_getter` |
+| `sukl_availability_checker` | `sukl_code: str` | Overeni aktualni dostupnosti leku na trhu / stavu distribuce | `biomcp.sukl_availability_checker` |
 
 ### 7.2 US2: Diagnozy MKN-10 (3 nastroje)
 
 | Nazev nastroje | Parametry | Popis | Klic metriky |
 |----------------|-----------|-------|--------------|
-| `mkn_diagnosis_searcher` | `query: str`, `max_results: int=10` | Vyhledavani podle kodu MKN-10 nebo volnym textem v cestine | `czechmedmcp.mkn_diagnosis_searcher` |
-| `mkn_diagnosis_getter` | `code: str` | Ziskani kompletniho detailu diagnozy vcetne hierarchie | `czechmedmcp.mkn_diagnosis_getter` |
-| `mkn_category_browser` | `code: str\|None=None` | Procházeni hierarchie kategorii MKN-10 (bez kodu pro korenove kapitoly) | `czechmedmcp.mkn_category_browser` |
+| `mkn_diagnosis_searcher` | `query: str`, `max_results: int=10` | Vyhledavani podle kodu MKN-10 nebo volnym textem v cestine | `biomcp.mkn_diagnosis_searcher` |
+| `mkn_diagnosis_getter` | `code: str` | Ziskani kompletniho detailu diagnozy vcetne hierarchie | `biomcp.mkn_diagnosis_getter` |
+| `mkn_category_browser` | `code: str\|None=None` | Procházeni hierarchie kategorii MKN-10 (bez kodu pro korenove kapitoly) | `biomcp.mkn_category_browser` |
 
 ### 7.3 US3: Poskytovatele NRPZS (2 nastroje)
 
 | Nazev nastroje | Parametry | Popis | Klic metriky |
 |----------------|-----------|-------|--------------|
-| `nrpzs_provider_searcher` | `query: str\|None`, `city: str\|None`, `specialty: str\|None`, `page: int=1`, `page_size: int=10` | Vyhledavani poskytovatelu podle nazvu, mesta nebo odbornosti | `czechmedmcp.nrpzs_provider_searcher` |
-| `nrpzs_provider_getter` | `provider_id: str` | Ziskani kompletniho detailu poskytovatele vcetne pracovist | `czechmedmcp.nrpzs_provider_getter` |
+| `nrpzs_provider_searcher` | `query: str\|None`, `city: str\|None`, `specialty: str\|None`, `page: int=1`, `page_size: int=10` | Vyhledavani poskytovatelu podle nazvu, mesta nebo odbornosti | `biomcp.nrpzs_provider_searcher` |
+| `nrpzs_provider_getter` | `provider_id: str` | Ziskani kompletniho detailu poskytovatele vcetne pracovist | `biomcp.nrpzs_provider_getter` |
 
 ### 7.4 US4: SZV + VZP (4 nastroje)
 
 | Nazev nastroje | Parametry | Popis | Klic metriky |
 |----------------|-----------|-------|--------------|
-| `szv_procedure_searcher` | `query: str`, `max_results: int=10` | Vyhledavani zdravotnich vykonu podle kodu nebo nazvu | `czechmedmcp.szv_procedure_searcher` |
-| `szv_procedure_getter` | `code: str` | Ziskani kompletniho detailu vykonu s bodovou hodnotou | `czechmedmcp.szv_procedure_getter` |
-| `vzp_codebook_searcher` | `query: str`, `codebook_type: str\|None`, `max_results: int=10` | Vyhledavani v ciselnicich VZP -- ve vsech nebo v jednom typu | `czechmedmcp.vzp_codebook_searcher` |
-| `vzp_codebook_getter` | `codebook_type: str`, `code: str` | Ziskani detailu polozky ciselniku podle typu a kodu | `czechmedmcp.vzp_codebook_getter` |
+| `szv_procedure_searcher` | `query: str`, `max_results: int=10` | Vyhledavani zdravotnich vykonu podle kodu nebo nazvu | `biomcp.szv_procedure_searcher` |
+| `szv_procedure_getter` | `code: str` | Ziskani kompletniho detailu vykonu s bodovou hodnotou | `biomcp.szv_procedure_getter` |
+| `vzp_codebook_searcher` | `query: str`, `codebook_type: str\|None`, `max_results: int=10` | Vyhledavani v ciselnicich VZP -- ve vsech nebo v jednom typu | `biomcp.vzp_codebook_searcher` |
+| `vzp_codebook_getter` | `codebook_type: str`, `code: str` | Ziskani detailu polozky ciselniku podle typu a kodu | `biomcp.vzp_codebook_getter` |
 
 ---
 
@@ -891,7 +891,7 @@ Kazdy cesky nastroj dodrzuje presne tento vzor vrstveni:
 
 ```python
 @mcp_app.tool()                              # Registrace ve FastMCP
-@track_performance("czechmedmcp.{domain}")   # Sledovani vykonu
+@track_performance("biomcp.{domain}")   # Sledovani vykonu
 async def tool_name(
     param: Annotated[
         type,
@@ -910,7 +910,7 @@ Klicove aspekty tohoto vzoru:
 
 1. **`@mcp_app.tool()`** -- dekorator FastMCP, ktery registruje funkci jako MCP nastroj. Nazev funkce se stane nazvem nastroje (napr. `sukl_drug_searcher`).
 
-2. **`@track_performance()`** -- zaznamenava dobu provedeni a metriky uspechu/neuspechu. Nazev metriky dodrzuje vzor `czechmedmcp.{modul}_{operace}`.
+2. **`@track_performance()`** -- zaznamenava dobu provedeni a metriky uspechu/neuspechu. Nazev metriky dodrzuje vzor `biomcp.{modul}_{operace}`.
 
 3. **`Annotated[type, Field(...)]`** -- deskriptory Pydantic `Field` uvnitr `typing.Annotated` poskytuji jak validacni omezeni (`ge`, `le`), tak popisy zobrazene ve schematu MCP nastroje.
 
@@ -998,7 +998,7 @@ if normalized_q in name:                          # Odpovida bez ohledu na diakr
 
 **Soubor:** `src/biomcp/metrics.py`
 
-Kazdy cesky MCP nastroj je dekorovan `@track_performance("czechmedmcp.{name}")`, coz:
+Kazdy cesky MCP nastroj je dekorovan `@track_performance("biomcp.{name}")`, coz:
 
 1. Zaznamena **pocatecni cas** pomoci `time.perf_counter()`.
 2. Pocka na dokonceni asynchronni funkce nastroje.
@@ -1010,20 +1010,20 @@ Metriky jsou aktivni pouze pokud je nastavena promenna prostredi `BIOMCP_METRICS
 Nazvy metrik dodrzuji konzistentni jmenny prostor:
 
 ```text
-czechmedmcp.sukl_drug_searcher
-czechmedmcp.sukl_drug_getter
-czechmedmcp.sukl_spc_getter
-czechmedmcp.sukl_pil_getter
-czechmedmcp.sukl_availability_checker
-czechmedmcp.mkn_diagnosis_searcher
-czechmedmcp.mkn_diagnosis_getter
-czechmedmcp.mkn_category_browser
-czechmedmcp.nrpzs_provider_searcher
-czechmedmcp.nrpzs_provider_getter
-czechmedmcp.szv_procedure_searcher
-czechmedmcp.szv_procedure_getter
-czechmedmcp.vzp_codebook_searcher
-czechmedmcp.vzp_codebook_getter
+biomcp.sukl_drug_searcher
+biomcp.sukl_drug_getter
+biomcp.sukl_spc_getter
+biomcp.sukl_pil_getter
+biomcp.sukl_availability_checker
+biomcp.mkn_diagnosis_searcher
+biomcp.mkn_diagnosis_getter
+biomcp.mkn_category_browser
+biomcp.nrpzs_provider_searcher
+biomcp.nrpzs_provider_getter
+biomcp.szv_procedure_searcher
+biomcp.szv_procedure_getter
+biomcp.vzp_codebook_searcher
+biomcp.vzp_codebook_getter
 ```
 
 ### 11.3 Zpracovani chyb

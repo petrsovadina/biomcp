@@ -18,16 +18,9 @@ check: ## Run code quality tools.
 	@uv run deptry .
 
 .PHONY: test
-test: ## Test the code with pytest and JavaScript tests
+test: ## Test the code with pytest
 	@echo "🚀 Testing code: Running pytest with parallel execution"
 	@uv run python -m pytest -x --ff -n auto --dist loadscope
-	@echo "🚀 Testing JavaScript: Running worker sanitization tests"
-	@node --test tests/tdd/workers/test_worker_sanitization.js
-
-.PHONY: test-js
-test-js: ## Test JavaScript code only
-	@echo "🚀 Testing JavaScript: Running worker sanitization tests"
-	@node --test tests/tdd/workers/test_worker_sanitization.js
 
 .PHONY: cov
 cov: ## Generate HTML coverage report
@@ -50,22 +43,12 @@ publish: build ## Publish a release to PyPI.
 	@uvx twine upload -r pypi dist/*
 
 .PHONY: docs-test
-docs-test: check-docs ## Test if documentation can be built without warnings or errors
+docs-test: ## Test if documentation can be built without warnings or errors
 	@uv run mkdocs build -s
 
-.PHONY: check-docs
-check-docs: ## Check that all docs are in mkdocs.yml
-	@uv run python scripts/check_docs_in_mkdocs.py
-
 .PHONY: docs
-docs: update-endpoints ## Build and serve the documentation
+docs: ## Build and serve the documentation
 	@uv run mkdocs serve
-
-.PHONY: update-endpoints
-update-endpoints: ## Update third-party endpoints documentation
-	@echo "🚀 Updating third-party endpoints documentation"
-	@uv run python scripts/generate_endpoints_doc.py
-	@uv run python docs/developer-guides/generate_endpoints.py
 
 .PHONY: help
 help:

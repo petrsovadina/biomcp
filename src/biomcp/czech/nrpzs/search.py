@@ -9,7 +9,12 @@ import logging
 
 import httpx
 
-from biomcp.constants import NRPZS_PROVIDERS_URL
+from biomcp.constants import (
+    CACHE_TTL_DAY,
+    CZECH_HTTP_TIMEOUT,
+    DEFAULT_CACHE_TIMEOUT,
+    NRPZS_PROVIDERS_URL,
+)
 from biomcp.czech.diacritics import normalize_query
 from biomcp.http_client import (
     cache_response,
@@ -19,8 +24,8 @@ from biomcp.http_client import (
 
 logger = logging.getLogger(__name__)
 
-_SEARCH_CACHE_TTL = 60 * 60 * 24  # 24 hours
-_DETAIL_CACHE_TTL = 60 * 60 * 24 * 7  # 1 week
+_SEARCH_CACHE_TTL = CACHE_TTL_DAY
+_DETAIL_CACHE_TTL = DEFAULT_CACHE_TIMEOUT
 
 
 def _build_search_params(
@@ -153,7 +158,7 @@ async def _nrpzs_search(
         return cached
 
     try:
-        async with httpx.AsyncClient(timeout=30.0) as client:
+        async with httpx.AsyncClient(timeout=CZECH_HTTP_TIMEOUT) as client:
             resp = await client.get(NRPZS_PROVIDERS_URL, params=params)
             resp.raise_for_status()
             data = resp.json()
@@ -202,7 +207,7 @@ async def _nrpzs_get(provider_id: str) -> str:
         return cached
 
     try:
-        async with httpx.AsyncClient(timeout=30.0) as client:
+        async with httpx.AsyncClient(timeout=CZECH_HTTP_TIMEOUT) as client:
             resp = await client.get(url)
             if resp.status_code == 404:
                 return json.dumps(

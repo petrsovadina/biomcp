@@ -16,6 +16,7 @@ from biomcp.cbioportal_helper import (
     get_cbioportal_summary_for_genes,
     get_variant_cbioportal_summary,
 )
+from biomcp.constants import compute_skip
 from biomcp.core import ensure_list, mcp_app
 from biomcp.diseases.getter import _disease_details
 from biomcp.drugs.getter import _drug_details
@@ -580,7 +581,7 @@ async def variant_searcher(
         sift=sift_prediction,
         polyphen=polyphen_prediction,
         size=page_size,
-        offset=(page - 1) * page_size if page > 1 else 0,
+        offset=compute_skip(page, page_size) if page > 1 else 0,
     )
 
     # Fetch cBioPortal + OncoKB summaries in parallel
@@ -1443,7 +1444,7 @@ async def openfda_adverse_searcher(
     """
     from biomcp.openfda import search_adverse_events
 
-    skip = (page - 1) * limit
+    skip = compute_skip(page, limit)
     return await search_adverse_events(
         drug=drug,
         reaction=reaction,
@@ -1534,7 +1535,7 @@ async def openfda_label_searcher(
     """
     from biomcp.openfda import search_drug_labels
 
-    skip = (page - 1) * limit
+    skip = compute_skip(page, limit)
     return await search_drug_labels(
         name=name,
         indication=indication,
@@ -1634,7 +1635,7 @@ async def openfda_device_searcher(
     """
     from biomcp.openfda import search_device_events
 
-    skip = (page - 1) * limit
+    skip = compute_skip(page, limit)
     return await search_device_events(
         device=device,
         manufacturer=manufacturer,
@@ -1720,7 +1721,7 @@ async def openfda_approval_searcher(
     """
     from biomcp.openfda import search_drug_approvals
 
-    skip = (page - 1) * limit
+    skip = compute_skip(page, limit)
     return await search_drug_approvals(
         drug=drug,
         application_number=application_number,
@@ -1817,7 +1818,7 @@ async def openfda_recall_searcher(
     """
     from biomcp.openfda import search_drug_recalls
 
-    skip = (page - 1) * limit
+    skip = compute_skip(page, limit)
     return await search_drug_recalls(
         drug=drug,
         recall_class=recall_class,
@@ -1908,7 +1909,7 @@ async def openfda_shortage_searcher(
     """
     from biomcp.openfda import search_drug_shortages
 
-    skip = (page - 1) * limit
+    skip = compute_skip(page, limit)
     return await search_drug_shortages(
         drug=drug,
         status=status,

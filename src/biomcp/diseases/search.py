@@ -3,7 +3,7 @@
 import logging
 from typing import Any
 
-from ..constants import NCI_DISEASES_URL
+from ..constants import NCI_DISEASES_URL, compute_skip
 from ..integrations.cts_api import CTSAPIError, make_cts_request
 from ..utils import parse_or_query
 
@@ -357,7 +357,7 @@ async def search_diseases_with_or(
     )
 
     # Apply pagination to combined results
-    start_idx = (page - 1) * page_size
+    start_idx = compute_skip(page, page_size)
     end_idx = start_idx + page_size
     paginated_diseases = unique_diseases[start_idx:end_idx]
 

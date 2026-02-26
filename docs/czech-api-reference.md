@@ -1486,7 +1486,7 @@ Všechny nástroje jsou instrumentovány metrikou `@track_performance`:
 
 ```python
 @mcp_app.tool()
-@track_performance("czechmedmcp.sukl_drug_searcher")
+@track_performance("biomcp.sukl_drug_searcher")
 async def sukl_drug_searcher(...):
     ...
 ```

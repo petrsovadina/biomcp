@@ -9,6 +9,7 @@ import logging
 
 import httpx
 
+from biomcp.constants import DEFAULT_CACHE_TIMEOUT
 from biomcp.czech.sukl.client import (
     SUKL_DLP_V1,
     SUKL_HTTP_TIMEOUT,
@@ -24,7 +25,7 @@ from biomcp.http_client import (
 
 logger = logging.getLogger(__name__)
 
-_CACHE_TTL = 60 * 60 * 24 * 7  # 1 week
+_CACHE_TTL = DEFAULT_CACHE_TIMEOUT
 
 
 async def _fetch_composition(sukl_code: str) -> list[dict]:
@@ -136,11 +137,21 @@ async def _sukl_drug_details(sukl_code: str) -> str:
     return json.dumps(result, ensure_ascii=False)
 
 
-async def _sukl_spc_getter(sukl_code: str) -> str:
-    """Get Summary of Product Characteristics (SmPC).
+async def _sukl_document_getter(
+    sukl_code: str, doc_type: str
+) -> str:
+    """Get a SUKL document (SmPC or PIL) by type.
 
-    Returns JSON with sukl_code, name, spc_text, spc_url, source.
+    Args:
+        sukl_code: SUKL drug code.
+        doc_type: Document type — ``"spc"`` or ``"pil"``.
+
+    Returns JSON with sukl_code, name, text, url, source.
     """
+    label = "SmPC" if doc_type == "spc" else "PIL"
+    text_key = f"{doc_type}_text"
+    url_key = f"{doc_type}_url"
+
     detail = await _fetch_drug_detail(sukl_code)
     if not detail:
         return json.dumps(
@@ -148,69 +159,40 @@ async def _sukl_spc_getter(sukl_code: str) -> str:
             ensure_ascii=False,
         )
 
-    doc_meta = await _fetch_doc_metadata(sukl_code, typ="spc")
+    doc_meta = await _fetch_doc_metadata(sukl_code, typ=doc_type)
+    name = detail.get("nazev", "")
+
     if not doc_meta:
         return json.dumps(
             {
-                "error": f"SmPC not available for {sukl_code}",
+                "error": f"{label} not available for {sukl_code}",
                 "sukl_code": sukl_code,
-                "name": detail.get("nazev", ""),
-                "spc_text": None,
-                "spc_url": None,
+                "name": name,
+                text_key: None,
+                url_key: None,
                 "source": "SUKL",
             },
             ensure_ascii=False,
         )
 
-    spc_url = _build_doc_url(sukl_code, "spc")
-
+    doc_url = _build_doc_url(sukl_code, doc_type)
     return json.dumps(
         {
             "sukl_code": sukl_code,
-            "name": detail.get("nazev", ""),
-            "spc_text": f"SmPC document available at: {spc_url}",
-            "spc_url": spc_url,
+            "name": name,
+            text_key: f"{label} document available at: {doc_url}",
+            url_key: doc_url,
             "source": "SUKL",
         },
         ensure_ascii=False,
     )
+
+
+async def _sukl_spc_getter(sukl_code: str) -> str:
+    """Get Summary of Product Characteristics (SmPC)."""
+    return await _sukl_document_getter(sukl_code, "spc")
 
 
 async def _sukl_pil_getter(sukl_code: str) -> str:
-    """Get Patient Information Leaflet (PIL).
-
-    Returns JSON with sukl_code, name, pil_text, pil_url, source.
-    """
-    detail = await _fetch_drug_detail(sukl_code)
-    if not detail:
-        return json.dumps(
-            {"error": f"Drug not found: {sukl_code}"},
-            ensure_ascii=False,
-        )
-
-    doc_meta = await _fetch_doc_metadata(sukl_code, typ="pil")
-    if not doc_meta:
-        return json.dumps(
-            {
-                "error": f"PIL not available for {sukl_code}",
-                "sukl_code": sukl_code,
-                "name": detail.get("nazev", ""),
-                "pil_text": None,
-                "pil_url": None,
-                "source": "SUKL",
-            },
-            ensure_ascii=False,
-        )
-
-    pil_url = _build_doc_url(sukl_code, "pil")
-
-    return json.dumps(
-        {
-            "sukl_code": sukl_code,
-            "name": detail.get("nazev", ""),
-            "pil_text": f"PIL document available at: {pil_url}",
-            "pil_url": pil_url,
-            "source": "SUKL",
-        },
-        ensure_ascii=False,
-    )
+    """Get Patient Information Leaflet (PIL)."""
+    return await _sukl_document_getter(sukl_code, "pil")

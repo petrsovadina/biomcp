@@ -1,5 +1,6 @@
 """NCI Clinical Trials Search API integration for trial searches."""
 
+import asyncio
 import logging
 from typing import Any
 
@@ -12,6 +13,29 @@ from .search import TrialQuery
 logger = logging.getLogger(__name__)
 
 
+async def _expand_single_disease(condition: str) -> list[str]:
+    """Expand a single disease term with synonyms."""
+    try:
+        results = await search_diseases(
+            name=condition,
+            include_synonyms=True,
+            page_size=5,
+        )
+        terms = [condition]
+        for disease in results.get("diseases", [])[:3]:
+            if disease.get("name"):
+                terms.append(disease["name"])
+            synonyms = disease.get("synonyms", [])
+            if isinstance(synonyms, list):
+                terms.extend(synonyms[:2])
+        return terms
+    except Exception as e:
+        logger.warning(
+            f"Failed to expand disease term {condition}: {e}"
+        )
+        return [condition]
+
+
 async def _expand_disease_terms(
     conditions: list[str],
     expand_synonyms: bool,
@@ -20,58 +44,57 @@ async def _expand_disease_terms(
     if not expand_synonyms:
         return conditions
 
-    disease_terms = []
-    for condition in conditions:
-        try:
-            results = await search_diseases(
-                name=condition,
-                include_synonyms=True,
-                page_size=5,
-            )
-            # Add the original term plus any exact matches
-            disease_terms.append(condition)
-            for disease in results.get("diseases", [])[:3]:
-                if disease.get("name"):
-                    disease_terms.append(disease["name"])
-                # Add top synonyms
-                synonyms = disease.get("synonyms", [])
-                if isinstance(synonyms, list):
-                    disease_terms.extend(synonyms[:2])
-        except Exception as e:
-            logger.warning(f"Failed to expand disease term {condition}: {e}")
-            disease_terms.append(condition)
+    # Fetch all expansions in parallel
+    expanded = await asyncio.gather(
+        *(_expand_single_disease(c) for c in conditions)
+    )
+    disease_terms = [
+        term for group in expanded for term in group
+    ]
 
     # Remove duplicates while preserving order
-    seen = set()
+    seen: set[str] = set()
     unique_diseases = []
     for term in disease_terms:
-        if term.lower() not in seen:
-            seen.add(term.lower())
+        key = term.lower()
+        if key not in seen:
+            seen.add(key)
             unique_diseases.append(term)
 
     return unique_diseases
 
 
-async def _normalize_interventions(interventions: list[str]) -> list[str]:
-    """Normalize intervention names to IDs where possible."""
-    intervention_ids = []
-    for intervention in interventions:
-        try:
-            results = await search_interventions(
-                name=intervention,
-                page_size=1,
+async def _normalize_single_intervention(
+    intervention: str,
+) -> str:
+    """Normalize a single intervention name to ID."""
+    try:
+        results = await search_interventions(
+            name=intervention,
+            page_size=1,
+        )
+        interventions_data = results.get("interventions", [])
+        if interventions_data:
+            return interventions_data[0].get(
+                "id", intervention
             )
-            interventions_data = results.get("interventions", [])
-            if interventions_data:
-                # Use the ID if available, otherwise the name
-                int_id = interventions_data[0].get("id", intervention)
-                intervention_ids.append(int_id)
-            else:
-                intervention_ids.append(intervention)
-        except Exception:
-            intervention_ids.append(intervention)
+        return intervention
+    except Exception:
+        return intervention
 
-    return intervention_ids
+
+async def _normalize_interventions(
+    interventions: list[str],
+) -> list[str]:
+    """Normalize intervention names to IDs where possible."""
+    return list(
+        await asyncio.gather(
+            *(
+                _normalize_single_intervention(i)
+                for i in interventions
+            )
+        )
+    )
 
 
 def _map_phase_to_nci(phase: Any) -> str | None:

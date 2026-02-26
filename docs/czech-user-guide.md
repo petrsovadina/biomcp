@@ -88,8 +88,8 @@ vyžadována žádná autentizace ani API klíče.
 
 ```bash
 # Klonování repozitáře
-git clone https://github.com/digimedic/czechmedmcp.git
-cd czechmedmcp
+git clone https://github.com/digimedic/biomcp.git
+cd biomcp
 
 # Instalace pomocí uv (doporučeno)
 uv pip install -e ".[dev]"
@@ -98,7 +98,7 @@ uv pip install -e ".[dev]"
 pip install -e ".[dev]"
 ```
 
-Tímto nainstalujete nástroj příkazové řádky `czechmedmcp` spolu se všemi
+Tímto nainstalujete nástroj příkazové řádky `biomcp` spolu se všemi
 závislostmi včetně `httpx`, `pydantic`, `lxml` a `diskcache`.
 
 ### 2.3 Nastavení dat MKN-10
@@ -117,10 +117,10 @@ mkdir -p data/mkn10
 
 ```bash
 # Ověření dostupnosti CLI
-czechmedmcp --help
+biomcp --help
 
 # Rychlý ověřovací test
-czechmedmcp czech sukl search --query "Paralen"
+biomcp czech sukl search --query "Paralen"
 ```
 
 Pokud uvidíte JSON výstup s výsledky vyhledávání léků, instalace je funkční.
@@ -135,10 +135,10 @@ CzechMedMCP podporuje dva režimy přenosu:
 
 ```bash
 # Režim STDIO (výchozí) -- pro Claude Desktop, Cursor, VS Code
-czechmedmcp run
+biomcp run
 
 # Režim HTTP -- pro produkci, Docker, vzdálené klienty
-czechmedmcp run --mode streamable_http --port 8080
+biomcp run --mode streamable_http --port 8080
 ```
 
 Po spuštění server zaregistruje **35 MVP nástrojů**: 21 globálních BioMCP
@@ -153,9 +153,9 @@ Přidejte následující konfiguraci do souboru nastavení MCP v Claude Desktop
 ```json
 {
   "mcpServers": {
-    "czechmedmcp": {
+    "biomcp": {
       "command": "uv",
-      "args": ["run", "--with", "czechmedmcp", "czechmedmcp", "run"]
+      "args": ["run", "--with", "biomcp", "biomcp", "run"]
     }
   }
 }
@@ -175,7 +175,7 @@ nebo
 Pro vývoj a ladění použijte webové rozhraní MCP Inspector:
 
 ```bash
-npx @modelcontextprotocol/inspector uv run --with czechmedmcp czechmedmcp run
+npx @modelcontextprotocol/inspector uv run --with biomcp biomcp run
 ```
 
 Otevře se prohlížečové rozhraní, kde můžete prozkoumat všechny zaregistrované
@@ -184,8 +184,8 @@ nástroje, odesílat testovací požadavky a prohlížet odpovědi.
 ### 3.4 Nasazení v Dockeru
 
 ```bash
-docker build -t czechmedmcp:latest .
-docker run -p 8080:8080 czechmedmcp:latest czechmedmcp run --mode streamable_http
+docker build -t biomcp:latest .
+docker run -p 8080:8080 biomcp:latest biomcp run --mode streamable_http
 ```
 
 ---
@@ -213,16 +213,16 @@ Vyhledávání podle obchodního názvu, účinné látky nebo ATC kódu:
 
 ```bash
 # Hledání podle obchodního názvu
-czechmedmcp czech sukl search --query "Paralen"
+biomcp czech sukl search --query "Paralen"
 
 # Hledání podle účinné látky
-czechmedmcp czech sukl search --query "Ibuprofen"
+biomcp czech sukl search --query "Ibuprofen"
 
 # Hledání podle ATC kódu
-czechmedmcp czech sukl search --query "M01AE01"
+biomcp czech sukl search --query "M01AE01"
 
 # Hledání konkrétní značky
-czechmedmcp czech sukl search --query "Nurofen"
+biomcp czech sukl search --query "Nurofen"
 ```
 
 **Příklad odpovědi:**
@@ -256,7 +256,7 @@ czechmedmcp czech sukl search --query "Nurofen"
 
 ```bash
 # Stránka 2, 20 výsledků na stránku
-czechmedmcp czech sukl search --query "Ibuprofen" --page 2 --page-size 20
+biomcp czech sukl search --query "Ibuprofen" --page 2 --page-size 20
 ```
 
 **Ekvivalent MCP nástroje** (jak jej volá AI asistent):
@@ -272,7 +272,7 @@ Jakmile máte kód SUKL z výsledku vyhledávání, můžete získat kompletní 
 o léku:
 
 ```bash
-czechmedmcp czech sukl get "0052520"
+biomcp czech sukl get "0052520"
 ```
 
 **Příklad odpovědi:**
@@ -309,7 +309,7 @@ SmPC (Souhrn údajů o přípravku / Summary of Product Characteristics) je
 autoritativní referenční dokument pro předepisování léku:
 
 ```bash
-czechmedmcp czech sukl spc "0052520"
+biomcp czech sukl spc "0052520"
 ```
 
 **Příklad odpovědi:**
@@ -333,7 +333,7 @@ PIL (Příbalová informace / Patient Information Leaflet) je dokument
 poskytovaný pacientům:
 
 ```bash
-czechmedmcp czech sukl pil "0052520"
+biomcp czech sukl pil "0052520"
 ```
 
 **Příklad odpovědi:**
@@ -353,7 +353,7 @@ czechmedmcp czech sukl pil "0052520"
 Ověření, zda je lék aktuálně dostupný na českém trhu:
 
 ```bash
-czechmedmcp czech sukl availability "0052520"
+biomcp czech sukl availability "0052520"
 ```
 
 **Příklad odpovědi:**
@@ -417,13 +417,13 @@ Pokud znáte kód (nebo jeho prefix), systém provede prefixové vyhledávání:
 
 ```bash
 # Přesný kód
-czechmedmcp czech mkn search --query "J06.9"
+biomcp czech mkn search --query "J06.9"
 
 # Prefix kódu
-czechmedmcp czech mkn search --query "J06"
+biomcp czech mkn search --query "J06"
 
 # Rozsah bloku
-czechmedmcp czech mkn search --query "I20-I25"
+biomcp czech mkn search --query "I20-I25"
 ```
 
 **Příklad odpovědi pro "J06.9":**
@@ -449,15 +449,15 @@ je zpracována transparentně (viz sekce 5.1):
 
 ```bash
 # Vyhledávání českých termínů
-czechmedmcp czech mkn search --query "angina"
-czechmedmcp czech mkn search --query "akutní infarkt myokardu"
-czechmedmcp czech mkn search --query "diabetes mellitus"
-czechmedmcp czech mkn search --query "zlomenina femuru"
+biomcp czech mkn search --query "angina"
+biomcp czech mkn search --query "akutní infarkt myokardu"
+biomcp czech mkn search --query "diabetes mellitus"
+biomcp czech mkn search --query "zlomenina femuru"
 
 # Bez ohledu na diakritiku
-czechmedmcp czech mkn search --query "zanet plic"
+biomcp czech mkn search --query "zanet plic"
 # je ekvivalentní
-czechmedmcp czech mkn search --query "zánět plic"
+biomcp czech mkn search --query "zánět plic"
 ```
 
 **Příklad odpovědi pro "infarkt":**
@@ -502,7 +502,7 @@ Získání kompletního záznamu pro konkrétní kód včetně jeho pozice v hie
 MKN-10:
 
 ```bash
-czechmedmcp czech mkn get "I21.0"
+biomcp czech mkn get "I21.0"
 ```
 
 **Příklad odpovědi:**
@@ -540,13 +540,13 @@ kapitol:
 
 ```bash
 # Všechny kapitoly
-czechmedmcp czech mkn browse
+biomcp czech mkn browse
 
 # Procházení konkrétního bloku
-czechmedmcp czech mkn browse "J00-J06"
+biomcp czech mkn browse "J00-J06"
 
 # Procházení kapitoly
-czechmedmcp czech mkn browse "X"
+biomcp czech mkn browse "X"
 ```
 
 **Příklad: procházení kapitol (kořenová úroveň):**
@@ -620,19 +620,19 @@ Musí být zadán alespoň jeden filtr:
 
 ```bash
 # Hledání podle města a odbornosti
-czechmedmcp czech nrpzs search --city "Praha" --specialty "kardiologie"
+biomcp czech nrpzs search --city "Praha" --specialty "kardiologie"
 
 # Hledání podle názvu poskytovatele
-czechmedmcp czech nrpzs search --query "Fakultní nemocnice"
+biomcp czech nrpzs search --query "Fakultní nemocnice"
 
 # Odbornost ve městě
-czechmedmcp czech nrpzs search --city "Brno" --specialty "neurologie"
+biomcp czech nrpzs search --city "Brno" --specialty "neurologie"
 
 # Široké hledání ve městě
-czechmedmcp czech nrpzs search --city "Ostrava"
+biomcp czech nrpzs search --city "Ostrava"
 
 # Hledání specifického typu poskytovatele
-czechmedmcp czech nrpzs search --query "lékárna" --city "Plzeň"
+biomcp czech nrpzs search --query "lékárna" --city "Plzeň"
 ```
 
 **Příklad odpovědi:**
@@ -676,7 +676,7 @@ Musí být zadán alespoň jeden z parametrů `query`, `city` nebo `specialty`.
 Získání kompletního záznamu včetně pracovišť, adres a kontaktních údajů:
 
 ```bash
-czechmedmcp czech nrpzs get "12345"
+biomcp czech nrpzs get "12345"
 ```
 
 **Příklad odpovědi:**
@@ -725,19 +725,19 @@ poskytovatele, každé s vlastní adresou, odbornostmi a kontaktními údaji.
 
 ```bash
 # Ortopedie v Olomouckém kraji
-czechmedmcp czech nrpzs search --city "Olomouc" --specialty "ortopedie"
+biomcp czech nrpzs search --city "Olomouc" --specialty "ortopedie"
 
 # Nemocnice v Brně
-czechmedmcp czech nrpzs search --query "Nemocnice" --city "Brno"
+biomcp czech nrpzs search --query "Nemocnice" --city "Brno"
 
 # Dermatologové v Liberci
-czechmedmcp czech nrpzs search --city "Liberec" --specialty "dermatovenerologie"
+biomcp czech nrpzs search --city "Liberec" --specialty "dermatovenerologie"
 
 # Lékárny v Hradci Králové
-czechmedmcp czech nrpzs search --query "lékárna" --city "Hradec Králové"
+biomcp czech nrpzs search --query "lékárna" --city "Hradec Králové"
 
 # Pediatři -- široké vyhledávání
-czechmedmcp czech nrpzs search --specialty "pediatrie"
+biomcp czech nrpzs search --specialty "pediatrie"
 ```
 
 ---
@@ -756,19 +756,19 @@ nezbytná pro vyúčtování a úhrady.
 
 ```bash
 # Hledání podle kódu výkonu
-czechmedmcp czech szv search --query "09513"
+biomcp czech szv search --query "09513"
 
 # Hledání podle názvu
-czechmedmcp czech szv search --query "EKG"
+biomcp czech szv search --query "EKG"
 
 # Hledání česky
-czechmedmcp czech szv search --query "elektrokardiografie"
+biomcp czech szv search --query "elektrokardiografie"
 
 # Hledání radiologických výkonů
-czechmedmcp czech szv search --query "rentgen"
+biomcp czech szv search --query "rentgen"
 
 # Hledání s více výsledky
-czechmedmcp czech szv search --query "vyšetření" --max-results 20
+biomcp czech szv search --query "vyšetření" --max-results 20
 ```
 
 **Příklad odpovědi:**
@@ -798,7 +798,7 @@ czechmedmcp czech szv search --query "vyšetření" --max-results 20
 Získání kompletního záznamu pro kód výkonu:
 
 ```bash
-czechmedmcp czech szv get "09513"
+biomcp czech szv get "09513"
 ```
 
 **Příklad odpovědi:**
@@ -845,16 +845,16 @@ typu:
 
 ```bash
 # Prohledání všech číselníků
-czechmedmcp czech vzp search --query "antibiotika"
+biomcp czech vzp search --query "antibiotika"
 
 # Filtrování podle typu
-czechmedmcp czech vzp search --query "EKG" --type "seznam_vykonu"
+biomcp czech vzp search --query "EKG" --type "seznam_vykonu"
 
 # Hledání lékových položek
-czechmedmcp czech vzp search --query "ibuprofen" --type "atc"
+biomcp czech vzp search --query "ibuprofen" --type "atc"
 
 # Hledání kódů diagnóz
-czechmedmcp czech vzp search --query "hypertenze" --type "diagnoza"
+biomcp czech vzp search --query "hypertenze" --type "diagnoza"
 ```
 
 **Dostupné typy číselníků:**
@@ -891,9 +891,9 @@ czechmedmcp czech vzp search --query "hypertenze" --type "diagnoza"
 Získání kompletního záznamu pro konkrétní položku číselníku podle typu a kódu:
 
 ```bash
-czechmedmcp czech vzp get "seznam_vykonu" "09513"
-czechmedmcp czech vzp get "atc" "J01CA04"
-czechmedmcp czech vzp get "diagnoza" "I21"
+biomcp czech vzp get "seznam_vykonu" "09513"
+biomcp czech vzp get "atc" "J01CA04"
+biomcp czech vzp get "diagnoza" "I21"
 ```
 
 **Příklad odpovědi:**
@@ -961,23 +961,23 @@ Nástroje, které mohou vracet mnoho výsledků, podporují stránkování:
 
 ```bash
 # Prvních 10 výsledků (výchozí)
-czechmedmcp czech sukl search --query "Ibuprofen"
+biomcp czech sukl search --query "Ibuprofen"
 
 # Výsledky 11-20
-czechmedmcp czech sukl search --query "Ibuprofen" --page 2
+biomcp czech sukl search --query "Ibuprofen" --page 2
 
 # 50 výsledků na stránku
-czechmedmcp czech sukl search --query "Ibuprofen" --page 1 --page-size 50
+biomcp czech sukl search --query "Ibuprofen" --page 1 --page-size 50
 ```
 
 **MKN-10, SZV a VZP** používají parametr `max_results` pro omezení výstupu:
 
 ```bash
 # Výchozí: 10 výsledků
-czechmedmcp czech mkn search --query "infarkt"
+biomcp czech mkn search --query "infarkt"
 
 # Až 50 výsledků
-czechmedmcp czech mkn search --query "infarkt" --max-results 50
+biomcp czech mkn search --query "infarkt" --max-results 50
 ```
 
 Odpověď vždy obsahuje pole `total` udávající celkový počet odpovídajících
@@ -1086,69 +1086,69 @@ Zde je několik ukázkových konverzačních scénářů:
 
 ## 6. Přehled CLI příkazů
 
-Všechny české nástroje jsou dostupné pod skupinou příkazů `czechmedmcp czech`.
+Všechny české nástroje jsou dostupné pod skupinou příkazů `biomcp czech`.
 Každý podpříkaz ve výchozím nastavení vrací JSON.
 
 ### Příkazy SUKL
 
 ```bash
 # Vyhledávání léků
-czechmedmcp czech sukl search --query "QUERY" [--page N] [--page-size N]
+biomcp czech sukl search --query "QUERY" [--page N] [--page-size N]
 
 # Podrobnosti léku
-czechmedmcp czech sukl get SUKL_CODE
+biomcp czech sukl get SUKL_CODE
 
 # SmPC (Souhrn údajů o přípravku)
-czechmedmcp czech sukl spc SUKL_CODE
+biomcp czech sukl spc SUKL_CODE
 
 # PIL (Příbalový leták)
-czechmedmcp czech sukl pil SUKL_CODE
+biomcp czech sukl pil SUKL_CODE
 
 # Kontrola dostupnosti
-czechmedmcp czech sukl availability SUKL_CODE
+biomcp czech sukl availability SUKL_CODE
 ```
 
 ### Příkazy MKN-10
 
 ```bash
 # Vyhledávání diagnóz (podle kódu nebo textu)
-czechmedmcp czech mkn search --query "QUERY" [--max-results N]
+biomcp czech mkn search --query "QUERY" [--max-results N]
 
 # Podrobnosti diagnózy
-czechmedmcp czech mkn get CODE
+biomcp czech mkn get CODE
 
 # Procházení hierarchie (bez kódu pro kapitoly)
-czechmedmcp czech mkn browse [CODE]
+biomcp czech mkn browse [CODE]
 ```
 
 ### Příkazy NRPZS
 
 ```bash
 # Vyhledávání poskytovatelů
-czechmedmcp czech nrpzs search [--query "NAME"] [--city "CITY"] [--specialty "SPEC"] [--page N] [--page-size N]
+biomcp czech nrpzs search [--query "NAME"] [--city "CITY"] [--specialty "SPEC"] [--page N] [--page-size N]
 
 # Podrobnosti poskytovatele
-czechmedmcp czech nrpzs get PROVIDER_ID
+biomcp czech nrpzs get PROVIDER_ID
 ```
 
 ### Příkazy SZV
 
 ```bash
 # Vyhledávání výkonů
-czechmedmcp czech szv search --query "QUERY" [--max-results N]
+biomcp czech szv search --query "QUERY" [--max-results N]
 
 # Podrobnosti výkonu
-czechmedmcp czech szv get CODE
+biomcp czech szv get CODE
 ```
 
 ### Příkazy VZP
 
 ```bash
 # Prohledávání číselníků
-czechmedmcp czech vzp search --query "QUERY" [--type "CODEBOOK_TYPE"] [--max-results N]
+biomcp czech vzp search --query "QUERY" [--type "CODEBOOK_TYPE"] [--max-results N]
 
 # Podrobnosti položky číselníku
-czechmedmcp czech vzp get CODEBOOK_TYPE CODE
+biomcp czech vzp get CODEBOOK_TYPE CODE
 ```
 
 ### Přehled názvů MCP nástrojů
@@ -1278,14 +1278,14 @@ zpracování.
 
 ### Server se nespouští
 
-**Příznak:** `czechmedmcp run` selže nebo server neodpovídá.
+**Příznak:** `biomcp run` selže nebo server neodpovídá.
 
 **Řešení:**
 
 1. Ověřte, že je nainstalován Python 3.10+: `python3 --version`
-2. Ověřte, že je balíček nainstalován: `czechmedmcp --help`
+2. Ověřte, že je balíček nainstalován: `biomcp --help`
 3. Zkontrolujte konflikty portů při použití HTTP režimu:
-   `czechmedmcp run --mode streamable_http --port 8081`
+   `biomcp run --mode streamable_http --port 8081`
 4. Zkontrolujte logy pro chybové hlášení
 
 ### Claude Desktop nevidí nástroje
@@ -1298,9 +1298,9 @@ zpracování.
    uvedenému v sekci 3.2
 2. Kompletně restartujte Claude Desktop (ukončete a znovu otevřete)
 3. Nejprve otestujte server ručně:
-   `czechmedmcp czech sukl search --query "test"`
+   `biomcp czech sukl search --query "test"`
 4. Použijte MCP Inspector k ověření registrace nástrojů:
-   `npx @modelcontextprotocol/inspector uv run --with czechmedmcp czechmedmcp run`
+   `npx @modelcontextprotocol/inspector uv run --with biomcp biomcp run`
 
 ---
 

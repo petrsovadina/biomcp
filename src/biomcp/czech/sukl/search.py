@@ -10,6 +10,7 @@ import logging
 
 import httpx
 
+from biomcp.constants import CACHE_TTL_DAY, compute_skip
 from biomcp.czech.diacritics import normalize_query
 from biomcp.czech.sukl.client import (
     SUKL_DLP_V1,
@@ -26,7 +27,7 @@ from biomcp.http_client import (
 
 logger = logging.getLogger(__name__)
 
-_DRUG_LIST_CACHE_TTL = 60 * 60 * 24  # 24 hours
+_DRUG_LIST_CACHE_TTL = CACHE_TTL_DAY
 
 
 async def _fetch_drug_list(
@@ -137,7 +138,7 @@ async def _sukl_drug_search(
     ]
 
     total = len(matches)
-    start = (page - 1) * page_size
+    start = compute_skip(page, page_size)
     end = start + page_size
     page_results = matches[start:end]
 

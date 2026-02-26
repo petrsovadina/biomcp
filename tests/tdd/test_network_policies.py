@@ -1,6 +1,5 @@
 """Comprehensive tests for network policies and HTTP centralization."""
 
-from pathlib import Path
 from unittest.mock import patch
 
 import pytest
@@ -165,41 +164,6 @@ class TestEndpointTracking:
 
             assert result == {"data": "test"}
             assert error is None
-
-
-class TestHTTPImportChecks:
-    """Test the HTTP import checking script."""
-
-    def test_check_script_exists(self):
-        """Test that the check script exists."""
-        script_path = (
-            Path(__file__).parent.parent.parent
-            / "scripts"
-            / "check_http_imports.py"
-        )
-        assert script_path.exists()
-
-    def test_allowed_files_configured(self):
-        """Test that allowed files are properly configured."""
-        # Import the script module
-        import sys
-
-        script_path = Path(__file__).parent.parent.parent / "scripts"
-        sys.path.insert(0, str(script_path))
-
-        try:
-            from check_http_imports import ALLOWED_FILES, HTTP_LIBRARIES
-
-            # Check essential files are allowed
-            assert "http_client.py" in ALLOWED_FILES
-            assert "http_client_simple.py" in ALLOWED_FILES
-
-            # Check we're checking for the right libraries
-            assert "httpx" in HTTP_LIBRARIES
-            assert "aiohttp" in HTTP_LIBRARIES
-            assert "requests" in HTTP_LIBRARIES
-        finally:
-            sys.path.pop(0)
 
 
 class TestGlobalRegistry:

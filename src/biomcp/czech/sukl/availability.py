@@ -9,6 +9,7 @@ from datetime import datetime, timezone
 
 import httpx
 
+from biomcp.constants import CACHE_TTL_HOUR
 from biomcp.czech.sukl.client import (
     SUKL_DLP_V1,
     SUKL_HTTP_TIMEOUT,
@@ -24,7 +25,7 @@ from biomcp.http_client import (
 
 logger = logging.getLogger(__name__)
 
-_CACHE_TTL = 60 * 60  # 1 hour for availability
+_CACHE_TTL = CACHE_TTL_HOUR
 
 
 async def _check_distribution(sukl_code: str) -> str:

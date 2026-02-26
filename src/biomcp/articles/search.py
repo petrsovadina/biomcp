@@ -6,7 +6,7 @@ from typing import Annotated, Any, get_args
 from pydantic import BaseModel, Field, computed_field
 
 from .. import http_client, render
-from ..constants import PUBTATOR3_SEARCH_URL, SYSTEM_PAGE_SIZE
+from ..constants import PUBTATOR3_SEARCH_URL, SYSTEM_PAGE_SIZE, compute_skip
 from ..core import PublicationState
 from .autocomplete import Concept, EntityRequest, autocomplete
 from .fetch import call_pubtator_api
@@ -201,8 +201,7 @@ async def search_articles(
                 ],
             )
         )
-        # Apply pagination: skip first (page-1)*limit results, then take 'limit' results
-        offset = (page - 1) * limit
+        offset = compute_skip(page, limit)
         data = data[offset : offset + limit]
 
     if data and not output_json:

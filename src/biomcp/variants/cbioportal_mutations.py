@@ -1,5 +1,6 @@
 """cBioPortal mutation-specific search functionality."""
 
+import asyncio
 import logging
 from collections import Counter, defaultdict
 from typing import Any, cast
@@ -230,36 +231,39 @@ class CBioPortalMutationClient(CBioPortalCoreClient):
             studies, error = await self.http_adapter.get(
                 "/studies",
                 endpoint_key="cbioportal_studies",
-                cache_ttl=3600,  # Cache for 1 hour
+                cache_ttl=3600,
             )
 
             if error or not studies:
                 return {}
-            study_info = {}
+
             cancer_type_client = get_cancer_type_client()
 
-            for s in studies:
-                cancer_type_id = s.get("cancerTypeId", "")
-                if cancer_type_id and cancer_type_id != "unknown":
-                    # Use the API to get the proper display name
-                    cancer_type = (
-                        await cancer_type_client.get_cancer_type_name(
-                            cancer_type_id
+            async def _resolve_cancer_type(s: dict) -> str:
+                ct_id = s.get("cancerTypeId", "")
+                if ct_id and ct_id != "unknown":
+                    return await (
+                        cancer_type_client.get_cancer_type_name(
+                            ct_id
                         )
                     )
-                else:
-                    # Try to get from full study info
-                    cancer_type = (
-                        await cancer_type_client.get_study_cancer_type(
-                            s["studyId"]
-                        )
+                return await (
+                    cancer_type_client.get_study_cancer_type(
+                        s["studyId"]
                     )
+                )
 
-                study_info[s["studyId"]] = {
+            cancer_types = await asyncio.gather(
+                *(_resolve_cancer_type(s) for s in studies)
+            )
+
+            return {
+                s["studyId"]: {
                     "name": s.get("name", ""),
-                    "cancer_type": cancer_type,
+                    "cancer_type": ct,
                 }
-            return study_info
+                for s, ct in zip(studies, cancer_types, strict=False)
+            }
         except Exception as e:
             logger.error(f"Error fetching studies: {e}")
             return {}

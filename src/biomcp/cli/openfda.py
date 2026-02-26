@@ -8,6 +8,7 @@ from typing import Annotated
 import typer
 from rich.console import Console
 
+from ..constants import compute_skip
 from ..openfda import (
     get_adverse_event,
     get_device_event,
@@ -89,7 +90,7 @@ def search_adverse_events_cli(
     ] = None,
 ):
     """Search FDA adverse event reports for drugs."""
-    skip = (page - 1) * limit
+    skip = compute_skip(page, limit)
 
     try:
         results = asyncio.run(
@@ -170,7 +171,7 @@ def search_drug_labels_cli(
     ] = None,
 ):
     """Search FDA drug product labels."""
-    skip = (page - 1) * limit
+    skip = compute_skip(page, limit)
 
     try:
         results = asyncio.run(
@@ -262,7 +263,7 @@ def search_device_events_cli(
     ] = None,
 ):
     """Search FDA device adverse event reports."""
-    skip = (page - 1) * limit
+    skip = compute_skip(page, limit)
 
     try:
         results = asyncio.run(
@@ -335,7 +336,7 @@ def search_drug_approvals_cli(
     ] = None,
 ):
     """Search FDA drug approval records."""
-    skip = (page - 1) * limit
+    skip = compute_skip(page, limit)
 
     try:
         results = asyncio.run(
@@ -418,7 +419,7 @@ def search_drug_recalls_cli(
     ] = None,
 ):
     """Search FDA drug recall records."""
-    skip = (page - 1) * limit
+    skip = compute_skip(page, limit)
 
     try:
         results = asyncio.run(
@@ -491,7 +492,7 @@ def search_drug_shortages_cli(
     ] = None,
 ):
     """Search FDA drug shortage records."""
-    skip = (page - 1) * limit
+    skip = compute_skip(page, limit)
 
     try:
         results = asyncio.run(

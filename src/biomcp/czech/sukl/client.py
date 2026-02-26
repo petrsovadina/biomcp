@@ -9,7 +9,11 @@ import logging
 
 import httpx
 
-from biomcp.constants import SUKL_API_URL
+from biomcp.constants import (
+    CZECH_HTTP_TIMEOUT,
+    DEFAULT_CACHE_TIMEOUT,
+    SUKL_API_URL,
+)
 from biomcp.http_client import (
     cache_response,
     generate_cache_key,
@@ -19,8 +23,8 @@ from biomcp.http_client import (
 logger = logging.getLogger(__name__)
 
 SUKL_DLP_V1 = f"{SUKL_API_URL.removesuffix('/api')}/v1"
-SUKL_HTTP_TIMEOUT = 30.0
-_DEFAULT_CACHE_TTL = 60 * 60 * 24 * 7  # 1 week
+SUKL_HTTP_TIMEOUT = CZECH_HTTP_TIMEOUT
+_DEFAULT_CACHE_TTL = DEFAULT_CACHE_TIMEOUT
 
 
 async def fetch_drug_detail(

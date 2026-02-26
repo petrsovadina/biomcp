@@ -1,6 +1,5 @@
 """Optimized article search with caching and parallel processing."""
 
-import asyncio
 import hashlib
 
 from .. import ensure_list
@@ -90,88 +89,3 @@ async def article_searcher_optimized(
     await _search_cache.set(cache_key, result, ttl=300)
 
     return result
-
-
-# Additional optimization: Batch article searches
-class ArticleSearchBatcher:
-    """Batch multiple article searches to reduce overhead."""
-
-    def __init__(self, batch_size: int = 5, timeout: float = 0.1):
-        self.batch_size = batch_size
-        self.timeout = timeout
-        self._pending_searches: list[tuple[PubmedRequest, asyncio.Future]] = []
-        self._batch_task: asyncio.Task | None = None
-
-    async def search(self, request: PubmedRequest) -> str:
-        """Add a search to the batch."""
-        future = asyncio.get_event_loop().create_future()
-        self._pending_searches.append((request, future))
-
-        # Start batch processing if not already running
-        if self._batch_task is None or self._batch_task.done():
-            self._batch_task = asyncio.create_task(self._process_batch())
-
-        return await future
-
-    async def _process_batch(self):
-        """Process pending searches in batch."""
-        await asyncio.sleep(self.timeout)  # Wait for more requests
-
-        if not self._pending_searches:
-            return
-
-        # Take up to batch_size searches
-        batch = self._pending_searches[: self.batch_size]
-        self._pending_searches = self._pending_searches[self.batch_size :]
-
-        # Process searches in parallel
-        search_tasks = []
-        for request, _ in batch:
-            task = search_articles_unified(request, include_pubmed=True)
-            search_tasks.append(task)
-
-        results = await asyncio.gather(*search_tasks, return_exceptions=True)
-
-        # Set results on futures
-        for (_, future), result in zip(batch, results, strict=False):
-            if isinstance(result, Exception):
-                future.set_exception(result)
-            else:
-                future.set_result(result)
-
-
-# Global batcher instance
-_article_batcher = ArticleSearchBatcher()
-
-
-async def article_searcher_batched(
-    call_benefit: str,
-    chemicals: list[str] | str | None = None,
-    diseases: list[str] | str | None = None,
-    genes: list[str] | str | None = None,
-    keywords: list[str] | str | None = None,
-    variants: list[str] | str | None = None,
-    include_preprints: bool = True,
-    include_cbioportal: bool = True,
-) -> str:
-    """Batched version of article_searcher for multiple concurrent searches."""
-
-    request = PubmedRequest(
-        chemicals=ensure_list(chemicals, split_strings=True),
-        diseases=ensure_list(diseases, split_strings=True),
-        genes=ensure_list(genes, split_strings=True),
-        keywords=ensure_list(keywords, split_strings=True),
-        variants=ensure_list(variants, split_strings=True),
-    )
-
-    # Use the optimized version with caching
-    return await article_searcher_optimized(
-        call_benefit=call_benefit,
-        chemicals=request.chemicals,
-        diseases=request.diseases,
-        genes=request.genes,
-        keywords=request.keywords,
-        variants=request.variants,
-        include_preprints=include_preprints,
-        include_cbioportal=include_cbioportal,
-    )

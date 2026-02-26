@@ -9,7 +9,12 @@ import logging
 
 import httpx
 
-from biomcp.constants import VZP_BASE_URL
+from biomcp.constants import (
+    CACHE_TTL_DAY,
+    CZECH_HTTP_TIMEOUT,
+    DEFAULT_CACHE_TIMEOUT,
+    VZP_BASE_URL,
+)
 from biomcp.czech.diacritics import normalize_query
 from biomcp.http_client import (
     cache_response,
@@ -24,8 +29,8 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 
 _VZP_API_BASE = f"{VZP_BASE_URL}/o-vzp/vzajemne-informace/ciselnik-vykonu"
-_VZP_CODEBOOK_CACHE_TTL = 60 * 60 * 24  # 24 hours
-_VZP_ENTRY_CACHE_TTL = 60 * 60 * 24 * 7  # 1 week
+_VZP_CODEBOOK_CACHE_TTL = CACHE_TTL_DAY
+_VZP_ENTRY_CACHE_TTL = DEFAULT_CACHE_TIMEOUT
 
 # Supported codebook type identifiers.  The primary one for health
 # procedures is ``seznam_vykonu``.
@@ -57,7 +62,7 @@ async def _fetch_codebook(
         return json.loads(cached)
 
     try:
-        async with httpx.AsyncClient(timeout=30.0) as client:
+        async with httpx.AsyncClient(timeout=CZECH_HTTP_TIMEOUT) as client:
             resp = await client.get(
                 url,
                 headers={"Accept": "application/json"},
@@ -101,7 +106,7 @@ async def _fetch_entry(codebook_type: str, code: str) -> dict | None:
         return json.loads(cached)
 
     try:
-        async with httpx.AsyncClient(timeout=30.0) as client:
+        async with httpx.AsyncClient(timeout=CZECH_HTTP_TIMEOUT) as client:
             resp = await client.get(
                 url,
                 headers={"Accept": "application/json"},

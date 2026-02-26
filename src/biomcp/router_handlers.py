@@ -4,6 +4,7 @@ import json
 import logging
 from typing import Any
 
+from .constants import compute_skip
 from .exceptions import (
     InvalidParameterError,
     ResultParsingError,
@@ -68,7 +69,7 @@ async def handle_article_search(
         raise ResultParsingError("article", e) from e
 
     # Manual pagination
-    start = (page - 1) * page_size
+    start = compute_skip(page, page_size)
     end = start + page_size
     items = all_results[start:end]
     total = len(all_results)
@@ -149,7 +150,7 @@ async def handle_trial_search(
     all_results, total = _parse_trial_results(result_str)
 
     # Manual pagination
-    start = (page - 1) * page_size
+    start = compute_skip(page, page_size)
     end = start + page_size
     items = all_results[start:end]
 

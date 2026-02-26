@@ -239,33 +239,6 @@ def clean_text(text: str | None) -> str:
     return text.strip()
 
 
-def build_search_query(
-    field_map: dict[str, str], operator: str = "AND"
-) -> str:
-    """
-    Build an OpenFDA search query from field mappings.
-
-    Args:
-        field_map: Dictionary mapping field names to search values
-        operator: Logical operator (AND/OR) to combine fields
-
-    Returns:
-        Formatted search query string
-    """
-    query_parts = []
-
-    for field, value in field_map.items():
-        if value:
-            # Escape special characters
-            escaped_value = value.replace('"', '\\"')
-            # Add quotes for multi-word values
-            if " " in escaped_value:
-                escaped_value = f'"{escaped_value}"'
-            query_parts.append(f"{field}:{escaped_value}")
-
-    return f" {operator} ".join(query_parts)
-
-
 def extract_drug_names(result: dict[str, Any]) -> list[str]:
     """Extract drug names from an OpenFDA result."""
     drug_names = set()

@@ -14,6 +14,7 @@ import logging
 
 from lxml import etree
 
+from biomcp.constants import CACHE_TTL_MONTH
 from biomcp.czech.diacritics import normalize_query
 from biomcp.http_client import (
     cache_response,
@@ -25,7 +26,7 @@ logger = logging.getLogger(__name__)
 
 # ClaML XML namespace for xml:lang attribute
 _XML_NS = "http://www.w3.org/XML/1998/namespace"
-_CACHE_TTL = 60 * 60 * 24 * 30  # 30 days
+_CACHE_TTL = CACHE_TTL_MONTH
 
 # Type aliases for the two index types
 CodeIndex = dict[str, dict]

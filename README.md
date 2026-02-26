@@ -1,297 +1,230 @@
-# BioMCP: Biomedical Model Context Protocol
+# BioMCP: Biomedicínský Model Context Protocol
 
-BioMCP is an open source (MIT License) toolkit that empowers AI assistants and
-agents with specialized biomedical knowledge. Built following the Model Context
-Protocol (MCP), it connects AI systems to authoritative biomedical data
-sources, enabling them to answer questions about clinical trials, scientific
-literature, and genomic variants with precision and depth.
+> Fork projektu [genomoncology/biomcp](https://github.com/genomoncology/biomcp) s rozšířením o české zdravotnické datové zdroje.
 
-[![▶️ Watch the video](./docs/blog/images/what_is_biomcp_thumbnail.png)](https://www.youtube.com/watch?v=bKxOWrWUUhM)
+BioMCP je open source (MIT licence) sada nástrojů, která propojuje AI asistenty a agenty se specializovanými biomedicínskými znalostmi. Postavený na protokolu [Model Context Protocol (MCP)](https://modelcontextprotocol.io/), spojuje AI systémy s autoritativními biomedicínskými datovými zdroji a umožňuje jim odpovídat na otázky o klinických studiích, vědecké literatuře, genomických variantách a českém zdravotnickém systému s přesností a hloubkou.
 
-## MCPHub Certification
+## Proč BioMCP?
 
-BioMCP is certified by [MCPHub](https://mcphub.com/mcp-servers/genomoncology/biomcp). This certification ensures that BioMCP follows best practices for Model Context Protocol implementation and provides reliable biomedical data access.
+Velké jazykové modely mají široké obecné znalosti, ale často jim chybí specializované doménové informace nebo přístup k aktuálním zdrojům. BioMCP tento nedostatek překonává pro biomedicínu a české zdravotnictví:
 
-## Why BioMCP?
+- Poskytuje **strukturovaný přístup** ke klinickým studiím, biomedicínské literatuře, genomickým variantám a českým zdravotnickým registrům
+- Umožňuje **dotazy v přirozeném jazyce** na specializované databáze bez znalosti jejich syntaxe
+- Podporuje **biomedicínský výzkum** i **české klinické workflows** prostřednictvím jednotného rozhraní
+- Funguje jako **MCP server** pro AI asistenty a agenty (Claude Desktop, Cursor, VS Code aj.)
 
-While Large Language Models have broad general knowledge, they often lack
-specialized domain-specific information or access to up-to-date resources.
-BioMCP bridges this gap for biomedicine by:
+## Biomedicínské datové zdroje
 
-- Providing **structured access** to clinical trials, biomedical literature,
-  and genomic variants
-- Enabling **natural language queries** to specialized databases without
-  requiring knowledge of their specific syntax
-- Supporting **biomedical research** workflows through a consistent interface
-- Functioning as an **MCP server** for AI assistants and agents
+### Literární zdroje
 
-## Biomedical Data Sources
+- **PubTator3/PubMed** — recenzovaná biomedicínská literatura s anotacemi entit
+- **bioRxiv/medRxiv** — preprintové servery pro biologii a zdravotní vědy
+- **Europe PMC** — platforma otevřené vědy včetně preprintů
 
-BioMCP integrates with multiple biomedical data sources:
+### Klinické a genomické zdroje
 
-### Literature Sources
+- **ClinicalTrials.gov** — registr a databáze výsledků klinických studií
+- **NCI Clinical Trials Search API** — kurátorská databáze onkologických studií NCI
+  - Pokročilé filtry (biomarkery, předchozí terapie, mozkové metastázy)
+  - Databáze organizací a intervencí
+  - Řízený slovník nemocí se synonymy
+- **BioThings Suite** — komplexní biomedicínská datová API:
+  - **MyVariant.info** — konsolidované anotace genetických variant
+  - **MyGene.info** — anotace a informace o genech v reálném čase
+  - **MyDisease.info** — ontologie nemocí a synonyma
+  - **MyChem.info** — anotace léčiv a chemických látek
+- **TCGA/GDC** — The Cancer Genome Atlas pro data o onkologických variantách
+- **1000 Genomes** — populační frekvenční data přes Ensembl
+- **cBioPortal** — portál genomiky rakoviny s daty o výskytu mutací
+- **OncoKB** — znalostní báze precizní onkologie pro klinickou interpretaci variant
+  - Terapeutické implikace a FDA-schválené léčby
+  - Anotace onkogenicity a efektu mutací
+  - Demo server funguje okamžitě bez autentizace (BRAF, ROS1, TP53)
 
-- **PubTator3/PubMed** - Peer-reviewed biomedical literature with entity annotations
-- **bioRxiv/medRxiv** - Preprint servers for biology and health sciences
-- **Europe PMC** - Open science platform including preprints
+### Regulační a bezpečnostní zdroje
 
-### Clinical & Genomic Sources
+- **OpenFDA** — regulační a bezpečnostní data FDA:
+  - **Drug Adverse Events (FAERS)** — postmarketingové zprávy o bezpečnosti léčiv
+  - **Drug Labels (SPL)** — oficiální preskripční informace
+  - **Device Events (MAUDE)** — nežádoucí příhody zdravotnických prostředků
+  - **Drug Approvals** — historie schvalování léčiv FDA
+  - **Drug Recalls** — stahování léčiv FDA
+  - **Drug Shortages** — aktuální informace o nedostatku léčiv
 
-- **ClinicalTrials.gov** - Clinical trial registry and results database
-- **NCI Clinical Trials Search API** - National Cancer Institute's curated cancer trials database
-  - Advanced search filters (biomarkers, prior therapies, brain metastases)
-  - Organization and intervention databases
-  - Disease vocabulary with synonyms
-- **BioThings Suite** - Comprehensive biomedical data APIs:
-  - **MyVariant.info** - Consolidated genetic variant annotation
-  - **MyGene.info** - Real-time gene annotations and information
-  - **MyDisease.info** - Disease ontology and synonym information
-  - **MyChem.info** - Drug/chemical annotations and properties
-- **TCGA/GDC** - The Cancer Genome Atlas for cancer variant data
-- **1000 Genomes** - Population frequency data via Ensembl
-- **cBioPortal** - Cancer genomics portal with mutation occurrence data
-- **OncoKB** - Precision oncology knowledge base for clinical variant interpretation (demo server with BRAF, ROS1, TP53)
-  - Therapeutic implications and FDA-approved treatments
-  - Oncogenicity and mutation effect annotations
-  - Works immediately without authentication
+### Analytické a predikční zdroje
 
-### Regulatory & Safety Sources
+- **AlphaGenome** — predikce efektů variant od Google DeepMind (vyžaduje API klíč)
+- **Enrichr** — analýza obohacení genových sad (pathways, ontologie, buněčné typy)
 
-- **OpenFDA** - FDA regulatory and safety data:
-  - **Drug Adverse Events (FAERS)** - Post-market drug safety reports
-  - **Drug Labels (SPL)** - Official prescribing information
-  - **Device Events (MAUDE)** - Medical device adverse events, with genomic device filtering
-  - **Drug Approvals** - FDA drug approval history
-  - **Drug Recalls** - FDA drug recall enforcement reports
-  - **Drug Shortages** - Current drug shortage information
+### České zdravotnické zdroje
 
-### Analysis & Prediction Sources
+- **SUKL** — Státní ústav pro kontrolu léčiv
+  - Vyhledávání v registru léčiv, detaily, složení
+  - Přístup k dokumentům SmPC a příbalové informaci (PIL)
+  - Kontrola dostupnosti léčiv na trhu v reálném čase
+- **MKN-10** — Mezinárodní klasifikace nemocí, 10. revize
+  - Vyhledávání podle kódu i volného textu s podporou diakritiky
+  - Procházení celé hierarchie diagnóz (kapitoly, bloky, kategorie)
+- **NRPZS** — Národní registr poskytovatelů zdravotních služeb
+  - Vyhledávání poskytovatelů podle jména, města, odbornosti
+  - Detaily pracovišť s kontaktními údaji
+- **SZV** — Seznam zdravotních výkonů
+  - Vyhledávání výkonů podle kódu nebo názvu
+  - Bodové hodnoty, časové dotace, kódy odborností
+- **VZP** — Číselníky Všeobecné zdravotní pojišťovny
+  - Prohledávání číselníků výkonů, diagnóz a ATC kódů
+  - Detaily položek s pravidly úhrad
 
-- **AlphaGenome** - Google DeepMind variant effect predictions (requires API key)
-- **Enrichr** - Gene set enrichment analysis from Ma'ayan Lab (pathway, ontology, cell type)
+Všechny české zdroje jsou veřejná API české státní správy — nevyžadují autentizaci.
 
-### Czech Healthcare Sources / České zdravotnické zdroje
+## Dostupné MCP nástroje
 
-- **SUKL** - State Institute for Drug Control (Státní ústav pro kontrolu léčiv)
-  - Drug registry search, details, composition
-  - SmPC and PIL document access
-  - Real-time drug market availability
-- **MKN-10** - Czech ICD-10 diagnosis codes (Mezinárodní klasifikace nemocí)
-  - Code and free-text search with diacritics support
-  - Full diagnosis hierarchy browsing (chapters, blocks, categories)
-- **NRPZS** - National Registry of Healthcare Providers (Národní registr poskytovatelů)
-  - Provider search by name, city, specialty
-  - Workplace details with contact information
-- **SZV** - Health Procedure List (Seznam zdravotních výkonů)
-  - Procedure search by code or name
-  - Point values, time requirements, specialty codes
-- **VZP** - General Health Insurance codebooks (Číselníky VZP)
-  - Codebook search across procedure, diagnosis, and ATC types
-  - Entry details with reimbursement rules
+BioMCP poskytuje 51 specializovaných nástrojů pro biomedicínský výzkum (37 globálních + 14 českých zdravotnických):
 
-## Available MCP Tools
+### Základní nástroje (3)
 
-BioMCP provides 51 specialized tools for biomedical research (37 global + 14 Czech healthcare):
+#### 1. Nástroj sekvenčního myšlení (Think)
 
-### Core Tools (3)
-
-#### 1. Think Tool (ALWAYS USE FIRST!)
-
-**CRITICAL**: The `think` tool MUST be your first step for ANY biomedical research task.
+Nástroj `think` by měl být prvním krokem pro každou biomedicínskou výzkumnou úlohu:
 
 ```python
-# Start analysis with sequential thinking
 think(
-    thought="Breaking down the query about BRAF mutations in melanoma...",
+    thought="Rozklad dotazu o BRAF mutacích u melanomu...",
     thoughtNumber=1,
     totalThoughts=3,
     nextThoughtNeeded=True
 )
 ```
 
-The sequential thinking tool helps:
+Pomáhá systematicky rozložit komplexní biomedicínské problémy, naplánovat vícekrokový výzkumný přístup a sledovat průběh analýzy.
 
-- Break down complex biomedical problems systematically
-- Plan multi-step research approaches
-- Track reasoning progress
-- Ensure comprehensive analysis
+#### 2. Nástroj vyhledávání (Search)
 
-#### 2. Search Tool
+Podporuje dva režimy:
 
-The search tool supports two modes:
-
-##### Unified Query Language (Recommended)
-
-Use the `query` parameter with structured field syntax for powerful cross-domain searches:
+##### Unifikovaný dotazovací jazyk (doporučeno)
 
 ```python
-# Simple natural language
+# Jednoduchý dotaz v přirozeném jazyce
 search(query="BRAF melanoma")
 
-# Field-specific search
+# Vyhledávání podle polí
 search(query="gene:BRAF AND trials.condition:melanoma")
 
-# Complex queries
+# Komplexní dotazy
 search(query="gene:BRAF AND variants.significance:pathogenic AND articles.date:>2023")
 
-# Get searchable fields schema
+# Schéma prohledávatelných polí
 search(get_schema=True)
-
-# Explain how a query is parsed
-search(query="gene:BRAF", explain_query=True)
 ```
 
-**Supported Fields:**
+**Podporovaná pole:** `gene:`, `variant:`, `disease:`, `trials.condition:`, `trials.phase:`, `trials.status:`, `trials.intervention:`, `articles.author:`, `articles.journal:`, `articles.date:`, `variants.significance:`, `variants.rsid:`, `variants.frequency:`
 
-- **Cross-domain**: `gene:`, `variant:`, `disease:`
-- **Trials**: `trials.condition:`, `trials.phase:`, `trials.status:`, `trials.intervention:`
-- **Articles**: `articles.author:`, `articles.journal:`, `articles.date:`
-- **Variants**: `variants.significance:`, `variants.rsid:`, `variants.frequency:`
-
-##### Domain-Based Search
-
-Use the `domain` parameter with specific filters:
+##### Doménové vyhledávání
 
 ```python
-# Search articles (includes automatic cBioPortal integration)
+# Vyhledávání článků (automatická integrace cBioPortal)
 search(domain="article", genes=["BRAF"], diseases=["melanoma"])
 
-# Search with mutation-specific cBioPortal data
-search(domain="article", genes=["BRAF"], keywords=["V600E"])
-search(domain="article", genes=["SRSF2"], keywords=["F57*"])  # Wildcard patterns
-
-# Search trials
+# Vyhledávání studií
 search(domain="trial", conditions=["lung cancer"], phase="3")
 
-# Search variants
+# Vyhledávání variant
 search(domain="variant", gene="TP53", significance="pathogenic")
 ```
 
-**Note**: When searching articles with a gene parameter, cBioPortal data is automatically included:
-
-- Gene-level summaries show mutation frequency across cancer studies
-- Mutation-specific searches (e.g., "V600E") show study-level occurrence data
-- Cancer types are dynamically resolved from cBioPortal API
-
-#### 3. Fetch Tool
-
-Retrieve full details for a single article, trial, or variant:
+#### 3. Nástroj získání detailů (Fetch)
 
 ```python
-# Fetch article details (supports both PMID and DOI)
-fetch(domain="article", id="34567890")  # PMID
-fetch(domain="article", id="10.1101/2024.01.20.23288905")  # DOI
+# Detail článku (PMID i DOI)
+fetch(domain="article", id="34567890")
+fetch(domain="article", id="10.1101/2024.01.20.23288905")
 
-# Fetch trial with all sections
+# Detail studie se všemi sekcemi
 fetch(domain="trial", id="NCT04280705", detail="all")
 
-# Fetch variant details
+# Detail varianty
 fetch(domain="variant", id="rs113488022")
 ```
 
-**Domain-specific options:**
+### Individuální nástroje (48)
 
-- **Articles**: `detail="full"` retrieves full text if available
-- **Trials**: `detail` can be "protocol", "locations", "outcomes", "references", or "all"
-- **Variants**: Always returns full details
+Pro přímý přístup ke specifické funkcionalitě nabízí BioMCP 48 individuálních nástrojů (34 globálních + 14 českých):
 
-### Individual Tools (48)
+#### Nástroje pro články (2)
+- **article_searcher** — vyhledávání v PubMed/PubTator3 a preprintech
+- **article_getter** — získání detailů článku (PMID i DOI)
 
-For users who prefer direct access to specific functionality, BioMCP also provides 48 individual tools (34 global + 14 Czech):
+#### Nástroje pro klinické studie (6)
+- **trial_searcher** — vyhledávání na ClinicalTrials.gov nebo NCI CTS API
+- **trial_getter** — získání kompletních detailů studie
+- **trial_protocol_getter** — protokol studie
+- **trial_references_getter** — publikace ke studii
+- **trial_outcomes_getter** — výsledky a míry hodnocení
+- **trial_locations_getter** — místa provádění studie
 
-#### Article Tools (2)
+#### Nástroje pro varianty (2)
+- **variant_searcher** — vyhledávání v MyVariant.info
+- **variant_getter** — získání komprehenzních detailů varianty
 
-- **article_searcher**: Search PubMed/PubTator3 and preprints
-- **article_getter**: Fetch detailed article information (supports PMID and DOI)
+#### NCI-specifické nástroje (6)
+- **nci_organization_searcher** / **nci_organization_getter** — organizace NCI
+- **nci_intervention_searcher** / **nci_intervention_getter** — intervence (léky, přístroje, postupy)
+- **nci_biomarker_searcher** — biomarkery v kritériích vhodnosti
+- **nci_disease_searcher** — řízený slovník onkologických onemocnění NCI
 
-#### Trial Tools (6)
+#### Nástroje pro geny, nemoci a léčiva (3)
+- **gene_getter** — informace o genech z MyGene.info
+- **disease_getter** — definice nemocí a synonyma z MyDisease.info
+- **drug_getter** — informace o léčivech z MyChem.info
 
-- **trial_searcher**: Search ClinicalTrials.gov or NCI CTS API (via source parameter)
-- **trial_getter**: Fetch all trial details from either source
-- **trial_protocol_getter**: Fetch protocol information only (ClinicalTrials.gov)
-- **trial_references_getter**: Fetch trial publications (ClinicalTrials.gov)
-- **trial_outcomes_getter**: Fetch outcome measures and results (ClinicalTrials.gov)
-- **trial_locations_getter**: Fetch site locations and contacts (ClinicalTrials.gov)
+#### Nástroje OpenFDA (12)
+- **openfda_adverse_searcher** / **openfda_adverse_getter** — nežádoucí účinky (FAERS)
+- **openfda_label_searcher** / **openfda_label_getter** — lékové příbalové informace (SPL)
+- **openfda_device_searcher** / **openfda_device_getter** — nežádoucí příhody prostředků (MAUDE)
+- **openfda_approval_searcher** / **openfda_approval_getter** — schválení léčiv FDA
+- **openfda_recall_searcher** / **openfda_recall_getter** — stahování léčiv FDA
+- **openfda_shortage_searcher** / **openfda_shortage_getter** — nedostatek léčiv FDA
 
-#### Variant Tools (2)
+#### Nástroje genomické analýzy (2)
+- **alphagenome_predictor** — predikce efektů variant přes AlphaGenome (vyžaduje API klíč)
+- **enrichr_analyzer** — analýza obohacení genových sad přes Enrichr
 
-- **variant_searcher**: Search MyVariant.info database
-- **variant_getter**: Fetch comprehensive variant details
+**Poznámka:** Všechny individuální nástroje vyhledávající podle genu automaticky zahrnují souhrny cBioPortal, když `include_cbioportal=True` (výchozí). Vyhledávání studií může rozšiřovat podmínky o synonyma, když `expand_synonyms=True` (výchozí).
 
-#### NCI-Specific Tools (6)
+#### České zdravotnické nástroje (14)
 
-- **nci_organization_searcher**: Search NCI's organization database
-- **nci_organization_getter**: Get organization details by ID
-- **nci_intervention_searcher**: Search NCI's intervention database (drugs, devices, procedures)
-- **nci_intervention_getter**: Get intervention details by ID
-- **nci_biomarker_searcher**: Search biomarkers used in trial eligibility criteria
-- **nci_disease_searcher**: Search NCI's controlled vocabulary of cancer conditions
+##### SUKL — Registr léčiv (5)
+- **sukl_drug_searcher** — vyhledávání v českém registru léčiv
+- **sukl_drug_getter** — detail léčiva podle kódu SUKL
+- **sukl_spc_getter** — Souhrn údajů o přípravku (SmPC)
+- **sukl_pil_getter** — Příbalová informace (PIL)
+- **sukl_availability_checker** — kontrola dostupnosti léčiva na trhu
 
-#### Gene, Disease & Drug Tools (3)
+##### MKN-10 — Diagnózy (3)
+- **mkn_diagnosis_searcher** — vyhledávání diagnóz podle kódu nebo textu
+- **mkn_diagnosis_getter** — detail diagnózy s hierarchií
+- **mkn_category_browser** — procházení stromu kategorií MKN-10
 
-- **gene_getter**: Get real-time gene information from MyGene.info
-- **disease_getter**: Get disease definitions and synonyms from MyDisease.info
-- **drug_getter**: Get drug/chemical information from MyChem.info
+##### NRPZS — Poskytovatelé zdravotních služeb (2)
+- **nrpzs_provider_searcher** — vyhledávání poskytovatelů
+- **nrpzs_provider_getter** — detail poskytovatele s pracovišti
 
-#### OpenFDA Tools (12)
+##### SZV + VZP — Výkony a pojištění (4)
+- **szv_procedure_searcher** — vyhledávání zdravotních výkonů
+- **szv_procedure_getter** — detail výkonu s bodovou hodnotou
+- **vzp_codebook_searcher** — prohledávání číselníků VZP
+- **vzp_codebook_getter** — detail položky číselníku
 
-- **openfda_adverse_searcher**: Search FDA adverse event reports (FAERS)
-- **openfda_adverse_getter**: Get adverse event report details
-- **openfda_label_searcher**: Search FDA drug labels (SPL)
-- **openfda_label_getter**: Get drug label details
-- **openfda_device_searcher**: Search medical device adverse events (MAUDE)
-- **openfda_device_getter**: Get device event details
-- **openfda_approval_searcher**: Search FDA drug approvals
-- **openfda_approval_getter**: Get drug approval details
-- **openfda_recall_searcher**: Search FDA drug recalls
-- **openfda_recall_getter**: Get drug recall details
-- **openfda_shortage_searcher**: Search FDA drug shortages
-- **openfda_shortage_getter**: Get drug shortage details
+Všechny české nástroje podporují **transparentní práci s diakritikou** — "leky" najde "léky", "Usti" najde "Ústí".
 
-#### Genomic Analysis Tools (2)
+Podrobná dokumentace českých nástrojů: [docs/czech-tools.md](./docs/czech-tools.md)
 
-- **alphagenome_predictor**: Predict variant effects using Google DeepMind AlphaGenome (requires API key)
-- **enrichr_analyzer**: Gene set enrichment analysis via Enrichr (pathway, ontology, cell type enrichment)
+## Rychlý start
 
-**Note**: All individual tools that search by gene automatically include cBioPortal summaries when the `include_cbioportal` parameter is True (default). Trial searches can expand disease conditions with synonyms when `expand_synonyms` is True (default).
+### Pro uživatele Claude Desktop
 
-#### Czech Healthcare Tools (14)
-
-##### SUKL - Drug Registry (5)
-
-- **sukl_drug_searcher**: Search Czech drug registry by name, substance, or ATC code
-- **sukl_drug_getter**: Get full drug details by SUKL code
-- **sukl_spc_getter**: Get SmPC (Summary of Product Characteristics) document
-- **sukl_pil_getter**: Get PIL (Patient Information Leaflet) document
-- **sukl_availability_checker**: Check drug market availability status
-
-##### MKN-10 - Diagnosis Codes (3)
-
-- **mkn_diagnosis_searcher**: Search Czech ICD-10 diagnoses by code or text
-- **mkn_diagnosis_getter**: Get diagnosis details with full hierarchy
-- **mkn_category_browser**: Browse MKN-10 category tree
-
-##### NRPZS - Healthcare Providers (2)
-
-- **nrpzs_provider_searcher**: Search providers by name, city, or specialty
-- **nrpzs_provider_getter**: Get provider details with workplaces
-
-##### SZV + VZP - Procedures & Insurance (4)
-
-- **szv_procedure_searcher**: Search health procedures by code or name
-- **szv_procedure_getter**: Get procedure details with point values
-- **vzp_codebook_searcher**: Search VZP insurance codebooks
-- **vzp_codebook_getter**: Get codebook entry details
-
-All Czech tools support **diacritics-transparent search** - searching "leky" finds "léky", "Usti" finds "Ústí".
-
-For detailed Czech tool documentation, see [docs/czech-tools.md](./docs/czech-tools.md).
-
-## Quick Start
-
-### For Claude Desktop Users
-
-1. **Install `uv`** if you don't have it (recommended):
+1. **Nainstalujte `uv`** (pokud nemáte):
 
    ```bash
    # MacOS
@@ -301,10 +234,10 @@ For detailed Czech tool documentation, see [docs/czech-tools.md](./docs/czech-to
    pip install uv
    ```
 
-2. **Configure Claude Desktop**:
-   - Open Claude Desktop settings
-   - Navigate to Developer section
-   - Click "Edit Config" and add:
+2. **Nakonfigurujte Claude Desktop**:
+   - Otevřete nastavení Claude Desktop
+   - Přejděte do sekce Developer
+   - Klikněte na "Edit Config" a přidejte:
    ```json
    {
      "mcpServers": {
@@ -315,152 +248,122 @@ For detailed Czech tool documentation, see [docs/czech-tools.md](./docs/czech-to
      }
    }
    ```
-   - Restart Claude Desktop and start chatting about biomedical topics!
+   - Restartujte Claude Desktop a začněte klást biomedicínské otázky!
 
-### Python Package Installation
+### Instalace Python balíčku
 
 ```bash
-# Using pip
+# Pomocí pip
 pip install biomcp-python
 
-# Using uv (recommended for faster installation)
+# Pomocí uv (doporučeno pro rychlejší instalaci)
 uv pip install biomcp-python
 
-# Run directly without installation
+# Přímé spuštění bez instalace
 uv run --with biomcp-python biomcp trial search --condition "lung cancer"
 ```
 
-## Configuration
+## Konfigurace
 
-### Environment Variables
-
-BioMCP supports optional environment variables for enhanced functionality:
+### Proměnné prostředí
 
 ```bash
-# cBioPortal API authentication (optional)
-export CBIO_TOKEN="your-api-token"  # For authenticated access
-export CBIO_BASE_URL="https://www.cbioportal.org/api"  # Custom API endpoint
+# Autentizace cBioPortal API (volitelné)
+export CBIO_TOKEN="your-api-token"
+export CBIO_BASE_URL="https://www.cbioportal.org/api"
 
-# OncoKB demo server (optional - advanced users only)
-# By default: Uses free demo server with BRAF, ROS1, TP53 (no setup required)
-# For full gene access: Set ONCOKB_TOKEN from your OncoKB license
-# export ONCOKB_TOKEN="your-oncokb-token"  # www.oncokb.org/account/settings
+# OncoKB (volitelné — demo server funguje automaticky s BRAF, ROS1, TP53)
+# export ONCOKB_TOKEN="your-oncokb-token"  # Pro plný přístup ke genům
 
-# Performance tuning
-export BIOMCP_USE_CONNECTION_POOL="true"  # Enable HTTP connection pooling (default: true)
-export BIOMCP_METRICS_ENABLED="false"     # Enable performance metrics (default: false)
+# Ladění výkonu
+export BIOMCP_USE_CONNECTION_POOL="true"   # HTTP connection pooling (výchozí: true)
+export BIOMCP_METRICS_ENABLED="false"      # Metriky výkonu (výchozí: false)
 ```
 
-## Running BioMCP Server
+## Spuštění BioMCP serveru
 
-BioMCP supports multiple transport protocols to suit different deployment scenarios:
-
-### Local Development (STDIO)
-
-For direct integration with Claude Desktop or local MCP clients:
+### Lokální vývoj (STDIO)
 
 ```bash
-# Default STDIO mode for local development
+# Výchozí STDIO režim pro lokální vývoj
 biomcp run
 
-# Or explicitly specify STDIO
+# Explicitně STDIO
 biomcp run --mode stdio
 ```
 
-### HTTP Server Mode
+### HTTP server
 
-BioMCP supports multiple HTTP transport protocols:
-
-#### Legacy SSE Transport (Worker Mode)
-
-For backward compatibility with existing SSE clients:
-
-```bash
-biomcp run --mode worker
-# Server available at http://localhost:8000/sse
-```
-
-#### Streamable HTTP Transport (Recommended)
-
-The new MCP-compliant Streamable HTTP transport provides optimal performance and standards compliance:
+#### Streamable HTTP (doporučeno)
 
 ```bash
 biomcp run --mode streamable_http
 
-# Custom host and port
+# Vlastní host a port
 biomcp run --mode streamable_http --host 127.0.0.1 --port 8080
 ```
 
-Features of Streamable HTTP transport:
+Vlastnosti Streamable HTTP:
+- Jediný endpoint `/mcp` pro všechny operace
+- Dynamický režim odpovědí (JSON pro rychlé operace, SSE pro dlouhotrvající)
+- Plná kompatibilita se specifikací MCP (2025-03-26)
+- Lepší škálovatelnost pro cloudové nasazení
 
-- Single `/mcp` endpoint for all operations
-- Dynamic response mode (JSON for quick operations, SSE for long-running)
-- Session management support (future)
-- Full MCP specification compliance (2025-03-26)
-- Better scalability for cloud deployments
-
-### Deployment Options
-
-#### Docker
+#### Starší SSE transport
 
 ```bash
-# Build the Docker image locally
-docker build -t biomcp:latest .
+biomcp run --mode worker
+# Server na http://localhost:8000/sse
+```
 
-# Run the container
+### Docker
+
+```bash
+docker build -t biomcp:latest .
 docker run -p 8000:8000 biomcp:latest biomcp run --mode streamable_http
 ```
 
-#### Cloudflare Workers
+## Příkazová řádka (CLI)
 
-The worker mode can be deployed to Cloudflare Workers for global edge deployment.
-
-Note: All APIs work without authentication, but tokens may provide higher rate limits.
-
-## Command Line Interface
-
-BioMCP provides a comprehensive CLI for direct database interaction:
+BioMCP poskytuje komprehenzní CLI pro přímou interakci s databázemi:
 
 ```bash
-# Get help
+# Nápověda
 biomcp --help
 
-# Run the MCP server
+# Spuštění MCP serveru
 biomcp run
 
-# Article search examples
-biomcp article search --gene BRAF --disease Melanoma  # Includes preprints by default
-biomcp article search --gene BRAF --no-preprints      # Exclude preprints
+# Vyhledávání článků
+biomcp article search --gene BRAF --disease Melanoma
+biomcp article search --gene BRAF --no-preprints
 biomcp article get 21717063 --full
 
-# Clinical trial examples
+# Klinické studie
 biomcp trial search --condition "Lung Cancer" --phase PHASE3
-biomcp trial search --condition melanoma --source nci --api-key YOUR_KEY  # Use NCI API
+biomcp trial search --condition melanoma --source nci --api-key YOUR_KEY
 biomcp trial get NCT04280705 Protocol
-biomcp trial get NCT04280705 --source nci --api-key YOUR_KEY  # Get from NCI
 
-# Variant examples with external annotations
+# Varianty s externími anotacemi
 biomcp variant search --gene TP53 --significance pathogenic
-biomcp variant get rs113488022  # Includes TCGA, 1000 Genomes, and cBioPortal data by default
-biomcp variant get rs113488022 --no-external  # Core annotations only
+biomcp variant get rs113488022
+biomcp variant get rs113488022 --no-external
 
-# OncoKB integration (uses free demo server automatically)
-biomcp variant search --gene BRAF --include-oncokb  # Works with BRAF, ROS1, TP53
+# OncoKB integrace (demo server automaticky)
+biomcp variant search --gene BRAF --include-oncokb
 
-# Gene information with functional enrichment
+# Informace o genech s funkčním obohacením
 biomcp gene get TP53 --enrich pathway
 biomcp gene get BRCA1 --enrich ontology
 biomcp gene get EGFR --enrich celltypes
 
-# NCI-specific examples (requires NCI API key)
+# NCI-specifické příklady
 biomcp organization search "MD Anderson" --api-key YOUR_KEY
-biomcp organization get ORG123456 --api-key YOUR_KEY
 biomcp intervention search pembrolizumab --api-key YOUR_KEY
-biomcp intervention search --type Device --api-key YOUR_KEY
 biomcp biomarker search "PD-L1" --api-key YOUR_KEY
 biomcp disease search melanoma --source nci --api-key YOUR_KEY
 
-# Czech healthcare examples / České zdravotnické příklady
+# České zdravotnické příklady
 biomcp czech sukl search --query "Ibuprofen"
 biomcp czech sukl get "0001234"
 biomcp czech sukl availability "0001234"
@@ -471,123 +374,97 @@ biomcp czech szv search --query "EKG"
 biomcp czech vzp search --query "antibiotika"
 ```
 
-## Testing & Verification
+## Testování a ověření
 
-Test your BioMCP setup with the MCP Inspector:
+Otestujte nastavení BioMCP pomocí MCP Inspector:
 
 ```bash
 npx @modelcontextprotocol/inspector uv run --with biomcp-python biomcp run
 ```
 
-This opens a web interface where you can explore and test all available tools.
+Otevře se webové rozhraní pro prozkoumání a testování všech dostupných nástrojů.
 
-## Enterprise Version: OncoMCP
+## Příklady použití
 
-OncoMCP extends BioMCP with GenomOncology's enterprise-grade precision oncology
-platform (POP), providing:
-
-- **HIPAA-Compliant Deployment**: Secure on-premise options
-- **Real-Time Trial Matching**: Up-to-date status and arm-level matching
-- **Healthcare Integration**: Seamless EHR and data warehouse connectivity
-- **Curated Knowledge Base**: 15,000+ trials and FDA approvals
-- **Sophisticated Patient Matching**: Using integrated clinical and molecular
-  profiles
-- **Advanced NLP**: Structured extraction from unstructured text
-- **Comprehensive Biomarker Processing**: Mutation and rule processing
-
-Learn more: [GenomOncology](https://genomoncology.com/)
-
-## MCP Registries
-
-[![smithery badge](https://smithery.ai/badge/@genomoncology/biomcp)](https://smithery.ai/server/@genomoncology/biomcp)
-
-<a href="https://glama.ai/mcp/servers/@genomoncology/biomcp">
-<img width="380" height="200" src="https://glama.ai/mcp/servers/@genomoncology/biomcp/badge" />
-</a>
-
-## Example Use Cases
-
-### Gene Information Retrieval
+### Získání informací o genu
 
 ```python
-# Get comprehensive gene information
 gene_getter(gene_id_or_symbol="TP53")
-# Returns: Official name, summary, aliases, links to databases
+# Vrací: Oficiální název, souhrn, aliasy, odkazy na databáze
 ```
 
-### Disease Synonym Expansion
+### Rozšíření synonym nemoci
 
 ```python
-# Get disease information with synonyms
+# Informace o nemoci se synonymy
 disease_getter(disease_id_or_name="GIST")
-# Returns: "gastrointestinal stromal tumor" and other synonyms
+# Vrací: "gastrointestinal stromal tumor" a další synonyma
 
-# Search trials with automatic synonym expansion
+# Vyhledávání studií s automatickým rozšířením synonym
 trial_searcher(conditions=["GIST"], expand_synonyms=True)
-# Searches for: GIST OR "gastrointestinal stromal tumor" OR "GI stromal tumor"
+# Prohledává: GIST OR "gastrointestinal stromal tumor" OR "GI stromal tumor"
 ```
 
-### Integrated Biomedical Research
+### Integrovaný biomedicínský výzkum
 
 ```python
-# 1. Always start with thinking
-think(thought="Analyzing BRAF V600E in melanoma treatment", thoughtNumber=1)
+# 1. Začněte myšlením
+think(thought="Analýza BRAF V600E u léčby melanomu", thoughtNumber=1)
 
-# 2. Get gene context
+# 2. Kontext genu
 gene_getter("BRAF")
 
-# 3. Search for pathogenic variants with OncoKB clinical interpretation (uses free demo server)
+# 3. Vyhledání patogenních variant s klinickou interpretací OncoKB
 variant_searcher(gene="BRAF", hgvsp="V600E", significance="pathogenic", include_oncokb=True)
 
-# 4. Find relevant clinical trials with disease expansion
+# 4. Nalezení relevantních klinických studií s rozšířením nemocí
 trial_searcher(conditions=["melanoma"], interventions=["BRAF inhibitor"])
 ```
 
-## Documentation
+### Kombinace českých a globálních dat
 
-For comprehensive documentation, visit [https://biomcp.org](https://biomcp.org)
+```python
+# 1. Najdi lék v SUKL registru
+sukl_drug_searcher(query="Ibuprofen")
 
-### Developer Guides
+# 2. Najdi klinické studie pro stejnou účinnou látku
+trial_searcher(conditions=["pain"], interventions=["Ibuprofen"])
 
-- [HTTP Client Guide](./docs/http-client-guide.md) - Using the centralized HTTP client
-- [Migration Examples](./docs/migration-examples.md) - Migrating from direct HTTP usage
-- [Error Handling Guide](./docs/error-handling.md) - Comprehensive error handling patterns
-- [Integration Testing Guide](./docs/integration-testing.md) - Best practices for reliable integration tests
-- [Third-Party Endpoints](./THIRD_PARTY_ENDPOINTS.md) - Complete list of external APIs used
-- [Czech Healthcare Tools](./docs/czech-tools.md) - Bilingual documentation for all 14 Czech tools
-- [Testing Guide](./docs/development/testing.md) - Running tests and understanding test categories
+# 3. Zakóduj diagnózu v MKN-10
+mkn_diagnosis_searcher(query="akutní infarkt myokardu")
+```
 
-## Development
+## Dokumentace
 
-### Running Tests
+### Vývojářské průvodce
+
+- [Průvodce HTTP klientem](./docs/developer-guides/06-http-client-and-caching.md) — Centralizovaný HTTP klient
+- [Průvodce zpracováním chyb](./docs/developer-guides/05-error-handling.md) — Vzory zpracování chyb
+
+### České zdravotnické rozšíření
+
+- [Přehled nástrojů](./docs/czech-tools.md) — Dokumentace 14 českých nástrojů
+- [Uživatelská příručka](./docs/czech-user-guide.md) — Kompletní příručka pro české uživatele
+- [API Reference](./docs/czech-api-reference.md) — Referenční příručka českých API
+- [Architektura](./docs/czech-architecture.md) — Technická architektura českých modulů
+
+## Vývoj
+
+### Spouštění testů
 
 ```bash
-# Run all tests (including integration tests)
+# Všechny testy (včetně integračních)
 make test
 
-# Run only unit tests (excluding integration tests)
+# Pouze unit testy (bez integračních)
 uv run python -m pytest tests -m "not integration"
 
-# Run only integration tests
+# Pouze integrační testy
 uv run python -m pytest tests -m "integration"
 ```
 
-**Note**: Integration tests make real API calls and may fail due to network issues or rate limiting.
-In CI/CD, integration tests are run separately and allowed to fail without blocking the build.
+**Poznámka:** Integrační testy provádějí reálná API volání a mohou selhat kvůli síťovým problémům nebo omezení přístupu (rate limiting). V CI/CD pipeline běží integrační testy odděleně a jejich selhání neblokuje build.
 
-## BioMCP Examples Repo
+## Licence
 
-Looking to see BioMCP in action?
-
-Check out the companion repository:
-👉 **[biomcp-examples](https://github.com/genomoncology/biomcp-examples)**
-
-It contains real prompts, AI-generated research briefs, and evaluation runs across different models.
-Use it to explore capabilities, compare outputs, or benchmark your own setup.
-
-Have a cool example of your own?
-**We’d love for you to contribute!** Just fork the repo and submit a PR with your experiment.
-
-## License
-
-This project is licensed under the MIT License.
+Tento projekt je licencován pod licencí MIT.

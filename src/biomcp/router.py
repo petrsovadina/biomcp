@@ -20,6 +20,7 @@ from biomcp.constants import (
     MAX_RESULTS_PER_DOMAIN_DEFAULT,
     TRIAL_DETAIL_SECTIONS,
     VALID_DOMAINS,
+    compute_skip,
 )
 from biomcp.core import mcp_app
 from biomcp.domain_handlers import get_domain_handler
@@ -476,7 +477,7 @@ async def search(  # noqa: C901
                 gene=gene,
                 significance=significance,
                 size=page_size,
-                offset=(page - 1) * page_size,
+                offset=compute_skip(page, page_size),
             )
             result_str = await search_variants(variant_query, output_json=True)
         except Exception as e:
@@ -768,7 +769,7 @@ async def search(  # noqa: C901
         drug_name = (
             chemicals[0] if chemicals else keywords[0] if keywords else None
         )
-        skip = (page - 1) * page_size
+        skip = compute_skip(page, page_size)
         fda_result = await search_adverse_events(
             drug=drug_name,
             limit=page_size,
@@ -785,7 +786,7 @@ async def search(  # noqa: C901
         drug_name = (
             chemicals[0] if chemicals else keywords[0] if keywords else None
         )
-        skip = (page - 1) * page_size
+        skip = compute_skip(page, page_size)
         fda_result = await search_drug_labels(
             name=drug_name,
             limit=page_size,
@@ -798,7 +799,7 @@ async def search(  # noqa: C901
         from biomcp.openfda import search_device_events
 
         device_name = keywords[0] if keywords else None
-        skip = (page - 1) * page_size
+        skip = compute_skip(page, page_size)
         fda_result = await search_device_events(
             device=device_name,
             limit=page_size,
@@ -813,7 +814,7 @@ async def search(  # noqa: C901
         drug_name = (
             chemicals[0] if chemicals else keywords[0] if keywords else None
         )
-        skip = (page - 1) * page_size
+        skip = compute_skip(page, page_size)
         fda_result = await search_drug_approvals(
             drug=drug_name,
             limit=page_size,
@@ -828,7 +829,7 @@ async def search(  # noqa: C901
         drug_name = (
             chemicals[0] if chemicals else keywords[0] if keywords else None
         )
-        skip = (page - 1) * page_size
+        skip = compute_skip(page, page_size)
         fda_result = await search_drug_recalls(
             drug=drug_name,
             limit=page_size,
@@ -843,7 +844,7 @@ async def search(  # noqa: C901
         drug_name = (
             chemicals[0] if chemicals else keywords[0] if keywords else None
         )
-        skip = (page - 1) * page_size
+        skip = compute_skip(page, page_size)
         fda_result = await search_drug_shortages(
             drug=drug_name,
             limit=page_size,

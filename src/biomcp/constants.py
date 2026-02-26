@@ -14,7 +14,6 @@ including API URLs, default values, limits, and domain configurations.
 PUBTATOR3_BASE_URL = "https://www.ncbi.nlm.nih.gov/research/pubtator3-api"
 PUBTATOR3_SEARCH_URL = f"{PUBTATOR3_BASE_URL}/search/"
 PUBTATOR3_FULLTEXT_URL = f"{PUBTATOR3_BASE_URL}/publications/export/biocjson"
-PUBTATOR3_AUTOCOMPLETE_URL = f"{PUBTATOR3_BASE_URL}/entity/autocomplete/"
 
 # ClinicalTrials.gov API
 # https://clinicaltrials.gov/data-api/api
@@ -43,11 +42,6 @@ MEDRXIV_BASE_URL = "https://api.biorxiv.org/details/medrxiv"
 EUROPE_PMC_BASE_URL = "https://www.ebi.ac.uk/europepmc/webservices/rest/search"
 
 # External Variant APIs
-GDC_BASE_URL = "https://api.gdc.cancer.gov"
-GDC_SSMS_ENDPOINT_URL = f"{GDC_BASE_URL}/ssms"  # Simple Somatic Mutations
-GDC_SSM_OCCURRENCES_URL = f"{GDC_BASE_URL}/ssm_occurrences"
-ENSEMBL_REST_BASE_URL = "https://rest.ensembl.org"
-ENSEMBL_VARIATION_URL = f"{ENSEMBL_REST_BASE_URL}/variation/human"
 CBIOPORTAL_BASE_URL = "https://www.cbioportal.org/api"
 
 # Czech Healthcare APIs
@@ -59,6 +53,7 @@ SZV_BASE_URL = "https://szv.mzcr.cz"
 NZIP_BASE_URL = "https://nzip.cz"
 VZP_BASE_URL = "https://www.vzp.cz"
 MKN10_BROWSER_URL = "https://mkn10.uzis.cz"
+CZECH_HTTP_TIMEOUT = 30.0  # Default timeout for Czech API calls
 
 # External Resource URLs
 PUBMED_BASE_URL = "https://pubmed.ncbi.nlm.nih.gov/"
@@ -82,6 +77,9 @@ UCSC_GENOME_BROWSER_URL = "https://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&"
 
 # Caching
 DEFAULT_CACHE_TIMEOUT = 60 * 60 * 24 * 7  # 1 week in seconds
+CACHE_TTL_DAY = 60 * 60 * 24  # 24 hours
+CACHE_TTL_HOUR = 60 * 60  # 1 hour
+CACHE_TTL_MONTH = 60 * 60 * 24 * 30  # 30 days
 
 # Pagination
 SYSTEM_PAGE_SIZE = (
@@ -91,6 +89,11 @@ DEFAULT_PAGE_SIZE = SYSTEM_PAGE_SIZE  # Alias for unified search
 MIN_PAGE_SIZE = 1
 MAX_PAGE_SIZE = 100
 DEFAULT_PAGE_NUMBER = 1
+
+
+def compute_skip(page: int, page_size: int) -> int:
+    """Compute zero-based offset from 1-based page number."""
+    return (page - 1) * page_size
 
 # Search limits
 MAX_RESULTS_PER_DOMAIN_DEFAULT = (

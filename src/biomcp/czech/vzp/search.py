@@ -1,19 +1,22 @@
 """VZP insurance codebook search implementation.
 
-Fetches and searches VZP codebook data from the VZP public API.
-Results are cached with diskcache to avoid repeated network calls.
+Downloads VZP procedure codebook (ZIP with CSV) from
+media.vzpstatic.cz and provides in-memory search.
+
+Data source: https://www.vzp.cz/poskytovatele/ciselniky
 """
 
+import csv
+import io
 import json
 import logging
+import zipfile
 
 import httpx
 
 from biomcp.constants import (
     CACHE_TTL_DAY,
-    CZECH_HTTP_TIMEOUT,
     DEFAULT_CACHE_TIMEOUT,
-    VZP_BASE_URL,
 )
 from biomcp.czech.diacritics import normalize_query
 from biomcp.http_client import (
@@ -24,162 +27,128 @@ from biomcp.http_client import (
 
 logger = logging.getLogger(__name__)
 
-# ---------------------------------------------------------------------------
-# Internal constants
-# ---------------------------------------------------------------------------
+# Current VZP codebook version (updated quarterly)
+_VZP_VERSION = "01460"
+_VZP_ZIP_URL = (
+    "https://media.vzpstatic.cz/media/Default/"
+    f"dokumenty/ciselniky/vykony_{_VZP_VERSION}.zip"
+)
 
-_VZP_API_BASE = f"{VZP_BASE_URL}/o-vzp/vzajemne-informace/ciselnik-vykonu"
-_VZP_CODEBOOK_CACHE_TTL = CACHE_TTL_DAY
-_VZP_ENTRY_CACHE_TTL = DEFAULT_CACHE_TIMEOUT
+_CODEBOOK_CACHE_TTL = CACHE_TTL_DAY
+_ENTRY_CACHE_TTL = DEFAULT_CACHE_TIMEOUT
 
-# Supported codebook type identifiers.  The primary one for health
-# procedures is ``seznam_vykonu``.
-_KNOWN_CODEBOOK_TYPES = [
-    "seznam_vykonu",
-    "diagnoza",
-    "lekarsky_predpis",
-    "atc",
+_VZP_FIELDS = [
+    "KOD", "ODB", "OME", "OMO", "NAZ", "VYS",
+    "ZUM", "TVY", "CTN", "PMZ", "PMA", "PJP",
+    "BOD", "KAT", "UMA", "UBO",
 ]
 
-
-# ---------------------------------------------------------------------------
-# Low-level fetchers
-# ---------------------------------------------------------------------------
+# Module-level cache
+_ENTRIES: list[dict] | None = None
 
 
-async def _fetch_codebook(
-    codebook_type: str = "seznam_vykonu",
-) -> list[dict]:
-    """Fetch all entries for a VZP codebook type.
-
-    Returns a list of raw entry dicts.  Results are cached for 24 h.
-    """
-    url = f"{_VZP_API_BASE}/{codebook_type}"
-    cache_key = generate_cache_key("GET", url, {})
-
+async def _download_codebook() -> list[dict]:
+    """Download and parse VZP codebook ZIP."""
+    cache_key = generate_cache_key(
+        "PARSED", f"vzp:vykony:{_VZP_VERSION}", {}
+    )
     cached = get_cached_response(cache_key)
     if cached:
         return json.loads(cached)
 
-    try:
-        async with httpx.AsyncClient(timeout=CZECH_HTTP_TIMEOUT) as client:
-            resp = await client.get(
-                url,
-                headers={"Accept": "application/json"},
-            )
-            if resp.status_code == 404:
-                return []
-            resp.raise_for_status()
-            data = resp.json()
-    except httpx.HTTPError as exc:
-        logger.warning(
-            "VZP API unavailable for codebook '%s': %s",
-            codebook_type,
-            exc,
-        )
-        return []
+    async with httpx.AsyncClient(
+        timeout=60.0,
+        follow_redirects=True,
+    ) as client:
+        resp = await client.get(_VZP_ZIP_URL)
+        resp.raise_for_status()
+        content = resp.content
 
-    entries = (
-        data
-        if isinstance(data, list)
-        else data.get("data", data.get("polozky", []))
-    )
+    with zipfile.ZipFile(io.BytesIO(content)) as zf:
+        filename = zf.namelist()[0]
+        raw = zf.read(filename).decode("cp852")
+
+    reader = csv.reader(io.StringIO(raw))
+    entries = []
+    for row in reader:
+        if len(row) >= len(_VZP_FIELDS):
+            entry = dict(zip(_VZP_FIELDS, row))
+            # Skip empty/header rows
+            if entry["KOD"] and entry["KOD"] != "KOD":
+                entries.append(entry)
+
     cache_response(
         cache_key,
-        json.dumps(entries),
-        _VZP_CODEBOOK_CACHE_TTL,
+        json.dumps(entries, ensure_ascii=False),
+        _CODEBOOK_CACHE_TTL,
     )
     return entries
 
 
-async def _fetch_entry(codebook_type: str, code: str) -> dict | None:
-    """Fetch a single codebook entry by type and code.
+async def _get_entries() -> list[dict]:
+    """Return cached or freshly loaded codebook entries."""
+    global _ENTRIES
+    if _ENTRIES is not None:
+        return _ENTRIES
 
-    Tries the direct API endpoint first, then falls back to scanning
-    the full codebook list.
-    """
-    url = f"{_VZP_API_BASE}/{codebook_type}/{code}"
-    cache_key = generate_cache_key("GET", url, {})
-
-    cached = get_cached_response(cache_key)
-    if cached:
-        return json.loads(cached)
-
-    try:
-        async with httpx.AsyncClient(timeout=CZECH_HTTP_TIMEOUT) as client:
-            resp = await client.get(
-                url,
-                headers={"Accept": "application/json"},
-            )
-            if resp.status_code == 404:
-                return None
-            resp.raise_for_status()
-            data = resp.json()
-    except httpx.HTTPError as exc:
-        logger.warning(
-            "Failed to fetch VZP entry %s/%s: %s",
-            codebook_type,
-            code,
-            exc,
-        )
-        return None
-
-    cache_response(
-        cache_key,
-        json.dumps(data),
-        _VZP_ENTRY_CACHE_TTL,
+    _ENTRIES = await _download_codebook()
+    logger.debug(
+        "Loaded %d VZP codebook entries", len(_ENTRIES)
     )
-    return data
+    return _ENTRIES
 
 
-# ---------------------------------------------------------------------------
-# Mapping helpers
-# ---------------------------------------------------------------------------
-
-
-def _normalise_entry(raw: dict, codebook_type: str) -> dict:
-    """Normalise a raw API dict into a canonical codebook entry dict."""
+def _entry_to_summary(
+    raw: dict, codebook_type: str,
+) -> dict:
+    """Return a lightweight summary dict."""
     return {
         "codebook_type": codebook_type,
-        "code": raw.get("kod", raw.get("code", "")),
-        "name": raw.get("nazev", raw.get("name", "")),
-        "description": raw.get("popis", raw.get("description")),
-        "valid_from": raw.get("platnost_od", raw.get("valid_from")),
-        "valid_to": raw.get("platnost_do", raw.get("valid_to")),
-        "rules": raw.get("pravidla", raw.get("rules", [])),
-        "related_codes": raw.get(
-            "souvisejici_kody", raw.get("related_codes", [])
+        "code": raw.get("KOD", "").strip(),
+        "name": raw.get("NAZ", "").strip(),
+    }
+
+
+def _normalise_entry(
+    raw: dict, codebook_type: str,
+) -> dict:
+    """Convert raw CSV row to canonical entry dict."""
+    return {
+        "codebook_type": codebook_type,
+        "code": raw.get("KOD", "").strip(),
+        "name": raw.get("NAZ", "").strip(),
+        "description": raw.get("VYS", "").strip() or None,
+        "specialty": raw.get("ODB", "").strip(),
+        "location": raw.get("OME", "").strip(),
+        "specialty_limits": (
+            raw.get("OMO", "").strip() or None
         ),
+        "point_value": raw.get("BOD", "").strip() or None,
+        "price_czk": raw.get("PMA", "").strip() or None,
+        "duration_minutes": (
+            raw.get("TVY", "").strip() or None
+        ),
+        "carrier_time": (
+            raw.get("CTN", "").strip() or None
+        ),
+        "category": raw.get("KAT", "").strip(),
+        "material_supplement": raw.get("ZUM", "").strip(),
         "source": "VZP",
     }
 
 
-def _entry_to_summary(raw: dict, codebook_type: str) -> dict:
-    """Return a lightweight summary dict for search results."""
-    return {
-        "codebook_type": codebook_type,
-        "code": raw.get("kod", raw.get("code", "")),
-        "name": raw.get("nazev", raw.get("name", "")),
-    }
-
-
-def _matches_query(raw: dict, normalized_q: str, codebook_type: str) -> bool:
-    """Return True if the entry matches the normalised query."""
-    code = (raw.get("kod") or raw.get("code") or "").lower()
-    name = normalize_query(raw.get("nazev") or raw.get("name") or "")
-    desc = normalize_query(raw.get("popis") or raw.get("description") or "")
-    ctype = normalize_query(codebook_type)
+def _matches_query(
+    raw: dict, normalized_q: str,
+) -> bool:
+    """Return True if the entry matches the query."""
+    code = raw.get("KOD", "").lower()
+    name = normalize_query(raw.get("NAZ", ""))
+    desc = normalize_query(raw.get("VYS", ""))
     return (
         normalized_q in code
         or normalized_q in name
         or normalized_q in desc
-        or normalized_q in ctype
     )
-
-
-# ---------------------------------------------------------------------------
-# Public search functions
-# ---------------------------------------------------------------------------
 
 
 async def _vzp_search(
@@ -189,39 +158,39 @@ async def _vzp_search(
 ) -> str:
     """Search VZP insurance codebooks.
 
-    Performs a diacritics-insensitive search across one or all
-    known codebook types.
-
     Args:
-        query: Search text (code fragment, name, or description).
-        codebook_type: Optional codebook type filter.  When *None*,
-            all known codebook types are searched.
-        max_results: Maximum number of results to return.
+        query: Search text (code, name, or description).
+        codebook_type: Ignored (kept for API compat).
+        max_results: Maximum number of results.
 
     Returns:
-        JSON string with keys ``total`` and ``results`` (list of
-        codebook entry summary dicts).
+        JSON string with search results.
     """
-    types_to_search = (
-        [codebook_type] if codebook_type else _KNOWN_CODEBOOK_TYPES
-    )
+    ctype = codebook_type or "seznam_vykonu"
+
+    try:
+        entries = await _get_entries()
+    except Exception as exc:
+        logger.error("Failed to load VZP data: %s", exc)
+        return json.dumps(
+            {
+                "total": 0,
+                "results": [],
+                "error": f"VZP data unavailable: {exc}",
+            },
+            ensure_ascii=False,
+        )
+
     normalized_q = normalize_query(query)
     matches: list[dict] = []
 
-    for ctype in types_to_search:
-        if len(matches) >= max_results:
-            break
-        try:
-            entries = await _fetch_codebook(ctype)
-        except Exception as exc:
-            logger.warning("Failed fetching codebook '%s': %s", ctype, exc)
-            continue
-
-        for raw in entries:
-            if _matches_query(raw, normalized_q, ctype):
-                matches.append(_entry_to_summary(raw, ctype))
-                if len(matches) >= max_results:
-                    break
+    for raw in entries:
+        if _matches_query(raw, normalized_q):
+            matches.append(
+                _entry_to_summary(raw, ctype)
+            )
+            if len(matches) >= max_results:
+                break
 
     return json.dumps(
         {"total": len(matches), "results": matches},
@@ -229,43 +198,41 @@ async def _vzp_search(
     )
 
 
-async def _vzp_get(codebook_type: str, code: str) -> str:
-    """Get full codebook entry details by type and code.
+async def _vzp_get(
+    codebook_type: str, code: str,
+) -> str:
+    """Get full codebook entry details.
 
     Args:
         codebook_type: Codebook type identifier.
         code: Entry code.
 
     Returns:
-        JSON string with full ``CodebookEntry`` fields or an error
-        object when the entry is not found.
+        JSON string with full entry details.
     """
-    # Try the direct endpoint first
-    raw = await _fetch_entry(codebook_type, code)
-
-    if raw is None:
-        # Fall back to scanning the full codebook
-        try:
-            entries = await _fetch_codebook(codebook_type)
-        except Exception as exc:
-            logger.error(
-                "Failed to fetch codebook '%s': %s",
-                codebook_type,
-                exc,
-            )
-            entries = []
-
-        code_lower = code.lower()
-        for item in entries:
-            item_code = (item.get("kod") or item.get("code") or "").lower()
-            if item_code == code_lower:
-                raw = item
-                break
-
-    if raw is None:
+    try:
+        entries = await _get_entries()
+    except Exception as exc:
+        logger.error("Failed to load VZP data: %s", exc)
         return json.dumps(
-            {"error": (f"Codebook entry not found: {codebook_type}/{code}")},
+            {"error": f"VZP data unavailable: {exc}"},
             ensure_ascii=False,
         )
 
-    return json.dumps(_normalise_entry(raw, codebook_type), ensure_ascii=False)
+    code_lower = code.strip().lower()
+    for raw in entries:
+        if raw.get("KOD", "").strip().lower() == code_lower:
+            return json.dumps(
+                _normalise_entry(raw, codebook_type),
+                ensure_ascii=False,
+            )
+
+    return json.dumps(
+        {
+            "error": (
+                f"Codebook entry not found: "
+                f"{codebook_type}/{code}"
+            ),
+        },
+        ensure_ascii=False,
+    )

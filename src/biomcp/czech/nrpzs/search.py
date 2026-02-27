@@ -1,9 +1,13 @@
 """NRPZS healthcare provider search and detail retrieval.
 
-Uses the NRPZS (Národní registr poskytovatelů zdravotních služeb)
-API at nrpzs.uzis.cz with diskcache for response caching.
+Downloads CSV open data from ÚZIS (datanzis.uzis.gov.cz) and
+provides in-memory search with diskcache for the raw CSV.
+
+Data source: https://datanzis.uzis.gov.cz (CC BY 4.0)
 """
 
+import csv
+import io
 import json
 import logging
 
@@ -12,8 +16,6 @@ import httpx
 from biomcp.constants import (
     CACHE_TTL_DAY,
     CZECH_HTTP_TIMEOUT,
-    DEFAULT_CACHE_TIMEOUT,
-    NRPZS_PROVIDERS_URL,
 )
 from biomcp.czech.diacritics import normalize_query
 from biomcp.http_client import (
@@ -24,111 +26,171 @@ from biomcp.http_client import (
 
 logger = logging.getLogger(__name__)
 
-_SEARCH_CACHE_TTL = CACHE_TTL_DAY
-_DETAIL_CACHE_TTL = DEFAULT_CACHE_TIMEOUT
+_NRPZS_CSV_URL = (
+    "https://datanzis.uzis.gov.cz/data/NR-01-NRPZS/NR-01-06/"
+    "Otevrena-data-NR-01-06-nrpzs-mista-poskytovani-"
+    "zdravotnich-sluzeb.csv"
+)
+_CSV_CACHE_TTL = CACHE_TTL_DAY
+
+# Module-level cache
+_PROVIDERS: list[dict] | None = None
 
 
-def _build_search_params(
-    query: str | None,
-    city: str | None,
-    specialty: str | None,
-    page: int,
-    page_size: int,
-) -> dict:
-    """Build query parameters for the NRPZS search endpoint."""
-    params: dict = {
-        "strana": page,
-        "velikostStranky": page_size,
-    }
-    if query:
-        params["nazev"] = normalize_query(query)
-    if city:
-        params["obec"] = normalize_query(city)
-    if specialty:
-        params["odbornost"] = normalize_query(specialty)
-    return params
+async def _download_csv() -> str:
+    """Download the NRPZS CSV from ÚZIS open data."""
+    cache_key = generate_cache_key("GET", _NRPZS_CSV_URL, {})
+    cached = get_cached_response(cache_key)
+    if cached:
+        return cached
+
+    async with httpx.AsyncClient(
+        timeout=CZECH_HTTP_TIMEOUT,
+        follow_redirects=True,
+    ) as client:
+        resp = await client.get(_NRPZS_CSV_URL)
+        resp.raise_for_status()
+        content = resp.text
+
+    cache_response(cache_key, content, _CSV_CACHE_TTL)
+    return content
 
 
-def _record_to_summary(record: dict) -> dict:
-    """Convert an API record to a ProviderSummary dict."""
-    odbornosti = record.get("odbornosti") or []
-    if isinstance(odbornosti, str):
-        odbornosti = [odbornosti] if odbornosti else []
+def _parse_csv(csv_text: str) -> list[dict]:
+    """Parse NRPZS CSV into a list of provider dicts."""
+    reader = csv.DictReader(io.StringIO(csv_text))
+    providers = []
+    for row in reader:
+        providers.append(row)
+    return providers
+
+
+async def _get_providers() -> list[dict]:
+    """Return cached or freshly loaded provider list."""
+    global _PROVIDERS
+    if _PROVIDERS is not None:
+        return _PROVIDERS
+
+    csv_text = await _download_csv()
+    _PROVIDERS = _parse_csv(csv_text)
+    logger.debug("Loaded %d NRPZS providers", len(_PROVIDERS))
+    return _PROVIDERS
+
+
+def _csv_to_summary(row: dict) -> dict:
+    """Convert a CSV row to ProviderSummary dict."""
+    specialties_str = row.get("ZZ_obor_pece", "")
+    specialties = (
+        [s.strip() for s in specialties_str.split(",")
+         if s.strip()]
+        if specialties_str
+        else []
+    )
 
     return {
-        "provider_id": str(record.get("id", "")),
-        "name": record.get("nazev", ""),
-        "city": record.get("obec"),
-        "specialties": odbornosti,
+        "provider_id": row.get("ZZ_misto_poskytovani_ID", ""),
+        "name": row.get("ZZ_nazev", ""),
+        "city": row.get("ZZ_obec"),
+        "specialties": specialties,
     }
 
 
-def _record_to_provider(record: dict) -> dict:
-    """Convert a detailed API record to a HealthcareProvider dict."""
-    odbornosti = record.get("odbornosti") or []
-    if isinstance(odbornosti, str):
-        odbornosti = [odbornosti] if odbornosti else []
+def _csv_to_provider(row: dict) -> dict:
+    """Convert a CSV row to full HealthcareProvider dict."""
+    specialties_str = row.get("ZZ_obor_pece", "")
+    specialties = (
+        [s.strip() for s in specialties_str.split(",")
+         if s.strip()]
+        if specialties_str
+        else []
+    )
 
-    druhy_pece = record.get("druhyPece") or []
-    if isinstance(druhy_pece, str):
-        druhy_pece = [druhy_pece] if druhy_pece else []
+    care_types_str = row.get("ZZ_druh_pece", "")
+    care_types = (
+        [s.strip() for s in care_types_str.split(",")
+         if s.strip()]
+        if care_types_str
+        else []
+    )
 
     address: dict | None = None
-    if any(record.get(k) for k in ("ulice", "obec", "psc", "kraj")):
+    if any(
+        row.get(k)
+        for k in (
+            "ZZ_ulice", "ZZ_obec", "ZZ_PSC", "ZZ_kraj_nazev"
+        )
+    ):
         address = {
-            "street": record.get("ulice"),
-            "city": record.get("obec"),
-            "postal_code": record.get("psc"),
-            "region": record.get("kraj"),
+            "street": row.get("ZZ_ulice"),
+            "city": row.get("ZZ_obec"),
+            "postal_code": row.get("ZZ_PSC"),
+            "region": row.get("ZZ_kraj_nazev"),
         }
 
-    workplaces_raw = record.get("pracoviste") or []
-    workplaces = [_raw_workplace_to_dict(wp) for wp in workplaces_raw]
+    contact: dict | None = None
+    phone = row.get("poskytovatel_telefon")
+    email = row.get("poskytovatel_email")
+    web = row.get("poskytovatel_web")
+    if any((phone, email, web)):
+        contact = {
+            "phone": phone or None,
+            "email": email or None,
+            "website": web or None,
+        }
 
     return {
-        "provider_id": str(record.get("id", "")),
-        "name": record.get("nazev", ""),
-        "legal_form": record.get("pravniForma"),
-        "ico": record.get("ico"),
+        "provider_id": row.get(
+            "ZZ_misto_poskytovani_ID", ""
+        ),
+        "name": row.get("ZZ_nazev", ""),
+        "legal_form": row.get(
+            "poskytovatel_pravni_forma_nazev"
+        ),
+        "ico": row.get("poskytovatel_ICO"),
         "address": address,
-        "specialties": odbornosti,
-        "care_types": druhy_pece,
-        "workplaces": workplaces,
-        "registration_number": record.get("registracniCislo"),
+        "specialties": specialties,
+        "care_types": care_types,
+        "care_form": row.get("ZZ_forma_pece"),
+        "contact": contact,
+        "facility_type": row.get("ZZ_druh_nazev"),
+        "region": row.get("ZZ_kraj_nazev"),
+        "district": row.get("ZZ_okres_nazev"),
         "source": "NRPZS",
     }
 
 
-def _raw_workplace_to_dict(wp: dict) -> dict:
-    """Convert a raw workplace dict from the API."""
-    specialties = wp.get("odbornosti") or []
-    if isinstance(specialties, str):
-        specialties = [specialties] if specialties else []
+def _matches_query(
+    row: dict,
+    query_n: str | None,
+    city_n: str | None,
+    specialty_n: str | None,
+) -> bool:
+    """Check if a CSV row matches the search criteria."""
+    if query_n:
+        name_n = normalize_query(
+            row.get("ZZ_nazev", "")
+        )
+        prov_n = normalize_query(
+            row.get("poskytovatel_nazev", "")
+        )
+        if query_n not in name_n and query_n not in prov_n:
+            return False
 
-    address: dict | None = None
-    if any(wp.get(k) for k in ("ulice", "obec", "psc", "kraj")):
-        address = {
-            "street": wp.get("ulice"),
-            "city": wp.get("obec"),
-            "postal_code": wp.get("psc"),
-            "region": wp.get("kraj"),
-        }
+    if city_n:
+        row_city = normalize_query(
+            row.get("ZZ_obec", "")
+        )
+        if city_n not in row_city:
+            return False
 
-    contact: dict | None = None
-    if any(wp.get(k) for k in ("telefon", "email", "www")):
-        contact = {
-            "phone": wp.get("telefon"),
-            "email": wp.get("email"),
-            "website": wp.get("www"),
-        }
+    if specialty_n:
+        spec_n = normalize_query(
+            row.get("ZZ_obor_pece", "")
+        )
+        if specialty_n not in spec_n:
+            return False
 
-    return {
-        "workplace_id": str(wp.get("id", "")),
-        "name": wp.get("nazev", ""),
-        "address": address,
-        "specialties": specialties,
-        "contact": contact,
-    }
+    return True
 
 
 async def _nrpzs_search(
@@ -138,96 +200,85 @@ async def _nrpzs_search(
     page: int = 1,
     page_size: int = 10,
 ) -> str:
-    """Search Czech healthcare providers in the NRPZS registry.
+    """Search Czech healthcare providers in NRPZS.
 
     Args:
-        query: Provider or facility name (diacritics-insensitive).
+        query: Provider or facility name.
         city: Filter by municipality name.
         specialty: Filter by medical specialty.
         page: Page number (1-based).
         page_size: Results per page (1-100).
 
     Returns:
-        JSON string with ProviderSearchResult fields.
+        JSON string with search results.
     """
-    params = _build_search_params(query, city, specialty, page, page_size)
-    cache_key = generate_cache_key("GET", NRPZS_PROVIDERS_URL, params)
-
-    cached = get_cached_response(cache_key)
-    if cached:
-        return cached
-
     try:
-        async with httpx.AsyncClient(timeout=CZECH_HTTP_TIMEOUT) as client:
-            resp = await client.get(NRPZS_PROVIDERS_URL, params=params)
-            resp.raise_for_status()
-            data = resp.json()
-    except httpx.HTTPError as exc:
-        logger.error("NRPZS search request failed: %s", exc)
+        providers = await _get_providers()
+    except Exception as exc:
+        logger.error("Failed to load NRPZS data: %s", exc)
         return json.dumps(
             {
                 "total": 0,
                 "page": page,
                 "page_size": page_size,
                 "results": [],
-                "error": f"NRPZS API unavailable: {exc}",
+                "error": f"NRPZS data unavailable: {exc}",
             },
             ensure_ascii=False,
         )
 
-    records = data.get("zaznamy") or []
-    pagination = data.get("strankovani") or {}
+    query_n = normalize_query(query) if query else None
+    city_n = normalize_query(city) if city else None
+    specialty_n = (
+        normalize_query(specialty) if specialty else None
+    )
+
+    # Paginate: skip to correct page
+    skip = (page - 1) * page_size
+    matches: list[dict] = []
+    total = 0
+
+    for row in providers:
+        if _matches_query(row, query_n, city_n, specialty_n):
+            total += 1
+            if total > skip and len(matches) < page_size:
+                matches.append(_csv_to_summary(row))
 
     result = {
-        "total": data.get("celkem", 0),
-        "page": pagination.get("stranka", page),
-        "page_size": pagination.get("velikostStranky", page_size),
-        "results": [_record_to_summary(r) for r in records],
+        "total": total,
+        "page": page,
+        "page_size": page_size,
+        "results": matches,
     }
 
-    serialized = json.dumps(result, ensure_ascii=False)
-    cache_response(cache_key, serialized, _SEARCH_CACHE_TTL)
-    return serialized
+    return json.dumps(result, ensure_ascii=False)
 
 
 async def _nrpzs_get(provider_id: str) -> str:
-    """Get full healthcare provider details by NRPZS provider ID.
+    """Get full provider details by facility ID.
 
     Args:
-        provider_id: The NRPZS provider identifier.
+        provider_id: ZZ_misto_poskytovani_ID value.
 
     Returns:
-        JSON string with HealthcareProvider fields, or an error dict.
+        JSON string with HealthcareProvider fields.
     """
-    url = f"{NRPZS_PROVIDERS_URL}/{provider_id}"
-    cache_key = generate_cache_key("GET", url, {})
-
-    cached = get_cached_response(cache_key)
-    if cached:
-        return cached
-
     try:
-        async with httpx.AsyncClient(timeout=CZECH_HTTP_TIMEOUT) as client:
-            resp = await client.get(url)
-            if resp.status_code == 404:
-                return json.dumps(
-                    {"error": (f"Provider not found: {provider_id}")},
-                    ensure_ascii=False,
-                )
-            resp.raise_for_status()
-            data = resp.json()
-    except httpx.HTTPError as exc:
-        logger.error(
-            "NRPZS detail request failed for %s: %s",
-            provider_id,
-            exc,
-        )
+        providers = await _get_providers()
+    except Exception as exc:
+        logger.error("Failed to load NRPZS data: %s", exc)
         return json.dumps(
-            {"error": f"NRPZS API unavailable: {exc}"},
+            {"error": f"NRPZS data unavailable: {exc}"},
             ensure_ascii=False,
         )
 
-    result = _record_to_provider(data)
-    serialized = json.dumps(result, ensure_ascii=False)
-    cache_response(cache_key, serialized, _DETAIL_CACHE_TTL)
-    return serialized
+    for row in providers:
+        row_id = row.get("ZZ_misto_poskytovani_ID", "")
+        if str(row_id) == str(provider_id):
+            result = _csv_to_provider(row)
+            return json.dumps(result, ensure_ascii=False)
+
+    return json.dumps(
+        {"error": f"Provider not found: {provider_id}"},
+        ensure_ascii=False,
+    )

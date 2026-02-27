@@ -1,137 +1,84 @@
-"""Unit tests for the MKN-10 ClaML XML parser."""
+"""Unit tests for the MKN-10 CSV parser."""
 
 import json
 from unittest.mock import patch
 
 import pytest
 
-from tests.czech.conftest import SAMPLE_CLAML_XML
+from biomcp.czech.mkn.parser import _parse_csv
+
+# Minimal CSV sample matching the real MZ ČR open data schema
+SAMPLE_CSV = """\
+kod_tecka,nazev,kod_kapitola_rozsah,kod_kapitola_cislo,nazev_kapitola,platnost_do
+J06,"Akutní infekce horních cest dýchacích na více a neurčených místech",J00-J99,X,"Nemoci dýchací soustavy",
+J06.9,"Akutní infekce horních cest dýchacích NS",J00-J99,X,"Nemoci dýchací soustavy",
+A00,"Cholera",A00-B99,I,"Některé infekční a parazitární nemoci",
+A00.0,"Cholera vyvolaná Vibrio cholerae 01 biotypem cholerae",A00-B99,I,"Některé infekční a parazitární nemoci",
+Z99,"Závislost na pomůckách",Z00-Z99,XXI,"Faktory ovlivňující zdravotní stav a kontakt se zdravotnickými službami",2020-01-01
+"""
 
 
-class TestParseClaml:
-    """Tests for parse_claml() function."""
+class TestParseCSV:
+    """Tests for _parse_csv() function."""
 
-    @pytest.fixture(autouse=True)
-    def clear_module_cache(self):
-        """Reset in-process index cache before each test."""
-        import biomcp.czech.mkn.search as search_mod
-
-        search_mod._INDEX_CACHE = None
-        search_mod._XML_CACHE = None
-        yield
-        search_mod._INDEX_CACHE = None
-        search_mod._XML_CACHE = None
-
-    @pytest.fixture
-    def no_diskcache(self):
-        """Bypass diskcache so tests are hermetic."""
-        with patch(
-            "biomcp.czech.mkn.parser.get_cached_response",
-            return_value=None,
-        ), patch(
-            "biomcp.czech.mkn.parser.cache_response",
-            return_value=None,
-        ):
-            yield
-
-    @pytest.mark.asyncio
-    async def test_parse_returns_two_indices(self, no_diskcache):
-        """parse_claml returns (code_index, text_index)."""
-        from biomcp.czech.mkn.parser import parse_claml
-
-        code_index, text_index = await parse_claml(SAMPLE_CLAML_XML)
+    def test_returns_two_indices(self):
+        """_parse_csv returns (code_index, text_index)."""
+        code_index, text_index = _parse_csv(SAMPLE_CSV)
         assert isinstance(code_index, dict)
         assert isinstance(text_index, dict)
 
-    @pytest.mark.asyncio
-    async def test_chapter_parsed(self, no_diskcache):
-        """Chapter class X is parsed with kind='chapter'."""
-        from biomcp.czech.mkn.parser import parse_claml
-
-        code_index, _ = await parse_claml(SAMPLE_CLAML_XML)
-        assert "X" in code_index
-        node = code_index["X"]
+    def test_chapter_parsed(self):
+        """Chapter J00-J99 is parsed with kind='chapter'."""
+        code_index, _ = _parse_csv(SAMPLE_CSV)
+        assert "J00-J99" in code_index
+        node = code_index["J00-J99"]
         assert node["kind"] == "chapter"
-        assert "dýchací" in node["name_cs"] or "dychaci" in node[
-            "name_cs"
-        ].lower()
+        assert "dýchací" in node["name_cs"]
 
-    @pytest.mark.asyncio
-    async def test_block_parsed(self, no_diskcache):
-        """Block class J00-J06 is parsed with kind='block'."""
-        from biomcp.czech.mkn.parser import parse_claml
-
-        code_index, _ = await parse_claml(SAMPLE_CLAML_XML)
-        assert "J00-J06" in code_index
-        node = code_index["J00-J06"]
-        assert node["kind"] == "block"
-        assert node["parent_code"] == "X"
-
-    @pytest.mark.asyncio
-    async def test_category_parsed(self, no_diskcache):
-        """Category J06 is parsed with kind='category'."""
-        from biomcp.czech.mkn.parser import parse_claml
-
-        code_index, _ = await parse_claml(SAMPLE_CLAML_XML)
+    def test_block_parsed(self):
+        """Block code J06 is parsed with kind='block'."""
+        code_index, _ = _parse_csv(SAMPLE_CSV)
         assert "J06" in code_index
         node = code_index["J06"]
-        assert node["kind"] == "category"
-        assert node["parent_code"] == "J00-J06"
+        assert node["kind"] == "block"
+        assert node["parent_code"] == "J00-J99"
 
-    @pytest.mark.asyncio
-    async def test_subcategory_parsed(self, no_diskcache):
+    def test_subcategory_parsed(self):
         """Subcategory J06.9 is parsed with correct parent."""
-        from biomcp.czech.mkn.parser import parse_claml
-
-        code_index, _ = await parse_claml(SAMPLE_CLAML_XML)
+        code_index, _ = _parse_csv(SAMPLE_CSV)
         assert "J06.9" in code_index
         node = code_index["J06.9"]
         assert node["kind"] == "category"
         assert node["parent_code"] == "J06"
 
-    @pytest.mark.asyncio
-    async def test_label_extraction_czech(self, no_diskcache):
-        """Preferred Czech label is extracted for each class."""
-        from biomcp.czech.mkn.parser import parse_claml
-
-        code_index, _ = await parse_claml(SAMPLE_CLAML_XML)
+    def test_label_extraction_czech(self):
+        """Czech labels are correctly extracted."""
+        code_index, _ = _parse_csv(SAMPLE_CSV)
         assert "Akutní" in code_index["J06"]["name_cs"]
         assert "NS" in code_index["J06.9"]["name_cs"]
 
-    @pytest.mark.asyncio
-    async def test_hierarchy_subclass_links(self, no_diskcache):
-        """Children are recorded as SubClass references."""
-        from biomcp.czech.mkn.parser import parse_claml
-
-        code_index, _ = await parse_claml(SAMPLE_CLAML_XML)
-        assert "J00-J06" in code_index["X"]["children"]
-        assert "J06" in code_index["J00-J06"]["children"]
+    def test_hierarchy_children(self):
+        """Children are recorded correctly."""
+        code_index, _ = _parse_csv(SAMPLE_CSV)
+        assert "J06" in code_index["J00-J99"]["children"]
         assert "J06.9" in code_index["J06"]["children"]
 
-    @pytest.mark.asyncio
-    async def test_leaf_node_has_no_children(self, no_diskcache):
-        """J06.9 is a leaf and has no SubClass children."""
-        from biomcp.czech.mkn.parser import parse_claml
-
-        code_index, _ = await parse_claml(SAMPLE_CLAML_XML)
+    def test_leaf_node_has_no_children(self):
+        """J06.9 is a leaf and has no children."""
+        code_index, _ = _parse_csv(SAMPLE_CSV)
         assert code_index["J06.9"]["children"] == []
 
-    @pytest.mark.asyncio
-    async def test_text_index_contains_words(self, no_diskcache):
+    def test_text_index_contains_words(self):
         """Text index is built from Czech labels."""
-        from biomcp.czech.mkn.parser import parse_claml
+        _, text_index = _parse_csv(SAMPLE_CSV)
+        assert any(
+            "akutni" in w or "akut" in w
+            for w in text_index
+        )
 
-        _, text_index = await parse_claml(SAMPLE_CLAML_XML)
-        # "akutni" is the normalized form of "Akutní"
-        assert any("akutni" in w or "akut" in w for w in text_index)
-
-    @pytest.mark.asyncio
-    async def test_text_index_maps_to_codes(self, no_diskcache):
-        """Text index maps normalized words to code lists."""
-        from biomcp.czech.mkn.parser import parse_claml
-
-        _, text_index = await parse_claml(SAMPLE_CLAML_XML)
-        # "infekce" should map to at least one category code
+    def test_text_index_maps_to_codes(self):
+        """Text index maps words to code lists."""
+        _, text_index = _parse_csv(SAMPLE_CSV)
         matching = [
             codes
             for word, codes in text_index.items()
@@ -139,16 +86,35 @@ class TestParseClaml:
         ]
         assert matching, "Expected 'infekce' to be indexed"
         all_codes = {c for codes in matching for c in codes}
-        assert "J06" in all_codes or "J00-J06" in all_codes
+        assert "J06" in all_codes or "J06.9" in all_codes
+
+    def test_expired_codes_excluded(self):
+        """Codes with platnost_do are excluded."""
+        code_index, _ = _parse_csv(SAMPLE_CSV)
+        assert "Z99" not in code_index
+
+    def test_multiple_chapters(self):
+        """Multiple chapters are created from distinct ranges."""
+        code_index, _ = _parse_csv(SAMPLE_CSV)
+        assert "J00-J99" in code_index
+        assert "A00-B99" in code_index
+        assert code_index["J00-J99"]["kind"] == "chapter"
+        assert code_index["A00-B99"]["kind"] == "chapter"
+
+
+class TestLoadMkn10:
+    """Tests for load_mkn10() function."""
 
     @pytest.mark.asyncio
     async def test_diskcache_used_on_hit(self):
-        """parse_claml returns cached result without re-parsing."""
-        from biomcp.czech.mkn.parser import parse_claml
+        """load_mkn10 returns cached result without download."""
+        from biomcp.czech.mkn.parser import load_mkn10
 
         cached_payload = json.dumps(
             {
-                "code_index": {"X": {"code": "X", "name_cs": "cached"}},
+                "code_index": {
+                    "X": {"code": "X", "name_cs": "cached"},
+                },
                 "text_index": {},
             }
         )
@@ -156,28 +122,8 @@ class TestParseClaml:
             "biomcp.czech.mkn.parser.get_cached_response",
             return_value=cached_payload,
         ):
-            code_index, text_index = await parse_claml(
-                SAMPLE_CLAML_XML
-            )
-        assert code_index == {"X": {"code": "X", "name_cs": "cached"}}
+            code_index, text_index = await load_mkn10()
+        assert code_index == {
+            "X": {"code": "X", "name_cs": "cached"},
+        }
         assert text_index == {}
-
-    @pytest.mark.asyncio
-    async def test_all_four_classes_present(self, no_diskcache):
-        """All four <Class> elements from sample XML are parsed."""
-        from biomcp.czech.mkn.parser import parse_claml
-
-        code_index, _ = await parse_claml(SAMPLE_CLAML_XML)
-        assert len(code_index) == 4
-        for code in ("X", "J00-J06", "J06", "J06.9"):
-            assert code in code_index
-
-    @pytest.mark.asyncio
-    async def test_malformed_xml_raises(self, no_diskcache):
-        """Malformed XML raises an error."""
-        from lxml import etree
-
-        from biomcp.czech.mkn.parser import parse_claml
-
-        with pytest.raises(etree.XMLSyntaxError):
-            await parse_claml("<broken>")

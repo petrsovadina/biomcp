@@ -115,7 +115,8 @@ class TestNrpzsApiIntegration:
             "source",
             "specialties",
             "care_types",
-            "workplaces",
+            "address",
+            "contact",
         }
         assert required_keys.issubset(detail.keys())
 

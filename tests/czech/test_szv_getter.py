@@ -1,28 +1,43 @@
 """Unit tests for SZV health procedure detail retrieval."""
 
 import json
-from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from biomcp.czech.szv.models import HealthProcedure
+_MOCK_PROCEDURES = [
+    {
+        "Kód": "09513",
+        "Název": "EKG 12ti svodové",
+        "Odbornost": "101",
+        "Další odbornosti": "102, 103",
+        "Celkové": 113,
+        "Přímé náklady": 50,
+        "Osobní": 40,
+        "Režijní": 23,
+        "Trvání": 10,
+        "Čas nositele": 5,
+        "Nositel": "L1",
+        "OF": "1x rok",
+        "OM": "A",
+        "Podmínky výkonu": "EKG přístroj",
+        "Poznámka výkonu": "Standardní vyšetření",
+        "Popis výkonu": "Popis EKG",
+        "ZULP": "",
+        "ZUM": "",
+        "Kategorie": "P",
+    },
+]
 
-# ---------------------------------------------------------------------------
-# Shared fixtures
-# ---------------------------------------------------------------------------
 
-_FULL_MOCK_PROCEDURE = {
-    "kod": "09513",
-    "nazev": "EKG 12ti svodové",
-    "body": 113,
-    "cas": 10,
-    "skupina": "09",
-    "skupina_nazev": "Kardiologická vyšetření",
-    "odbornosti": ["101", "102"],
-    "omezeni_frekvence": "1x per year",
-    "materialni_pozadavky": "EKG přístroj",
-    "poznamky": "Standardní vyšetření",
-}
+@pytest.fixture(autouse=True)
+def inject_procedures():
+    """Inject mock data into module-level cache."""
+    import biomcp.czech.szv.search as mod
+
+    old = mod._PROCEDURES
+    mod._PROCEDURES = list(_MOCK_PROCEDURES)
+    yield
+    mod._PROCEDURES = old
 
 
 class TestSzvGetter:
@@ -30,143 +45,44 @@ class TestSzvGetter:
 
     @pytest.mark.asyncio
     async def test_get_procedure_details(self):
-        """Fetching by code returns a full procedure object."""
         from biomcp.czech.szv.search import _szv_get
 
-        with patch(
-            "biomcp.czech.szv.search._fetch_procedure_detail",
-            new_callable=AsyncMock,
-            return_value=_FULL_MOCK_PROCEDURE,
-        ):
-            result = json.loads(await _szv_get("09513"))
-
+        result = json.loads(await _szv_get("09513"))
         assert result["code"] == "09513"
         assert result["name"] == "EKG 12ti svodové"
         assert result["source"] == "MZCR/SZV"
 
     @pytest.mark.asyncio
     async def test_get_includes_point_value(self):
-        """Returned procedure contains point_value."""
         from biomcp.czech.szv.search import _szv_get
 
-        with patch(
-            "biomcp.czech.szv.search._fetch_procedure_detail",
-            new_callable=AsyncMock,
-            return_value=_FULL_MOCK_PROCEDURE,
-        ):
-            result = json.loads(await _szv_get("09513"))
-
+        result = json.loads(await _szv_get("09513"))
         assert result["point_value"] == 113
 
     @pytest.mark.asyncio
-    async def test_get_includes_time_minutes(self):
-        """Returned procedure contains time_minutes."""
+    async def test_get_includes_time(self):
         from biomcp.czech.szv.search import _szv_get
 
-        with patch(
-            "biomcp.czech.szv.search._fetch_procedure_detail",
-            new_callable=AsyncMock,
-            return_value=_FULL_MOCK_PROCEDURE,
-        ):
-            result = json.loads(await _szv_get("09513"))
-
+        result = json.loads(await _szv_get("09513"))
         assert result["time_minutes"] == 10
 
     @pytest.mark.asyncio
-    async def test_get_includes_specialty_codes(self):
-        """Returned procedure includes specialty_codes list."""
+    async def test_get_includes_specialty(self):
         from biomcp.czech.szv.search import _szv_get
 
-        with patch(
-            "biomcp.czech.szv.search._fetch_procedure_detail",
-            new_callable=AsyncMock,
-            return_value=_FULL_MOCK_PROCEDURE,
-        ):
-            result = json.loads(await _szv_get("09513"))
-
-        assert isinstance(result["specialty_codes"], list)
-        assert "101" in result["specialty_codes"]
+        result = json.loads(await _szv_get("09513"))
+        assert result["specialty"] == "101"
 
     @pytest.mark.asyncio
     async def test_get_invalid_code(self):
-        """Unknown code returns a JSON error payload."""
         from biomcp.czech.szv.search import _szv_get
 
-        with patch(
-            "biomcp.czech.szv.search._fetch_procedure_detail",
-            new_callable=AsyncMock,
-            return_value=None,
-        ), patch(
-            "biomcp.czech.szv.search._fetch_procedure_list",
-            new_callable=AsyncMock,
-            return_value=[],
-        ):
-            result = json.loads(await _szv_get("INVALID_CODE"))
-
+        result = json.loads(await _szv_get("INVALID_CODE"))
         assert "error" in result
 
     @pytest.mark.asyncio
-    async def test_get_falls_back_to_list_scan(self):
-        """When detail endpoint returns None, list scan is used."""
+    async def test_get_description(self):
         from biomcp.czech.szv.search import _szv_get
 
-        with patch(
-            "biomcp.czech.szv.search._fetch_procedure_detail",
-            new_callable=AsyncMock,
-            return_value=None,
-        ), patch(
-            "biomcp.czech.szv.search._fetch_procedure_list",
-            new_callable=AsyncMock,
-            return_value=[_FULL_MOCK_PROCEDURE],
-        ):
-            result = json.loads(await _szv_get("09513"))
-
-        # Should succeed via fallback
-        assert result.get("code") == "09513"
-
-    @pytest.mark.asyncio
-    async def test_get_validates_against_model(self):
-        """Result validates against HealthProcedure Pydantic model."""
-        from biomcp.czech.szv.search import _szv_get
-
-        with patch(
-            "biomcp.czech.szv.search._fetch_procedure_detail",
-            new_callable=AsyncMock,
-            return_value=_FULL_MOCK_PROCEDURE,
-        ):
-            raw = await _szv_get("09513")
-
-        procedure = HealthProcedure.model_validate_json(raw)
-        assert procedure.code == "09513"
-        assert procedure.point_value == 113
-
-    @pytest.mark.asyncio
-    async def test_get_category_name(self):
-        """Returned procedure includes category_name when available."""
-        from biomcp.czech.szv.search import _szv_get
-
-        with patch(
-            "biomcp.czech.szv.search._fetch_procedure_detail",
-            new_callable=AsyncMock,
-            return_value=_FULL_MOCK_PROCEDURE,
-        ):
-            result = json.loads(await _szv_get("09513"))
-
-        assert result["category_name"] == "Kardiologická vyšetření"
-
-    @pytest.mark.asyncio
-    async def test_get_minimal_procedure(self):
-        """Minimal API response (code + name only) still succeeds."""
-        from biomcp.czech.szv.search import _szv_get
-
-        minimal = {"kod": "00001", "nazev": "Základní vyšetření"}
-        with patch(
-            "biomcp.czech.szv.search._fetch_procedure_detail",
-            new_callable=AsyncMock,
-            return_value=minimal,
-        ):
-            result = json.loads(await _szv_get("00001"))
-
-        assert result["code"] == "00001"
-        assert result["point_value"] is None
-        assert result["specialty_codes"] == []
+        result = json.loads(await _szv_get("09513"))
+        assert result["description"] == "Popis EKG"

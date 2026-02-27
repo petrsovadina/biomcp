@@ -18,14 +18,14 @@ class TestSuklDrugSearch:
     def mock_drug_detail(self):
         """Mock drug detail from /lecive-pripravky/{kod}."""
         return {
-            "kodSukl": "0000123",
+            "kodSUKL": "0000123",
             "nazev": "NUROFEN 400MG",
-            "doplnekNazvu": "400MG TBL FLM 24",
-            "kodFormy": "TBL FLM",
-            "nazevFormy": "potahovaná tableta",
-            "kodAtc": "M01AE01",
+            "doplnek": "400MG TBL FLM 24",
+            "lekovaFormaKod": "TBL FLM",
+            "sila": "400MG",
+            "ATCkod": "M01AE01",
             "registracniCislo": "07/123/01-C",
-            "nazevDrzitele": "Reckitt Benckiser Healthcare",
+            "drzitelKod": "Reckitt Benckiser Healthcare",
         }
 
     @pytest.fixture
@@ -33,7 +33,7 @@ class TestSuklDrugSearch:
         """Mock substance codelist response."""
         return [
             {
-                "kodLatky": "1234",
+                "kodLatky": 1234,
                 "nazev": "IBUPROFENUM",
                 "nazevCesky": "IBUPROFEN",
             },
@@ -44,10 +44,9 @@ class TestSuklDrugSearch:
         """Mock drug composition response."""
         return [
             {
-                "kodLatky": "1234",
-                "nazevLatky": "IBUPROFENUM",
+                "kodLatky": 1234,
                 "mnozstvi": "400",
-                "jednotka": "MG",
+                "jednotkaKod": "MG",
             }
         ]
 
@@ -97,7 +96,7 @@ class TestSuklDrugSearch:
         details = [
             {
                 **mock_drug_detail,
-                "kodSukl": f"000{i:04d}",
+                "kodSUKL": f"000{i:04d}",
                 "nazev": f"DRUG {i}",
             }
             for i in range(5)
@@ -105,11 +104,11 @@ class TestSuklDrugSearch:
 
         async def mock_fetch_detail(code, **kwargs):
             for d in details:
-                if d["kodSukl"] == code:
+                if d["kodSUKL"] == code:
                     return d
             return None
 
-        codes = [d["kodSukl"] for d in details]
+        codes = [d["kodSUKL"] for d in details]
         with patch(
             "biomcp.czech.sukl.search._fetch_drug_list",
             new_callable=AsyncMock,

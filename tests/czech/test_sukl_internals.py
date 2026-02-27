@@ -12,25 +12,45 @@ class TestSuklSearchInternals:
     def test_matches_query_by_name(self):
         from biomcp.czech.sukl.search import _matches_query
 
-        detail = {"nazev": "NUROFEN 400MG", "doplnekNazvu": "", "kodAtc": "", "nazevDrzitele": ""}
+        detail = {
+            "nazev": "NUROFEN 400MG",
+            "doplnek": "",
+            "ATCkod": "",
+            "drzitelKod": "",
+        }
         assert _matches_query(detail, "nurofen") is True
 
     def test_matches_query_by_atc(self):
         from biomcp.czech.sukl.search import _matches_query
 
-        detail = {"nazev": "", "doplnekNazvu": "", "kodAtc": "M01AE01", "nazevDrzitele": ""}
+        detail = {
+            "nazev": "",
+            "doplnek": "",
+            "ATCkod": "M01AE01",
+            "drzitelKod": "",
+        }
         assert _matches_query(detail, "m01ae01") is True
 
     def test_matches_query_by_holder(self):
         from biomcp.czech.sukl.search import _matches_query
 
-        detail = {"nazev": "", "doplnekNazvu": "", "kodAtc": "", "nazevDrzitele": "Reckitt Benckiser"}
+        detail = {
+            "nazev": "",
+            "doplnek": "",
+            "ATCkod": "",
+            "drzitelKod": "Reckitt Benckiser",
+        }
         assert _matches_query(detail, "reckitt") is True
 
     def test_matches_query_no_match(self):
         from biomcp.czech.sukl.search import _matches_query
 
-        detail = {"nazev": "ABC", "doplnekNazvu": "", "kodAtc": "", "nazevDrzitele": ""}
+        detail = {
+            "nazev": "ABC",
+            "doplnek": "",
+            "ATCkod": "",
+            "drzitelKod": "",
+        }
         assert _matches_query(detail, "xyz") is False
 
     def test_matches_query_none_detail(self):
@@ -42,10 +62,10 @@ class TestSuklSearchInternals:
         from biomcp.czech.sukl.search import _detail_to_summary
 
         detail = {
-            "kodSukl": "0000123",
+            "kodSUKL": "0000123",
             "nazev": "NUROFEN",
-            "kodAtc": "M01AE01",
-            "nazevFormy": "tableta",
+            "ATCkod": "M01AE01",
+            "lekovaFormaKod": "TBL FLM",
         }
         s = _detail_to_summary(detail)
         assert s["sukl_code"] == "0000123"
@@ -63,14 +83,14 @@ class TestSuklGetterInternals:
 
         comp = [
             {
-                "nazevLatky": "IBUPROFENUM",
+                "kodLatky": 1234,
                 "mnozstvi": "400",
-                "jednotka": "MG",
+                "jednotkaKod": "MG",
             }
         ]
         result = _composition_to_substances(comp)
         assert len(result) == 1
-        assert result[0]["name"] == "IBUPROFENUM"
+        assert result[0]["substance_code"] == 1234
         assert result[0]["strength"] == "400 MG"
 
     def test_composition_to_substances_empty(self):
@@ -85,7 +105,9 @@ class TestSuklGetterInternals:
             _composition_to_substances,
         )
 
-        comp = [{"nazevLatky": "TEST", "mnozstvi": "", "jednotka": ""}]
+        comp = [
+            {"kodLatky": 99, "mnozstvi": "", "jednotkaKod": ""}
+        ]
         result = _composition_to_substances(comp)
         assert result[0]["strength"] is None
 

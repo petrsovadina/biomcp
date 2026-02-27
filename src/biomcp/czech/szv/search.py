@@ -1,21 +1,21 @@
 """SZV health procedures search implementation.
 
-Uses NZIP Open Data API v3 (nzip.cz) as primary source and
-szv.mzcr.cz as supplementary source.  Results are cached with
-diskcache to reduce repeated network calls.
+Downloads Excel export from szv.mzcr.cz and provides
+in-memory search with diskcache for the raw data.
+
+Data source: https://szv.mzcr.cz/Vykon/Export/
 """
 
+import io
 import json
 import logging
 
 import httpx
+import openpyxl
 
 from biomcp.constants import (
     CACHE_TTL_DAY,
-    CZECH_HTTP_TIMEOUT,
     DEFAULT_CACHE_TIMEOUT,
-    NZIP_BASE_URL,
-    SZV_BASE_URL,
 )
 from biomcp.czech.diacritics import normalize_query
 from biomcp.http_client import (
@@ -26,154 +26,123 @@ from biomcp.http_client import (
 
 logger = logging.getLogger(__name__)
 
-# ---------------------------------------------------------------------------
-# Internal constants
-# ---------------------------------------------------------------------------
+_SZV_EXPORT_URL = "https://szv.mzcr.cz/Vykon/Export/"
+_LIST_CACHE_TTL = CACHE_TTL_DAY
+_DETAIL_CACHE_TTL = DEFAULT_CACHE_TIMEOUT
 
-_NZIP_API_V3 = f"{NZIP_BASE_URL}/api/v3"
-_PROCEDURE_LIST_CACHE_TTL = CACHE_TTL_DAY
-_PROCEDURE_DETAIL_CACHE_TTL = DEFAULT_CACHE_TIMEOUT
-
-# NZIP endpoint that returns a list of health procedures
-_NZIP_PROCEDURES_URL = f"{_NZIP_API_V3}/vykony"
-
-# Supplementary SZV endpoint
-_SZV_PROCEDURES_URL = f"{SZV_BASE_URL}/szv/vykony"
+# Module-level cache
+_PROCEDURES: list[dict] | None = None
 
 
-# ---------------------------------------------------------------------------
-# Low-level fetchers
-# ---------------------------------------------------------------------------
-
-
-async def _fetch_procedure_list() -> list[dict]:
-    """Fetch the full procedure list from NZIP Open Data API.
-
-    Returns a list of raw procedure dicts from the API.  The result
-    is cached for 24 hours.
-    """
-    cache_key = generate_cache_key("GET", _NZIP_PROCEDURES_URL, {})
+async def _download_excel() -> list[dict]:
+    """Download SZV Excel export and parse procedures."""
+    cache_key = generate_cache_key(
+        "PARSED", "szv:procedures", {}
+    )
     cached = get_cached_response(cache_key)
     if cached:
         return json.loads(cached)
 
-    try:
-        async with httpx.AsyncClient(timeout=CZECH_HTTP_TIMEOUT) as client:
-            resp = await client.get(
-                _NZIP_PROCEDURES_URL,
-                headers={"Accept": "application/json"},
-            )
-            resp.raise_for_status()
-            data = resp.json()
-    except httpx.HTTPError as exc:
-        logger.warning("NZIP API unavailable: %s", exc)
-        # Fall back to empty list; callers handle this gracefully
+    async with httpx.AsyncClient(
+        timeout=60.0,
+        follow_redirects=True,
+    ) as client:
+        resp = await client.get(_SZV_EXPORT_URL)
+        resp.raise_for_status()
+        content = resp.content
+
+    wb = openpyxl.load_workbook(
+        io.BytesIO(content), read_only=True
+    )
+    ws = wb["Export"]
+    rows = list(ws.iter_rows(values_only=True))
+    wb.close()
+
+    if not rows:
         return []
 
-    procedures = (
-        data
-        if isinstance(data, list)
-        else data.get("data", data.get("vykony", []))
-    )
+    headers = [str(h or "").strip() for h in rows[0]]
+    procedures = []
+    for row in rows[1:]:
+        entry = dict(zip(headers, row))
+        if entry.get("Kód"):
+            procedures.append(entry)
+
     cache_response(
         cache_key,
-        json.dumps(procedures),
-        _PROCEDURE_LIST_CACHE_TTL,
+        json.dumps(
+            procedures,
+            ensure_ascii=False,
+            default=str,
+        ),
+        _LIST_CACHE_TTL,
     )
     return procedures
 
 
-async def _fetch_procedure_detail(code: str) -> dict | None:
-    """Fetch a single procedure from NZIP by procedure code.
+async def _get_procedures() -> list[dict]:
+    """Return cached or freshly loaded procedure list."""
+    global _PROCEDURES
+    if _PROCEDURES is not None:
+        return _PROCEDURES
 
-    Returns the raw API dict or *None* when the code is unknown.
-    """
-    url = f"{_NZIP_PROCEDURES_URL}/{code}"
-    cache_key = generate_cache_key("GET", url, {})
-
-    cached = get_cached_response(cache_key)
-    if cached:
-        return json.loads(cached)
-
-    try:
-        async with httpx.AsyncClient(timeout=CZECH_HTTP_TIMEOUT) as client:
-            resp = await client.get(
-                url,
-                headers={"Accept": "application/json"},
-            )
-            if resp.status_code == 404:
-                return None
-            resp.raise_for_status()
-            data = resp.json()
-    except httpx.HTTPError as exc:
-        logger.warning(
-            "Failed to fetch procedure detail for %s: %s", code, exc
-        )
-        return None
-
-    cache_response(
-        cache_key,
-        json.dumps(data),
-        _PROCEDURE_DETAIL_CACHE_TTL,
+    _PROCEDURES = await _download_excel()
+    logger.debug(
+        "Loaded %d SZV procedures", len(_PROCEDURES)
     )
-    return data
-
-
-# ---------------------------------------------------------------------------
-# Mapping helpers
-# ---------------------------------------------------------------------------
+    return _PROCEDURES
 
 
 def _raw_to_summary(raw: dict) -> dict:
-    """Convert a raw API procedure dict to a lightweight summary."""
+    """Convert an Excel row to a procedure summary."""
     return {
-        "code": raw.get("kod", raw.get("code", "")),
-        "name": raw.get("nazev", raw.get("name", "")),
-        "point_value": raw.get("body", raw.get("point_value")),
-        "category": raw.get("skupina", raw.get("category")),
+        "code": str(raw.get("Kód", "")).strip(),
+        "name": str(raw.get("Název", "")).strip(),
+        "point_value": raw.get("Celkové"),
+        "category": raw.get("Kategorie"),
     }
 
 
 def _raw_to_full(raw: dict) -> dict:
-    """Convert a raw API procedure dict to a full HealthProcedure dict."""
-    code = raw.get("kod", raw.get("code", ""))
-    category = raw.get("skupina", raw.get("category"))
+    """Convert an Excel row to full procedure detail."""
     return {
-        "code": code,
-        "name": raw.get("nazev", raw.get("name", "")),
-        "category": category,
-        "category_name": raw.get("skupina_nazev", raw.get("category_name")),
-        "point_value": raw.get("body", raw.get("point_value")),
-        "time_minutes": raw.get("cas", raw.get("time_minutes")),
-        "frequency_limit": raw.get(
-            "omezeni_frekvence", raw.get("frequency_limit")
+        "code": str(raw.get("Kód", "")).strip(),
+        "name": str(raw.get("Název", "")).strip(),
+        "description": raw.get("Popis výkonu"),
+        "category": raw.get("Kategorie"),
+        "specialty": raw.get("Odbornost"),
+        "other_specialties": raw.get(
+            "Další odbornosti"
         ),
-        "specialty_codes": raw.get(
-            "odbornosti", raw.get("specialty_codes", [])
-        ),
-        "material_requirements": raw.get(
-            "materialni_pozadavky", raw.get("material_requirements")
-        ),
-        "notes": raw.get("poznamky", raw.get("notes")),
+        "point_value": raw.get("Celkové"),
+        "direct_costs": raw.get("Přímé náklady"),
+        "personnel_costs": raw.get("Osobní"),
+        "overhead_costs": raw.get("Režijní"),
+        "time_minutes": raw.get("Trvání"),
+        "carrier_time": raw.get("Čas nositele"),
+        "carrier_level": raw.get("Nositel"),
+        "frequency_limit": raw.get("OF"),
+        "location": raw.get("OM"),
+        "conditions": raw.get("Podmínky výkonu"),
+        "notes": raw.get("Poznámka výkonu"),
+        "zulp": raw.get("ZULP"),
+        "zum": raw.get("ZUM"),
         "source": "MZCR/SZV",
     }
 
 
 def _matches_query(raw: dict, normalized_q: str) -> bool:
-    """Return True if the raw procedure dict matches the query."""
-    code = (raw.get("kod") or raw.get("code") or "").lower()
-    name = normalize_query(raw.get("nazev") or raw.get("name") or "")
-    category = normalize_query(raw.get("skupina") or raw.get("category") or "")
+    """Return True if the procedure matches the query."""
+    code = str(raw.get("Kód", "")).lower()
+    name = normalize_query(str(raw.get("Název", "")))
+    spec = normalize_query(
+        str(raw.get("Odbornost", ""))
+    )
     return (
         normalized_q in code
         or normalized_q in name
-        or normalized_q in category
+        or normalized_q in spec
     )
-
-
-# ---------------------------------------------------------------------------
-# Public search functions
-# ---------------------------------------------------------------------------
 
 
 async def _szv_search(
@@ -182,26 +151,24 @@ async def _szv_search(
 ) -> str:
     """Search health procedures by code or name.
 
-    Performs a diacritics-insensitive search across procedure codes
-    and names from the NZIP Open Data API.
-
     Args:
-        query: Procedure code (e.g. ``"09513"``) or name fragment.
-        max_results: Maximum number of results to return.
+        query: Procedure code or name fragment.
+        max_results: Maximum number of results.
 
     Returns:
-        JSON string with keys ``total`` and ``results`` (list of
-        procedure summary dicts).
+        JSON string with search results.
     """
     try:
-        procedures = await _fetch_procedure_list()
+        procedures = await _get_procedures()
     except Exception as exc:
-        logger.error("Failed to fetch procedure list: %s", exc)
+        logger.error(
+            "Failed to load SZV data: %s", exc
+        )
         return json.dumps(
             {
                 "total": 0,
                 "results": [],
-                "error": f"SZV/NZIP API unavailable: {exc}",
+                "error": f"SZV data unavailable: {exc}",
             },
             ensure_ascii=False,
         )
@@ -222,37 +189,36 @@ async def _szv_search(
 
 
 async def _szv_get(code: str) -> str:
-    """Get full procedure details by procedure code.
+    """Get full procedure details by code.
 
     Args:
-        code: Procedure code (e.g. ``"09513"``).
+        code: Procedure code (e.g. "09513").
 
     Returns:
-        JSON string with full ``HealthProcedure`` fields or an error
-        object when the code is not found.
+        JSON string with full procedure fields.
     """
-    # First try the direct detail endpoint
-    raw = await _fetch_procedure_detail(code)
-
-    if raw is None:
-        # Fall back: scan the list for an exact code match
-        try:
-            procedures = await _fetch_procedure_list()
-        except Exception as exc:
-            logger.error("Failed to fetch procedure list: %s", exc)
-            procedures = []
-
-        code_lower = code.lower()
-        for item in procedures:
-            item_code = (item.get("kod") or item.get("code") or "").lower()
-            if item_code == code_lower:
-                raw = item
-                break
-
-    if raw is None:
+    try:
+        procedures = await _get_procedures()
+    except Exception as exc:
+        logger.error(
+            "Failed to load SZV data: %s", exc
+        )
         return json.dumps(
-            {"error": f"Procedure not found: {code}"},
+            {"error": f"SZV data unavailable: {exc}"},
             ensure_ascii=False,
         )
 
-    return json.dumps(_raw_to_full(raw), ensure_ascii=False)
+    code_lower = code.strip().lower()
+    for raw in procedures:
+        raw_code = str(
+            raw.get("Kód", "")
+        ).strip().lower()
+        if raw_code == code_lower:
+            return json.dumps(
+                _raw_to_full(raw), ensure_ascii=False
+            )
+
+    return json.dumps(
+        {"error": f"Procedure not found: {code}"},
+        ensure_ascii=False,
+    )

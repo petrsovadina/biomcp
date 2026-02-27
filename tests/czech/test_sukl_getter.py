@@ -13,15 +13,15 @@ class TestSuklDrugGetter:
     def mock_drug_api_response(self):
         """Full drug detail response from SUKL API."""
         return {
-            "kodSukl": "0000123",
+            "kodSUKL": "0000123",
             "nazev": "NUROFEN 400MG",
-            "doplnekNazvu": "400MG TBL FLM 24",
-            "kodFormy": "TBL FLM",
-            "nazevFormy": "potahovaná tableta",
-            "kodAtc": "M01AE01",
+            "doplnek": "400MG TBL FLM 24",
+            "lekovaFormaKod": "TBL FLM",
+            "sila": "400MG",
+            "ATCkod": "M01AE01",
             "registracniCislo": "07/123/01-C",
-            "nazevDrzitele": "Reckitt Benckiser Healthcare",
-            "platnostRegistrace": "2028-12-31",
+            "drzitelKod": "Reckitt Benckiser Healthcare",
+            "registracePlatDo": "2028-12-31",
         }
 
     @pytest.fixture
@@ -29,10 +29,9 @@ class TestSuklDrugGetter:
         """Drug composition response."""
         return [
             {
-                "kodLatky": "1234",
-                "nazevLatky": "IBUPROFENUM",
+                "kodLatky": 1234,
                 "mnozstvi": "400",
-                "jednotka": "MG",
+                "jednotkaKod": "MG",
             }
         ]
 

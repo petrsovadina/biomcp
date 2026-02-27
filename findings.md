@@ -59,3 +59,102 @@
 2. **SUKL scraping** — PIL/SPC závisí na HTML struktuře prehledy.sukl.cz
 3. **Upstream divergence** — čím víc měníme existující soubory, tím hůře se merguje
 4. **Package rename** — pokud se provede, rozbije všechny existující integrace
+
+---
+
+## MZ ČR Atlassian Wiki — Klíčové nálezy (2026-02-26)
+
+> Zdroj: https://mzcr.atlassian.net/wiki/spaces
+
+### Nalezené spaces
+
+| Space | Název | Relevance |
+|-------|-------|-----------|
+| **EPZS** | Manuál EZ pro PZS | **KLÍČOVÝ** — 50 stránek s API dokumentací |
+| **RS** | Registr Standardů | Prázdný (ve vývoji) |
+| **RSTP** | Registr standardů – testovací prostředí | Testovací |
+| **EZTEST** | EZ test | 7 stránek, interní testování |
+
+### Nový eHealth ekosystém MZ ČR (CSEZ)
+
+MZ ČR provozuje **centrální eHealth API gateway** — zcela nový systém nahrazující staré NRPZS/UZIS endpointy:
+
+| Prostředí | Base URL |
+|-----------|----------|
+| **Test (T2)** | `https://gwy-ext-sec-t2.csez.cz/` |
+| **Produkce** | `https://api.csez.gov.cz/` |
+| **JWT Token (test)** | `https://jsuint-auth-t2.csez.cz/connect/token` |
+| **JWT Token (prod)** | `https://jsuint-auth-ez.csez.cz/connect/token` |
+
+**Autentizace:** Certifikát registrovaný přes EZCA II + JWT assertion (RS256). Client ID formát: `<IČO>_<CN>` nebo `<IČO>_SHA256(der)`.
+
+### Dostupné služby na API gateway
+
+| Služba | Path (test i prod) | Relevance pro CzechMedMCP |
+|--------|---------------------|---------------------------|
+| **KRPZS** (Registr poskytovatelů) | `/krpzs/` | **NAHRAZUJE naši NRPZS** |
+| **Terminologický server** | `/terminologie/` (test) `/termx-fhir/` (prod) | **MKN-10, ATC, SNOMED** |
+| KRP (Registr pacientů) | `/krp/` | Ne — vyžaduje registraci PZS |
+| KRZP (Registr prac.) | `/krzp/` | Ne |
+| Dočasné úložiště | `/docasneUloziste/` | Ne |
+| eŽádanky | `/eZadanky/` | Ne |
+| Notifikace | `/notifikace/` | Ne |
+| Registr oprávnění | `/registrOpravneni/` | Ne |
+| Sdílený zdravotní záznam | `/sdilenyZdravotniZaznam/` | Ne |
+
+### KRPZS API — Swagger specifikace (nový NRPZS)
+
+**Swagger soubor:** `KZR_KRPZS_PZS_swagger.json` (35 KB)
+
+**Endpointy:**
+
+| Metoda | Path | Popis |
+|--------|------|-------|
+| POST | `/api/v1/Poskytovatel/hledat/{zadostId}/ico` | Hledání poskytovatele podle IČO |
+| POST | `/api/v1/Poskytovatel/hledat/{zadostId}/misto` | Hledání podle místa (kraj) |
+| POST | `/api/v1/Poskytovatel/hledat/{zadostId}/nazev` | Hledání podle názvu |
+| POST | `/api/v1/Poskytovatel/reklamuj/{zadostId}/udaj` | Reklamace údajů |
+| POST | `/api/v1/Poskytovatel/nastavit/{zadostId}/urlpronotifikace` | Nastavení notifikačního URL |
+
+**Klíčové modely:**
+- `PoskytovatelZdravotnichSluzeb` — název, adresa, kontakty, typ, oprávnění
+- `VerejneUdajePZS` — IČO, veřejné kontakty, oprávnění
+- `KZROdpoved` — base response s `odpovedId`, `zadostId`, `stav`, chyby
+
+**PROBLÉM:** API vyžaduje certifikát + JWT. Není veřejně přístupné bez registrace u CSEZ.
+
+### Terminologický server (NTS) — Zdroj MKN-10
+
+**Web rozhraní (T2):** `https://termx-web-t2-pub.csez.cz/landing`
+**FHIR API (T2):** `https://termx-api-t2-pub.csez.cz/fhir`
+**Swagger:** `https://termx-swagger-web-t2-pub.csez.cz/swagger/?urls.primaryName=termx-fhir`
+**Přístup:** Guest role, ale vyžaduje institucionální certifikát
+
+**FHIR operace dostupné:**
+- `CodeSystem/$lookup` — detail kódu (MKN-10, ATC, SNOMED)
+- `CodeSystem/$validate-code` — ověření kódu
+- `CodeSystem/$subsumes` — hierarchické vztahy
+- `ValueSet/$expand` — rozbalení sady hodnot
+- `ValueSet/$validate-code` — validace proti sadě
+- `ConceptMap/$translate` — překlad mezi systémy
+
+**Swagger soubor:** `terminologicky_server_fhir_swagger.yml` (56 KB)
+
+**Produkční NTS plánován od 1.1.2026.**
+
+### Dopad na CzechMedMCP
+
+| Modul | Současný stav | Nový zdroj z CSEZ | Proveditelnost |
+|-------|---------------|-------------------|----------------|
+| **NRPZS** | API 404 | KRPZS na `api.csez.gov.cz/krpzs/` | **Vyžaduje certifikát** — nelze bez registrace |
+| **MKN-10** | XML se nenačítá | NTS FHIR `CodeSystem/$lookup` | **Vyžaduje certifikát** — alternativně embed XML |
+| **SZV** | NZIP 0 výsledků | Není na CSEZ | Zůstává problém — CSV fallback |
+| **VZP** | API 404 | Není na CSEZ | Zůstává problém — hledat jiný zdroj |
+
+### Klíčový závěr
+
+CSEZ gateway je **budoucnost českého eHealth**, ale vyžaduje **institucionální certifikát a registraci**. Pro CzechMedMCP to znamená:
+
+1. **Krátkodobě (teď):** Opravit SUKL (kódový bug) + MKN-10 (embed XML) + graceful degradation pro NRPZS/SZV/VZP
+2. **Střednědobě (Medevio integrace):** Medevio jako PZS může získat certifikát a přistupovat ke KRPZS a NTS
+3. **Dlouhodobě:** Plná integrace s CSEZ gateway jako primární zdroj dat

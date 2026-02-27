@@ -87,7 +87,7 @@ async def _sukl_availability_check(sukl_code: str) -> str:
 
     return json.dumps(
         {
-            "sukl_code": detail.get("kodSukl", sukl_code),
+            "sukl_code": detail.get("kodSUKL", sukl_code),
             "name": detail.get("nazev", ""),
             "status": status,
             "last_checked": now,

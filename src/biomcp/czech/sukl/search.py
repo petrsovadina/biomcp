@@ -66,9 +66,9 @@ def _matches_query(detail: dict, normalized_q: str) -> bool:
         return False
 
     name = normalize_query(detail.get("nazev", ""))
-    supplement = normalize_query(detail.get("doplnekNazvu", ""))
-    atc = (detail.get("kodAtc") or "").lower()
-    holder = normalize_query(detail.get("nazevDrzitele", ""))
+    supplement = normalize_query(detail.get("doplnek", ""))
+    atc = (detail.get("ATCkod") or "").lower()
+    holder = (detail.get("drzitelKod") or "").lower()
 
     return (
         normalized_q in name
@@ -81,11 +81,11 @@ def _matches_query(detail: dict, normalized_q: str) -> bool:
 def _detail_to_summary(detail: dict) -> dict:
     """Convert API drug detail to DrugSummary dict."""
     return {
-        "sukl_code": detail.get("kodSukl", ""),
+        "sukl_code": detail.get("kodSUKL", ""),
         "name": detail.get("nazev", ""),
-        "active_substance": None,
-        "atc_code": detail.get("kodAtc"),
-        "pharmaceutical_form": detail.get("nazevFormy"),
+        "strength": detail.get("sila"),
+        "atc_code": detail.get("ATCkod"),
+        "pharmaceutical_form": detail.get("lekovaFormaKod"),
     }
 
 

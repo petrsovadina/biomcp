@@ -90,12 +90,18 @@ def _composition_to_substances(
 ) -> list[dict]:
     """Convert API composition to active substances list."""
     substances = []
+    seen: set[int] = set()
     for item in composition:
-        name = item.get("nazevLatky", "")
+        code = item.get("kodLatky", 0)
+        if code in seen:
+            continue
+        seen.add(code)
         amount = item.get("mnozstvi", "")
-        unit = item.get("jednotka", "")
+        unit = item.get("jednotkaKod", "")
         strength = f"{amount} {unit}".strip() if amount else None
-        substances.append({"name": name, "strength": strength})
+        substances.append(
+            {"substance_code": code, "strength": strength}
+        )
     return substances
 
 
@@ -121,14 +127,16 @@ async def _sukl_drug_details(sukl_code: str) -> str:
     pil_url = _build_doc_url(sukl_code, "pil") if pil_docs else None
 
     result = {
-        "sukl_code": detail.get("kodSukl", sukl_code),
+        "sukl_code": detail.get("kodSUKL", sukl_code),
         "name": detail.get("nazev", ""),
+        "strength": detail.get("sila"),
         "active_substances": _composition_to_substances(composition),
-        "pharmaceutical_form": detail.get("nazevFormy"),
-        "atc_code": detail.get("kodAtc"),
+        "pharmaceutical_form": detail.get("lekovaFormaKod"),
+        "atc_code": detail.get("ATCkod"),
         "registration_number": detail.get("registracniCislo"),
-        "mah": detail.get("nazevDrzitele"),
-        "registration_valid_to": detail.get("platnostRegistrace"),
+        "mah_code": detail.get("drzitelKod"),
+        "registration_valid_to": detail.get("registracePlatDo"),
+        "is_delivered": detail.get("jeDodavka"),
         "spc_url": spc_url,
         "pil_url": pil_url,
         "source": "SUKL",

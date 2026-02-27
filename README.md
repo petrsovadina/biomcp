@@ -4,7 +4,7 @@
 
 BioMCP je open source (MIT licence) sada nástrojů, která propojuje AI asistenty a agenty se specializovanými biomedicínskými znalostmi. Postavený na protokolu [Model Context Protocol (MCP)](https://modelcontextprotocol.io/), spojuje AI systémy s autoritativními biomedicínskými datovými zdroji a umožňuje jim odpovídat na otázky o klinických studiích, vědecké literatuře, genomických variantách a českém zdravotnickém systému s přesností a hloubkou.
 
-## Proč BioMCP?
+## Proč BioMCP?.
 
 Velké jazykové modely mají široké obecné znalosti, ale často jim chybí specializované doménové informace nebo přístup k aktuálním zdrojům. BioMCP tento nedostatek překonává pro biomedicínu a české zdravotnictví:
 

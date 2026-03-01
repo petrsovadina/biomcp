@@ -44,7 +44,7 @@ a VZP.
 
 CzechMedMCP je fork projektu [BioMCP](https://github.com/genomoncology/biomcp)
 (licence MIT), který přidává **14 českých zdravotnických MCP nástrojů**
-k existující sadě 37 globálních biomedicínských nástrojů.
+k existující sadě 21+ globálních biomedicínských výzkumných nástrojů.
 Zpřístupňuje české státní zdravotnické datové zdroje prostřednictvím
 [Model Context Protocol (MCP)](https://modelcontextprotocol.io/), takže
 AI asistenti jako Claude Desktop, Cursor a VS Code mohou odpovídat na
@@ -66,12 +66,12 @@ zdravotnické otázky s využitím autoritativních českých dat.
 | Modul | Zdroj (český název) | Popis | URL |
 |-------|---------------------|-------|-----|
 | **SUKL** | Státní ústav pro kontrolu léčiv | Registr léčiv, SmPC, PIL, dostupnost | prehledy.sukl.cz |
-| **MKN-10** | Mezinárodní klasifikace nemocí, 10. revize | CSV open data z MZ ČR | data.mzcr.cz |
-| **NRPZS** | Národní registr poskytovatelů zdravotních služeb | CSV open data z NRPZS | datanzis.uzis.gov.cz |
-| **SZV** | Seznam zdravotních výkonů | Excel export z MZ ČR | szv.mzcr.cz |
-| **VZP** | Všeobecná zdravotní pojišťovna | ZIP/CSV z VZP | media.vzpstatic.cz |
+| **MKN-10** | Mezinárodní klasifikace nemocí, 10. revize | České kódy diagnóz ICD-10 | mkn10.uzis.cz |
+| **NRPZS** | Národní registr poskytovatelů zdravotních služeb | Registr poskytovatelů zdravotních služeb | nrpzs.uzis.cz |
+| **SZV** | Seznam zdravotních výkonů | Seznam výkonů s bodovými hodnotami | szv.mzcr.cz, nzip.cz |
+| **VZP** | Všeobecná zdravotní pojišťovna | Číselníky pojišťovny | vzp.cz |
 
-Všechny datové zdroje jsou **veřejná open data české státní správy**. Není
+Všechny datové zdroje jsou **veřejná API české státní správy**. Není
 vyžadována žádná autentizace ani API klíče.
 
 ---
@@ -88,7 +88,7 @@ vyžadována žádná autentizace ani API klíče.
 
 ```bash
 # Klonování repozitáře
-git clone https://github.com/petrsovadina/biomcp.git
+git clone https://github.com/digimedic/biomcp.git
 cd biomcp
 
 # Instalace pomocí uv (doporučeno)
@@ -99,18 +99,19 @@ pip install -e ".[dev]"
 ```
 
 Tímto nainstalujete nástroj příkazové řádky `biomcp` spolu se všemi
-závislostmi včetně `httpx`, `pydantic`, `openpyxl` a `diskcache`.
+závislostmi včetně `httpx`, `pydantic`, `lxml` a `diskcache`.
 
-### 2.3 Datové zdroje českých modulů
+### 2.3 Nastavení dat MKN-10
 
-České moduly automaticky stahují a cachují data při prvním použití:
+Modul MKN-10 používá soubor ClaML XML z UZIS. Při prvním použití se systém
+pokusí soubor stáhnout a uložit do mezipaměti automaticky. Pokud automatické
+stažení selže, můžete soubor umístit ručně:
 
-- **MKN-10**: CSV klasifikace z data.mzcr.cz (MZ ČR open data)
-- **NRPZS**: CSV registr poskytovatelů z datanzis.uzis.gov.cz
-- **SZV**: Excel export výkonů z szv.mzcr.cz
-- **VZP**: ZIP/CSV číselníky z media.vzpstatic.cz
-
-Data jsou po stažení uložena v diskcache a při dalším spuštění se znovu nestahují.
+```bash
+mkdir -p data/mkn10
+# Stáhněte soubor ClaML XML z https://mkn10.uzis.cz/o-mkn
+# Umístěte jej jako: data/mkn10/mkn10.xml
+```
 
 ### 2.4 Ověření instalace
 
@@ -140,7 +141,9 @@ biomcp run
 biomcp run --mode streamable_http --port 8080
 ```
 
-Po spuštění server zaregistruje **51 nástrojů**: 33 individuálních + 14 českých + 2 routerové + 1 thinking + 1 metriky.
+Po spuštění server zaregistruje **35 MVP nástrojů**: 21 globálních BioMCP
+nástrojů + 14 českých zdravotnických nástrojů + 3 základní nástroje +
+1 kontrola stavu.
 
 ### 3.2 Konfigurace Claude Desktop
 
@@ -401,11 +404,11 @@ V AI asistentovi probíhá tento postup konverzačně:
 ### 4.2 Kódy diagnóz -- MKN-10
 
 **Zdroj:** UZIS (Ústav zdravotnických informací a statistiky ČR)
-**Data:** CSV z data.mzcr.cz (MZ ČR open data)
+**Data:** ClaML XML, zpracováno lokálně
 **Nástroje:** 3 (search, get, browse)
 
 Modul MKN-10 poskytuje českou lokalizaci Mezinárodní klasifikace nemocí,
-10. revize (ICD-10). Data jsou stažena jako CSV z open data portálu MZ ČR a indexována
+10. revize (ICD-10). Data jsou zpracována ze souboru ClaML XML a indexována
 v paměti pro vyhledávání v řádu mikrosekund.
 
 #### 4.2.1 Hledání podle kódu MKN-10
@@ -602,13 +605,13 @@ konkrétní podkategorii.
 ### 4.3 Poskytovatelé zdravotních služeb -- NRPZS
 
 **Zdroj:** Národní registr poskytovatelů zdravotních služeb (NRPZS)
-**Data:** CSV z datanzis.uzis.gov.cz (NRPZS open data)
+**API:** nrpzs.uzis.cz/api/v1
 **Nástroje:** 2 (search, get)
 
 Modul NRPZS prohledává Národní registr poskytovatelů zdravotních služeb,
 který pokrývá všechna registrovaná zdravotnická zařízení v České republice.
-Data jsou stažena jako CSV z open data portálu NRPZS. Používejte jej pro
-doporučení pacientů, hledání specialistů nebo vyhledávání zařízení podle města.
+Používejte jej pro doporučení pacientů, hledání specialistů nebo vyhledávání
+zařízení podle města.
 
 #### 4.3.1 Hledání podle názvu, města nebo odbornosti
 
@@ -692,21 +695,31 @@ biomcp czech nrpzs get "12345"
   },
   "specialties": ["kardiologie"],
   "care_types": ["ambulantní"],
-  "care_form": "ambulantní péče",
-  "contact": {
-    "phone": "+420 222 333 444",
-    "email": "ambulance@example.cz",
-    "website": null
-  },
-  "facility_type": "Ordinace",
-  "region": "Hlavní město Praha",
-  "district": "Praha",
+  "workplaces": [
+    {
+      "workplace_id": "67890",
+      "name": "Kardiologická ambulance",
+      "address": {
+        "street": "Vinohradská 123",
+        "city": "Praha",
+        "postal_code": "12000",
+        "region": "Hlavní město Praha"
+      },
+      "specialties": ["kardiologie"],
+      "contact": {
+        "phone": "+420 222 333 444",
+        "email": "ambulance@example.cz",
+        "website": "https://www.example.cz"
+      }
+    }
+  ],
+  "registration_number": "A-123-456",
   "source": "NRPZS"
 }
 ```
 
-Odpověď obsahuje adresu, kontaktní údaje, odbornosti a další informace
-o poskytovateli z CSV exportu registru NRPZS.
+Seznam `workplaces` obsahuje všechna registrovaná místa péče daného
+poskytovatele, každé s vlastní adresou, odbornostmi a kontaktními údaji.
 
 #### 4.3.3 Příklady kombinovaných filtrů
 
@@ -731,8 +744,8 @@ biomcp czech nrpzs search --specialty "pediatrie"
 
 ### 4.4 Zdravotní výkony -- SZV
 
-**Zdroj:** Seznam zdravotních výkonů (MZ ČR)
-**Data:** Excel export z szv.mzcr.cz
+**Zdroj:** Seznam zdravotních výkonů (MZCR), NZIP Open Data API v3
+**API:** nzip.cz (primární), szv.mzcr.cz (doplňkový)
 **Nástroje:** 2 (search, get)
 
 Modul SZV poskytuje přístup k Seznamu zdravotních výkonů včetně kódů výkonů,
@@ -818,7 +831,7 @@ Klíčová pole pro vyúčtování:
 ### 4.5 Číselníky pojišťoven -- VZP
 
 **Zdroj:** Všeobecná zdravotní pojišťovna (VZP)
-**Data:** ZIP/CSV z media.vzpstatic.cz
+**API:** vzp.cz
 **Nástroje:** 2 (search, get)
 
 Modul VZP prohledává číselníky publikované Všeobecnou zdravotní pojišťovnou
@@ -1168,13 +1181,15 @@ Pro integraci s AI asistentem jsou zde přesné názvy MCP nástrojů:
 **Příznak:** Příkazy vyhledávání a procházení MKN-10 vracejí
 `{"error": "No MKN-10 data loaded."}`.
 
-**Příčina:** CSV soubor z data.mzcr.cz se nepodařilo stáhnout.
+**Příčina:** Soubor ClaML XML nebyl stažen nebo se nenachází na očekávaném
+místě.
 
 **Řešení:**
 
-1. Zkontrolujte internetové připojení
-2. Ověřte dostupnost data.mzcr.cz v prohlížeči
-3. Smažte diskcache a restartujte server pro vynucení nového stažení
+1. Stáhněte soubor ClaML XML z
+   [mkn10.uzis.cz/o-mkn](https://mkn10.uzis.cz/o-mkn)
+2. Umístěte jej jako `data/mkn10/mkn10.xml` relativně ke kořenu projektu
+3. Restartujte server
 
 ### "SUKL API unavailable"
 
@@ -1291,17 +1306,20 @@ zpracování.
 
 ## Příloha: URL datových zdrojů
 
-| Služba | Základní URL | Data |
-|--------|-------------|------|
-| SUKL DLP API v1 | `https://prehledy.sukl.cz/` | Registr léčiv (live API) |
-| MKN-10 CSV | `https://data.mzcr.cz/` | MKN-10 klasifikace (CSV download) |
-| NRPZS CSV | `https://datanzis.uzis.gov.cz/` | Registr poskytovatelů (CSV download) |
-| SZV Excel | `https://szv.mzcr.cz/` | Seznam výkonů (Excel download) |
-| VZP ZIP/CSV | `https://media.vzpstatic.cz/` | Číselníky VZP (ZIP/CSV download) |
+| Služba | Základní URL | Autentizace | Data |
+|--------|-------------|-------------|------|
+| SUKL DLP API v1 | `https://prehledy.sukl.cz/` | Žádná | Registr léčiv |
+| SUKL Open Data | `https://opendata.sukl.cz/` | Žádná | Hromadné stahování |
+| SUKL Swagger dokumentace | `https://prehledy.sukl.cz/docs/` | Žádná | Specifikace API |
+| NRPZS API v1 | `https://nrpzs.uzis.cz/api/v1/` | Žádná | Poskytovatelé |
+| NRPZS API dokumentace | `https://nrpzs.uzis.cz/api/doc` | Žádná | Specifikace API |
+| MKN-10 prohlížeč | `https://mkn10.uzis.cz/` | Žádná | Kódy ICD-10 |
+| NZIP Open Data v3 | `https://nzip.cz/` | Žádná | Výkony |
+| SZV databáze | `https://szv.mzcr.cz/` | Žádná | Registr výkonů |
+| VZP číselníky | `https://www.vzp.cz/` | Žádná | Pojistná data |
 
-Všechny zdroje jsou veřejné. SUKL používá live API, ostatní moduly stahují
-statická open data. Nejsou vyžadovány žádné API klíče, certifikáty ani
-registrace.
+Všechna API jsou veřejná. Pro čtecí přístup používaný CzechMedMCP nejsou
+vyžadovány žádné API klíče, certifikáty ani registrace.
 
 ---
 

@@ -75,7 +75,7 @@ Velké jazykové modely mají široké obecné znalosti, ale často jim chybí s
   - Prohledávání číselníků výkonů, diagnóz a ATC kódů
   - Detaily položek s pravidly úhrad
 
-Všechny české zdroje jsou veřejná API české státní správy — nevyžadují autentizaci.
+Všechny české zdroje jsou veřejná open data české státní správy — nevyžadují autentizaci.
 
 ## Dostupné MCP nástroje
 
@@ -208,7 +208,7 @@ Pro přímý přístup ke specifické funkcionalitě nabízí BioMCP 48 individu
 
 ##### NRPZS — Poskytovatelé zdravotních služeb (2)
 - **nrpzs_provider_searcher** — vyhledávání poskytovatelů
-- **nrpzs_provider_getter** — detail poskytovatele s pracovišti
+- **nrpzs_provider_getter** — detail poskytovatele s adresou a kontakty
 
 ##### SZV + VZP — Výkony a pojištění (4)
 - **szv_procedure_searcher** — vyhledávání zdravotních výkonů

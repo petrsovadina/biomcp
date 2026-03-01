@@ -2,9 +2,9 @@
 
 Komplexní referenční dokumentace pro 14 MCP nástrojů českého zdravotnického systému rozdělených do 5 modulů.
 
-**Poslední aktualizace:** 2026-02-28
+**Poslední aktualizace:** 2026-02-20
 **Verze:** 1.0
-**Zdrojový kód:** `src/biomcp/czech/`
+**Zdrojový kód:** `/Users/petrsovadina/Desktop/Develope/personal/biomcp/src/biomcp/czech/`
 
 ---
 
@@ -28,10 +28,10 @@ Projekt CzechMedMCP poskytuje 14 MCP (Model Context Protocol) nástrojů pro pr�
 | Modul | Počet nástrojů | Zdroj dat | Popis |
 |-------|----------------|-----------|-------|
 | SUKL | 5 | SUKL DLP API v1 | Registr léčiv |
-| MKN-10 | 3 | MZ ČR CSV open data | Diagnózy (ICD-10) |
-| NRPZS | 2 | NRPZS CSV open data | Zdravotnické poskytovatele |
-| SZV | 2 | SZV Excel export | Zdravotnické výkony |
-| VZP | 2 | VZP ZIP/CSV | Pojišťovací číselníky |
+| MKN-10 | 3 | UZIS ClaML XML | Diagnózy (ICD-10) |
+| NRPZS | 2 | NRPZS API | Zdravotnické poskytovatele |
+| SZV | 2 | NZIP Open Data v3 | Zdravotnické výkony |
+| VZP | 2 | VZP veřejné API | Pojišťovací číselníky |
 
 Všechny nástroje vrací odpovědi ve formátu **JSON** s popořízeným textem ve čeština.
 
@@ -371,8 +371,8 @@ Vyhledávání diagnóz v MKN-10 podle kódu či textu.
 
 **Typ nástroje:** `async function`
 **MCP identifikátor:** `mkn_diagnosis_searcher`
-**Zdroj dat:** MZ ČR CSV open data (data.mzcr.cz)
-**Cache TTL:** 30 dní (CSV parsing)
+**Zdroj dat:** UZIS ClaML XML (ClaML formát)
+**Cache TTL:** 30 dní (XML parsing)
 
 #### Parametry
 
@@ -446,7 +446,7 @@ Získání úplných informací o diagnóze včetně hierarchie.
 
 **Typ nástroje:** `async function`
 **MCP identifikátor:** `mkn_diagnosis_getter`
-**Zdroj dat:** MZ ČR CSV open data
+**Zdroj dat:** UZIS ClaML XML
 **Cache TTL:** 30 dní
 
 #### Parametry
@@ -517,7 +517,7 @@ Procházení hierarchie MKN-10 kategorií.
 
 **Typ nástroje:** `async function`
 **MCP identifikátor:** `mkn_category_browser`
-**Zdroj dat:** MZ ČR CSV open data
+**Zdroj dat:** UZIS ClaML XML
 **Cache TTL:** 30 dní
 
 #### Parametry
@@ -619,7 +619,7 @@ Vyhledávání zdravotnických poskytovatelů v registru NRPZS.
 
 **Typ nástroje:** `async function`
 **MCP identifikátor:** `nrpzs_provider_searcher`
-**Zdroj dat:** NRPZS CSV open data (datanzis.uzis.gov.cz)
+**Zdroj dat:** NRPZS API (nrpzs.uzis.cz)
 **Cache TTL:** 24 hodin
 
 #### Parametry
@@ -713,7 +713,7 @@ Získání úplných informací o poskytovateli včetně pracovišť.
 
 **Typ nástroje:** `async function`
 **MCP identifikátor:** `nrpzs_provider_getter`
-**Zdroj dat:** NRPZS CSV open data
+**Zdroj dat:** NRPZS API
 **Cache TTL:** 7 dní
 
 #### Parametry
@@ -738,15 +738,25 @@ Získání úplných informací o poskytovateli včetně pracovišť.
   },
   "specialties": ["Chirurgie", "Ortopedika", "Onkologie"],
   "care_types": ["lůžková", "ambulantní"],
-  "care_form": "ambulantní péče",
-  "contact": {
-    "phone": "+420261082111",
-    "email": "info@nemocnice.cz",
-    "website": "http://www.nemocnice.cz"
-  },
-  "facility_type": "Nemocnice",
-  "region": "Hlavní město Praha",
-  "district": "Praha 4",
+  "workplaces": [
+    {
+      "workplace_id": "12345-1",
+      "name": "Chirurgická klinika",
+      "address": {
+        "street": "Na Dolanech 123",
+        "city": "Praha 4",
+        "postal_code": "14000",
+        "region": "Hlavní město Praha"
+      },
+      "specialties": ["Chirurgie"],
+      "contact": {
+        "phone": "+420261082111",
+        "email": "chirurgie@nemocnice.cz",
+        "website": "http://www.nemocnice.cz/chirurgie"
+      }
+    }
+  ],
+  "registration_number": "NRPZS123456",
   "source": "NRPZS"
 }
 ```
@@ -763,14 +773,16 @@ Získání úplných informací o poskytovateli včetně pracovišť.
   - `region` (string | null): Kraj
 - `specialties` (array): Zdravotnické odbornosti
 - `care_types` (array): Druhy péče (ambulantní, lůžková, domácí atd.)
-- `care_form` (string | null): Forma péče
-- `contact` (object | null): Kontaktní údaje
-  - `phone` (string | null): Telefonní číslo
-  - `email` (string | null): E-mailová adresa
-  - `website` (string | null): Webová stránka
-- `facility_type` (string | null): Typ zařízení
-- `region` (string | null): Kraj
-- `district` (string | null): Okres
+- `workplaces` (array): Pracovní místa
+  - `workplace_id` (string): Identifikátor pracoviště
+  - `name` (string): Název pracoviště
+  - `address` (object | null): Adresa pracoviště
+  - `specialties` (array): Odbornosti na pracovišti
+  - `contact` (object | null): Kontaktní údaje
+    - `phone` (string | null): Telefonní číslo
+    - `email` (string | null): E-mailová adresa
+    - `website` (string | null): Webová stránka
+- `registration_number` (string | null): Registrační číslo
 - `source` (string): Zdroj dat
 
 #### Příklad dotazu
@@ -801,7 +813,7 @@ Vyhledávání zdravotnických procedur.
 
 **Typ nástroje:** `async function`
 **MCP identifikátor:** `szv_procedure_searcher`
-**Zdroj dat:** SZV Excel export (szv.mzcr.cz)
+**Zdroj dat:** NZIP Open Data API v3 (nzip.cz)
 **Cache TTL:** 24 hodin
 
 #### Parametry
@@ -879,7 +891,7 @@ Získání úplných informací o proceduře.
 
 **Typ nástroje:** `async function`
 **MCP identifikátor:** `szv_procedure_getter`
-**Zdroj dat:** SZV Excel export
+**Zdroj dat:** NZIP Open Data API v3
 **Cache TTL:** 7 dní
 
 #### Parametry
@@ -947,7 +959,7 @@ Vyhledávání v číselníkech pojišťovny VZP.
 
 **Typ nástroje:** `async function`
 **MCP identifikátor:** `vzp_codebook_searcher`
-**Zdroj dat:** VZP ZIP/CSV (media.vzpstatic.cz)
+**Zdroj dat:** VZP veřejné API
 **Cache TTL:** 24 hodin
 
 #### Parametry
@@ -1031,7 +1043,7 @@ Získání úplných informací o položce v číselníku VZP.
 
 **Typ nástroje:** `async function`
 **MCP identifikátor:** `vzp_codebook_getter`
-**Zdroj dat:** VZP ZIP/CSV
+**Zdroj dat:** VZP veřejné API
 **Cache TTL:** 7 dní
 
 #### Parametry
@@ -1133,7 +1145,7 @@ class Drug(BaseModel):
 #### ActiveSubstance (Aktivní látka v léčivu)
 ```python
 class ActiveSubstance(BaseModel):
-    substance_code: int  # Kód látky
+    name: str  # Název látky
     strength: str | None  # Síla (např. "400 mg")
 ```
 
@@ -1183,12 +1195,19 @@ class HealthcareProvider(BaseModel):
     address: Address | None  # Adresa
     specialties: list[str]  # Zdravotnické odbornosti
     care_types: list[str]  # Druhy péče
-    care_form: str | None  # Forma péče
-    contact: Contact | None  # Kontaktní údaje
-    facility_type: str | None  # Typ zařízení
-    region: str | None  # Kraj
-    district: str | None  # Okres
+    workplaces: list[Workplace]  # Pracovní místa
+    registration_number: str | None  # Registrační číslo
     source: str = "NRPZS"
+```
+
+#### Workplace (Pracovní místo poskytovatele)
+```python
+class Workplace(BaseModel):
+    workplace_id: str  # Identifikátor pracoviště
+    name: str  # Název
+    address: Address | None  # Adresa
+    specialties: list[str]  # Odbornosti
+    contact: Contact | None  # Kontakt
 ```
 
 ### SZV modely
@@ -1238,7 +1257,7 @@ Všechny HTTP požadavky jsou kešovány pomocí diskcache pro zvýšení výkon
 | SUKL - seznam léčiv | 24 hodin | Relativně stabilní, občasné změny |
 | SUKL - detaily léčiva | 7 dní | Záznamy se mění vzácně |
 | SUKL - dostupnost | 1 hodina | Nejčastěji se měnící data |
-| MKN-10 - CSV parsing | 30 dní | Statická data |
+| MKN-10 - XML parsing | 30 dní | Statická data |
 | NRPZS - seznam | 24 hodin | Mívají moderní synchronizaci |
 | NRPZS - detaily | 7 dní | Mívají vzácné změny |
 | SZV - seznam procedur | 24 hodin | Aktuální seznam |
@@ -1318,7 +1337,7 @@ Všechny chyby jsou vráceny jako JSON objekty s polem `error`:
 | "Drug not found: 9999999" | SUKL kód neexistuje | Zkontrolujte kód |
 | "SUKL API unavailable" | Porucha API | Zkuste později |
 | "Code not found: ZZZ.9" | MKN-10 kód neexistuje | Ověřte kód |
-| "No MKN-10 data loaded" | CSV data nejsou načtena | Interní chyba |
+| "No MKN-10 data loaded" | XML není načten | Interní chyba |
 | "Provider not found: 99999" | NRPZS ID neexistuje | Zkontrolujte ID |
 | "Procedure not found: 99999" | SZV kód neexistuje | Ověřte kód |
 | "Codebook entry not found" | VZP položka chybí | Zkontrolujte parametry |
@@ -1328,10 +1347,10 @@ Všechny chyby jsou vráceny jako JSON objekty s polem `error`:
 | Modul | Endpoint | Zdrojová dokumentace |
 |-------|----------|---------------------|
 | SUKL | `https://prehledy.sukl.cz/api/v1/` | [SUKL DLP API](https://prehledy.sukl.cz) |
-| MKN-10 | `https://data.mzcr.cz/` | [MZ ČR Open Data](https://data.mzcr.cz) |
-| NRPZS | `https://datanzis.uzis.gov.cz/` | [NRPZS Open Data](https://datanzis.uzis.gov.cz) |
-| SZV | `https://szv.mzcr.cz/` | [SZV MZ ČR](https://szv.mzcr.cz) |
-| VZP | `https://media.vzpstatic.cz/` | [VZP Static](https://media.vzpstatic.cz) |
+| MKN-10 | ClaML XML | [UZIS MKN-10](https://www.uzis.cz) |
+| NRPZS | `https://nrpzs.uzis.cz/api/` | [NRPZS API](https://nrpzs.uzis.cz) |
+| SZV | `https://nzip.cz/api/v3/` | [NZIP Open Data](https://nzip.cz) |
+| VZP | `https://vzp.cz/o-vzp/...` | [VZP API](https://vzp.cz) |
 
 ---
 
@@ -1391,10 +1410,9 @@ if providers["total"] > 0:
     provider_id = providers["results"][0]["provider_id"]
     details = await nrpzs_provider_getter(provider_id=provider_id)
 
-    # Vypsat kontaktní údaje
-    if details.get("contact"):
-        print(f"Tel: {details['contact'].get('phone')}")
-        print(f"Email: {details['contact'].get('email')}")
+    # Vypsat všechna pracovní místa
+    for workplace in details["workplaces"]:
+        print(f"{workplace['name']} - {workplace['address']['city']}")
 ```
 
 ### Příklad 4: Vyhledání procedury a jejích parametrů
@@ -1477,13 +1495,13 @@ async def sukl_drug_searcher(...):
 
 ## Další zdroje
 
-- **Projekt:** `biomcp` (root repozitáře)
+- **Projekt:** `/Users/petrsovadina/Desktop/Develope/personal/biomcp/`
 - **Zdrojový kód:** `src/biomcp/czech/`
 - **Testování:** `tests/`
 - **Konfigurační soubor:** `CLAUDE.md`
 
 ---
 
-**Verze dokumentu:** 1.1
-**Poslední aktualizace:** 2026-02-28
+**Verze dokumentu:** 1.0
+**Poslední aktualizace:** 2026-02-20
 **Autoři:** Zdravotnický datový tým

@@ -64,3 +64,49 @@ class DiagnosisCategory(BaseModel):
     parent_code: str | None = Field(
         default=None, description="Parent class code"
     )
+
+
+class AgeGroupStats(BaseModel):
+    """Epidemiological stats for an age group."""
+
+    age_group: str = Field(
+        description="e.g. '0-14', '15-24', '25-34'"
+    )
+    count: int
+
+
+class RegionStats(BaseModel):
+    """Epidemiological stats for a region."""
+
+    region: str
+    count: int
+
+
+class DiagnosisStats(BaseModel):
+    """Epidemiological statistics for a diagnosis."""
+
+    code: str
+    name_cs: str
+    year: int
+    total_cases: int
+    male_count: int | None = None
+    female_count: int | None = None
+    age_distribution: list[AgeGroupStats] = Field(
+        default_factory=list
+    )
+    region_distribution: list[RegionStats] = Field(
+        default_factory=list
+    )
+    source: str = "NZIP"
+
+
+class DiagnosisAssistantResult(BaseModel):
+    """Result from diagnosis assistant workflow."""
+
+    query: str
+    candidates: list[dict] = Field(default_factory=list)
+    evidence: list[dict] = Field(default_factory=list)
+    disclaimer: str = (
+        "Tento nástroj slouží pouze jako pomůcka. "
+        "Konečná diagnóza je vždy na lékaři."
+    )

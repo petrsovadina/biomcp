@@ -4,11 +4,7 @@ Tools are registered here using @mcp_app.tool() decorator.
 This module is imported by czech/__init__.py to auto-register
 all Czech tools when the package is loaded.
 
-Tools are added incrementally per user story:
-- US1: SUKL (5 tools)
-- US2: MKN-10 (3 tools)
-- US3: NRPZS (2 tools)
-- US4: SZV + VZP (4 tools)
+All tools use ``czechmed_`` prefix per FR-024.
 """
 
 import logging
@@ -22,11 +18,14 @@ from biomcp.czech.mkn.search import (
     _mkn_get,
     _mkn_search,
 )
+from biomcp.czech.mkn.stats import _get_diagnosis_stats
 from biomcp.czech.nrpzs.search import (
+    _get_codebooks,
     _nrpzs_get,
     _nrpzs_search,
 )
 from biomcp.czech.sukl.availability import (
+    _batch_availability,
     _sukl_availability_check,
 )
 from biomcp.czech.sukl.getter import (
@@ -34,24 +33,50 @@ from biomcp.czech.sukl.getter import (
     _sukl_pil_getter,
     _sukl_spc_getter,
 )
-from biomcp.czech.sukl.search import _sukl_drug_search
+from biomcp.czech.sukl.reimbursement import (
+    _get_reimbursement,
+)
+from biomcp.czech.sukl.search import (
+    _find_pharmacies,
+    _sukl_drug_search,
+)
+from biomcp.czech.szv.reimbursement import (
+    _calculate_reimbursement,
+)
 from biomcp.czech.szv.search import _szv_get, _szv_search
-from biomcp.czech.vzp.search import _vzp_get, _vzp_search
+from biomcp.czech.vzp.drug_reimbursement import (
+    _compare_alternatives,
+    _get_vzp_drug_reimbursement,
+)
+from biomcp.czech.workflows.diagnosis_assistant import (
+    _diagnosis_assistant,
+)
+from biomcp.czech.workflows.drug_profile import (
+    _drug_profile,
+)
+from biomcp.czech.workflows.referral_assistant import (
+    _referral_assistant,
+)
 from biomcp.metrics import track_performance
 
 logger = logging.getLogger(__name__)
 
 # -------------------------------------------------------------------
-# US1: SUKL Drug Registry Tools (5 tools)
+# SUKL Drug Registry Tools (5 tools)
 # -------------------------------------------------------------------
 
 
 @mcp_app.tool()
-@track_performance("czechmedmcp.sukl_drug_searcher")
-async def sukl_drug_searcher(
+@track_performance("czechmedmcp.search_drug")
+async def czechmed_search_drug(
     query: Annotated[
         str,
-        Field(description=("Drug name, active substance, or ATC code")),
+        Field(
+            description=(
+                "Drug name, active substance, "
+                "SUKL code, or ATC code"
+            )
+        ),
     ],
     page: Annotated[
         int,
@@ -66,13 +91,16 @@ async def sukl_drug_searcher(
         ),
     ] = 10,
 ) -> str:
-    """Search Czech drug registry (SUKL)."""
+    """Search Czech drug registry (SUKL).
+
+    Supports diacritics-insensitive search.
+    """
     return await _sukl_drug_search(query, page, page_size)
 
 
 @mcp_app.tool()
-@track_performance("czechmedmcp.sukl_drug_getter")
-async def sukl_drug_getter(
+@track_performance("czechmedmcp.get_drug_detail")
+async def czechmed_get_drug_detail(
     sukl_code: Annotated[
         str,
         Field(description="SUKL drug identifier (7-digit code)"),
@@ -83,32 +111,51 @@ async def sukl_drug_getter(
 
 
 @mcp_app.tool()
-@track_performance("czechmedmcp.sukl_spc_getter")
-async def sukl_spc_getter(
+@track_performance("czechmedmcp.get_spc")
+async def czechmed_get_spc(
     sukl_code: Annotated[
         str,
         Field(description="SUKL drug identifier"),
     ],
+    section: Annotated[
+        str | None,
+        Field(
+            description=(
+                "Optional SPC section number "
+                "(e.g., 4.1-4.9, 5.1-5.3, 6.1-6.6)"
+            )
+        ),
+    ] = None,
 ) -> str:
-    """Get SmPC for a Czech drug."""
-    return await _sukl_spc_getter(sukl_code)
+    """Get SmPC (Summary of Product Characteristics) for a drug."""
+    return await _sukl_spc_getter(sukl_code, section)
 
 
 @mcp_app.tool()
-@track_performance("czechmedmcp.sukl_pil_getter")
-async def sukl_pil_getter(
+@track_performance("czechmedmcp.get_pil")
+async def czechmed_get_pil(
     sukl_code: Annotated[
         str,
         Field(description="SUKL drug identifier"),
     ],
+    section: Annotated[
+        str | None,
+        Field(
+            description=(
+                "Optional section: dosage, "
+                "contraindications, side_effects, "
+                "interactions, pregnancy, storage"
+            )
+        ),
+    ] = None,
 ) -> str:
-    """Get PIL for a Czech drug."""
-    return await _sukl_pil_getter(sukl_code)
+    """Get PIL (Patient Information Leaflet) for a drug."""
+    return await _sukl_pil_getter(sukl_code, section)
 
 
 @mcp_app.tool()
-@track_performance("czechmedmcp.sukl_availability_checker")
-async def sukl_availability_checker(
+@track_performance("czechmedmcp.check_availability")
+async def czechmed_check_availability(
     sukl_code: Annotated[
         str,
         Field(description="SUKL drug identifier"),
@@ -118,14 +165,78 @@ async def sukl_availability_checker(
     return await _sukl_availability_check(sukl_code)
 
 
+@mcp_app.tool()
+@track_performance("czechmedmcp.get_reimbursement")
+async def czechmed_get_reimbursement(
+    sukl_code: Annotated[
+        str,
+        Field(description="7-digit SUKL code"),
+    ],
+) -> str:
+    """Get reimbursement details — price, insurance coverage, copay."""
+    return await _get_reimbursement(sukl_code)
+
+
+@mcp_app.tool()
+@track_performance("czechmedmcp.batch_check_availability")
+async def czechmed_batch_check_availability(
+    sukl_codes: Annotated[
+        list[str],
+        Field(
+            description="List of 7-digit SUKL codes (1-50)",
+            min_length=1,
+            max_length=50,
+        ),
+    ],
+) -> str:
+    """Batch check market availability for multiple drugs."""
+    return await _batch_availability(sukl_codes)
+
+
+@mcp_app.tool()
+@track_performance("czechmedmcp.find_pharmacies")
+async def czechmed_find_pharmacies(
+    city: Annotated[
+        str | None,
+        Field(description="City name"),
+    ] = None,
+    postal_code: Annotated[
+        str | None,
+        Field(description="5-digit postal code"),
+    ] = None,
+    nonstop_only: Annotated[
+        bool,
+        Field(
+            description="Filter 24/7 pharmacies only"
+        ),
+    ] = False,
+    page: Annotated[
+        int,
+        Field(description="Page number", ge=1),
+    ] = 1,
+    page_size: Annotated[
+        int,
+        Field(
+            description="Results per page",
+            ge=1,
+            le=100,
+        ),
+    ] = 10,
+) -> str:
+    """Find pharmacies by city, postal code, or 24/7 filter."""
+    return await _find_pharmacies(
+        city, postal_code, nonstop_only, page, page_size
+    )
+
+
 # -------------------------------------------------------------------
-# US2: MKN-10 Diagnosis Code Tools (3 tools)
+# MKN-10 Diagnosis Code Tools (3 tools)
 # -------------------------------------------------------------------
 
 
 @mcp_app.tool()
-@track_performance("czechmedmcp.mkn_diagnosis_searcher")
-async def mkn_diagnosis_searcher(
+@track_performance("czechmedmcp.search_diagnosis")
+async def czechmed_search_diagnosis(
     query: Annotated[
         str,
         Field(description="MKN-10 code or free text in Czech"),
@@ -140,8 +251,8 @@ async def mkn_diagnosis_searcher(
 
 
 @mcp_app.tool()
-@track_performance("czechmedmcp.mkn_diagnosis_getter")
-async def mkn_diagnosis_getter(
+@track_performance("czechmedmcp.get_diagnosis_detail")
+async def czechmed_get_diagnosis_detail(
     code: Annotated[
         str,
         Field(description='MKN-10 code (e.g., "J06.9")'),
@@ -152,12 +263,15 @@ async def mkn_diagnosis_getter(
 
 
 @mcp_app.tool()
-@track_performance("czechmedmcp.mkn_category_browser")
-async def mkn_category_browser(
+@track_performance("czechmedmcp.browse_classification")
+async def czechmed_browse_classification(
     code: Annotated[
         str | None,
         Field(
-            description=("Category code to browse (omit for root/chapters)")
+            description=(
+                "Category code to browse "
+                "(omit for root/chapters)"
+            )
         ),
     ] = None,
 ) -> str:
@@ -165,14 +279,73 @@ async def mkn_category_browser(
     return await _mkn_browse(code)
 
 
+@mcp_app.tool()
+@track_performance("czechmedmcp.get_diagnosis_stats")
+async def czechmed_get_diagnosis_stats(
+    code: Annotated[
+        str,
+        Field(description="MKN-10 code (e.g. J06)"),
+    ],
+    year: Annotated[
+        int | None,
+        Field(
+            description="Year (2015-2025)",
+            ge=2015,
+            le=2025,
+        ),
+    ] = None,
+) -> str:
+    """Get epidemiological statistics for a diagnosis."""
+    return await _get_diagnosis_stats(code, year)
+
+
+@mcp_app.tool()
+@track_performance("czechmedmcp.diagnosis_assistant")
+async def czechmed_diagnosis_assistant(
+    symptoms: Annotated[
+        str,
+        Field(description="Symptom description in Czech"),
+    ],
+    max_candidates: Annotated[
+        int,
+        Field(
+            description="Max diagnosis candidates",
+            ge=1,
+            le=10,
+        ),
+    ] = 5,
+) -> str:
+    """Suggest MKN-10 codes for symptoms with PubMed evidence."""
+    return await _diagnosis_assistant(
+        symptoms, max_candidates
+    )
+
+
+@mcp_app.tool()
+@track_performance("czechmedmcp.drug_profile")
+async def czechmed_drug_profile(
+    query: Annotated[
+        str,
+        Field(
+            description=(
+                "Drug name, active substance, "
+                "or SUKL code"
+            )
+        ),
+    ],
+) -> str:
+    """Complete drug profile: registration + availability + reimbursement + evidence."""
+    return await _drug_profile(query)
+
+
 # -------------------------------------------------------------------
-# US3: NRPZS Provider Registry Tools (2 tools)
+# NRPZS Provider Registry Tools (4 tools)
 # -------------------------------------------------------------------
 
 
 @mcp_app.tool()
-@track_performance("czechmedmcp.nrpzs_provider_searcher")
-async def nrpzs_provider_searcher(
+@track_performance("czechmedmcp.search_provider")
+async def czechmed_search_provider(
     query: Annotated[
         str | None,
         Field(description="Provider name or keyword"),
@@ -195,12 +368,14 @@ async def nrpzs_provider_searcher(
     ] = 10,
 ) -> str:
     """Search Czech healthcare providers (NRPZS)."""
-    return await _nrpzs_search(query, city, specialty, page, page_size)
+    return await _nrpzs_search(
+        query, city, specialty, page, page_size
+    )
 
 
 @mcp_app.tool()
-@track_performance("czechmedmcp.nrpzs_provider_getter")
-async def nrpzs_provider_getter(
+@track_performance("czechmedmcp.get_provider_detail")
+async def czechmed_get_provider_detail(
     provider_id: Annotated[
         str,
         Field(description="NRPZS provider identifier"),
@@ -210,14 +385,57 @@ async def nrpzs_provider_getter(
     return await _nrpzs_get(provider_id)
 
 
+@mcp_app.tool()
+@track_performance("czechmedmcp.get_codebooks")
+async def czechmed_get_codebooks(
+    codebook_type: Annotated[
+        str,
+        Field(
+            description=(
+                "Codebook type: specialties, "
+                "care_forms, or care_types"
+            )
+        ),
+    ],
+) -> str:
+    """Get NRPZS reference codebook — specialties, care forms, or care types."""
+    return await _get_codebooks(codebook_type)
+
+
+@mcp_app.tool()
+@track_performance("czechmedmcp.referral_assistant")
+async def czechmed_referral_assistant(
+    diagnosis_code: Annotated[
+        str,
+        Field(description="MKN-10 code (e.g. I25.1)"),
+    ],
+    city: Annotated[
+        str,
+        Field(description="Patient city"),
+    ],
+    max_providers: Annotated[
+        int,
+        Field(
+            description="Max providers to return",
+            ge=1,
+            le=20,
+        ),
+    ] = 10,
+) -> str:
+    """Referral assistant: diagnosis to specialty to providers."""
+    return await _referral_assistant(
+        diagnosis_code, city, max_providers
+    )
+
+
 # -------------------------------------------------------------------
-# US4: SZV + VZP Tools (4 tools)
+# SZV + VZP Tools (5 tools)
 # -------------------------------------------------------------------
 
 
 @mcp_app.tool()
-@track_performance("czechmedmcp.szv_procedure_searcher")
-async def szv_procedure_searcher(
+@track_performance("czechmedmcp.search_procedure")
+async def czechmed_search_procedure(
     query: Annotated[
         str,
         Field(description="Procedure code or name"),
@@ -232,8 +450,8 @@ async def szv_procedure_searcher(
 
 
 @mcp_app.tool()
-@track_performance("czechmedmcp.szv_procedure_getter")
-async def szv_procedure_getter(
+@track_performance("czechmedmcp.get_procedure_detail")
+async def czechmed_get_procedure_detail(
     code: Annotated[
         str,
         Field(description='Procedure code (e.g., "09513")'),
@@ -244,36 +462,58 @@ async def szv_procedure_getter(
 
 
 @mcp_app.tool()
-@track_performance("czechmedmcp.vzp_codebook_searcher")
-async def vzp_codebook_searcher(
-    query: Annotated[
+@track_performance("czechmedmcp.calculate_reimbursement")
+async def czechmed_calculate_reimbursement(
+    procedure_code: Annotated[
         str,
-        Field(description="Search term"),
+        Field(description="5-digit procedure code"),
     ],
-    codebook_type: Annotated[
-        str | None,
-        Field(description="Filter by codebook type"),
-    ] = None,
-    max_results: Annotated[
+    insurance_code: Annotated[
+        str,
+        Field(
+            description=(
+                "Insurance code: 111 (VZP), "
+                "201 (VoZP), 205 (ČPZP), "
+                "207 (OZP), 209 (ZPŠ), "
+                "211 (ZPMV), 213 (RBP)"
+            )
+        ),
+    ] = "111",
+    count: Annotated[
         int,
-        Field(description="Maximum results", ge=1, le=100),
-    ] = 10,
+        Field(
+            description="Number of procedures",
+            ge=1,
+        ),
+    ] = 1,
 ) -> str:
-    """Search VZP insurance codebooks."""
-    return await _vzp_search(query, codebook_type, max_results)
+    """Calculate CZK reimbursement for a procedure."""
+    return await _calculate_reimbursement(
+        procedure_code, insurance_code, count
+    )
 
 
 @mcp_app.tool()
-@track_performance("czechmedmcp.vzp_codebook_getter")
-async def vzp_codebook_getter(
-    codebook_type: Annotated[
+@track_performance("czechmedmcp.get_vzp_reimbursement")
+async def czechmed_get_vzp_reimbursement(
+    sukl_code: Annotated[
         str,
-        Field(description="Codebook type identifier"),
-    ],
-    code: Annotated[
-        str,
-        Field(description="Entry code"),
+        Field(description="7-digit SUKL code"),
     ],
 ) -> str:
-    """Get codebook entry details."""
-    return await _vzp_get(codebook_type, code)
+    """Get VZP drug reimbursement — group, max price, coverage, copay."""
+    return await _get_vzp_drug_reimbursement(sukl_code)
+
+
+@mcp_app.tool()
+@track_performance("czechmedmcp.compare_alternatives")
+async def czechmed_compare_alternatives(
+    sukl_code: Annotated[
+        str,
+        Field(
+            description="7-digit SUKL code of reference drug"
+        ),
+    ],
+) -> str:
+    """Compare drug price alternatives in same ATC group."""
+    return await _compare_alternatives(sukl_code)

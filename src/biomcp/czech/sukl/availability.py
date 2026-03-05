@@ -3,9 +3,16 @@
 Uses SUKL DLP API v1 to check distribution status.
 """
 
+from __future__ import annotations
+
+import asyncio
 import json
 import logging
 from datetime import datetime, timezone
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from biomcp.czech.sukl.models import BatchAvailabilityResult
 
 import httpx
 
@@ -96,3 +103,104 @@ async def _sukl_availability_check(sukl_code: str) -> str:
         },
         ensure_ascii=False,
     )
+
+
+async def _batch_availability(sukl_codes: list[str]) -> str:
+    """Check availability for multiple drugs in parallel.
+
+    Args:
+        sukl_codes: List of 7-digit SUKL codes (1-50).
+
+    Returns:
+        JSON string with dual output via format_czech_response().
+    """
+    from biomcp.czech.response import format_czech_response
+    from biomcp.czech.sukl.models import (
+        BatchAvailabilityItem,
+        BatchAvailabilityResult,
+    )
+
+    now = datetime.now(timezone.utc).isoformat()
+
+    async def _check_one(code: str) -> BatchAvailabilityItem:
+        try:
+            detail = await _fetch_drug_detail(code)
+            name = (
+                detail.get("nazev") if detail else None
+            )
+            status = await _check_distribution(code)
+            return BatchAvailabilityItem(
+                sukl_code=code,
+                name=name,
+                status=status,
+            )
+        except Exception as e:
+            return BatchAvailabilityItem(
+                sukl_code=code,
+                status="unknown",
+                error=str(e),
+            )
+
+    results = await asyncio.gather(
+        *[_check_one(code) for code in sukl_codes],
+        return_exceptions=True,
+    )
+
+    items: list[BatchAvailabilityItem] = []
+    for i, r in enumerate(results):
+        if isinstance(r, BaseException):
+            items.append(
+                BatchAvailabilityItem(
+                    sukl_code=sukl_codes[i],
+                    status="unknown",
+                    error=str(r),
+                )
+            )
+        else:
+            items.append(r)
+
+    available = sum(
+        1 for it in items if it.status == "available"
+    )
+    shortage = sum(
+        1 for it in items if it.status == "shortage"
+    )
+    errors = sum(
+        1 for it in items if it.error is not None
+    )
+
+    batch = BatchAvailabilityResult(
+        total_checked=len(items),
+        available_count=available,
+        shortage_count=shortage,
+        error_count=errors,
+        items=items,
+        checked_at=now,
+    )
+
+    md = _format_batch_markdown(batch)
+    return format_czech_response(
+        data=batch.model_dump(),
+        tool_name="batch_check_availability",
+        markdown_template=md,
+    )
+
+
+def _format_batch_markdown(b: BatchAvailabilityResult) -> str:
+    """Format batch result as Czech Markdown."""
+    lines = [
+        "## Hromadná kontrola dostupnosti",
+        "",
+        f"**Zkontrolováno**: {b.total_checked} léků",
+        f"**Dostupné**: {b.available_count}",
+        f"**Výpadek**: {b.shortage_count}",
+        f"**Chyby**: {b.error_count}",
+        "",
+        "| SÚKL kód | Název | Status |",
+        "|----------|-------|--------|",
+    ]
+    for it in b.items:
+        name = it.name or "—"
+        status = it.error or it.status
+        lines.append(f"| {it.sukl_code} | {name} | {status} |")
+    return "\n".join(lines)

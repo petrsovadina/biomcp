@@ -1,36 +1,45 @@
-"""Test that all Czech MCP tools register correctly (T045)."""
+"""Test that all Czech MCP tools register correctly."""
 
 from typing import ClassVar
 
 
 class TestToolRegistration:
-    """Verify all 14 Czech tools are registered."""
+    """Verify all 23 Czech tools are registered with czechmed_ prefix."""
 
     EXPECTED_CZECH_TOOLS: ClassVar[list[str]] = [
-        "sukl_drug_searcher",
-        "sukl_drug_getter",
-        "sukl_spc_getter",
-        "sukl_pil_getter",
-        "sukl_availability_checker",
-        "mkn_diagnosis_searcher",
-        "mkn_diagnosis_getter",
-        "mkn_category_browser",
-        "nrpzs_provider_searcher",
-        "nrpzs_provider_getter",
-        "szv_procedure_searcher",
-        "szv_procedure_getter",
-        "vzp_codebook_searcher",
-        "vzp_codebook_getter",
+        "czechmed_search_drug",
+        "czechmed_get_drug_detail",
+        "czechmed_get_spc",
+        "czechmed_get_pil",
+        "czechmed_check_availability",
+        "czechmed_get_reimbursement",
+        "czechmed_batch_check_availability",
+        "czechmed_get_diagnosis_stats",
+        "czechmed_diagnosis_assistant",
+        "czechmed_search_diagnosis",
+        "czechmed_get_diagnosis_detail",
+        "czechmed_browse_classification",
+        "czechmed_search_provider",
+        "czechmed_get_provider_detail",
+        "czechmed_search_procedure",
+        "czechmed_get_procedure_detail",
+        "czechmed_get_vzp_reimbursement",
+        "czechmed_compare_alternatives",
+        "czechmed_calculate_reimbursement",
+        "czechmed_get_codebooks",
+        "czechmed_referral_assistant",
+        "czechmed_drug_profile",
+        "czechmed_find_pharmacies",
     ]
 
     def test_all_czech_tools_registered(self):
         """All 14 Czech tools must be registered."""
-        # Force import of czech_tools to register
         import biomcp.czech.czech_tools  # noqa: F401
         from biomcp.core import mcp_app
 
         tool_names = [
-            t.name for t in mcp_app._tool_manager._tools.values()
+            t.name
+            for t in mcp_app._tool_manager._tools.values()
         ]
 
         for name in self.EXPECTED_CZECH_TOOLS:
@@ -39,21 +48,18 @@ class TestToolRegistration:
             )
 
     def test_czech_tool_count(self):
-        """Exactly 14 Czech tools registered."""
+        """Exactly 22 Czech tools registered."""
         import biomcp.czech.czech_tools  # noqa: F401
         from biomcp.core import mcp_app
 
         tool_names = [
-            t.name for t in mcp_app._tool_manager._tools.values()
+            t.name
+            for t in mcp_app._tool_manager._tools.values()
         ]
         czech_tools = [
-            n
-            for n in tool_names
-            if n.startswith(
-                ("sukl_", "mkn_", "nrpzs_", "szv_", "vzp_")
-            )
+            n for n in tool_names if n.startswith("czechmed_")
         ]
-        assert len(czech_tools) == 14
+        assert len(czech_tools) == 23
 
     def test_global_tools_still_present(self):
         """Global BioMCP tools coexist with Czech tools."""
@@ -61,7 +67,7 @@ class TestToolRegistration:
         from biomcp.core import mcp_app
 
         tool_names = [
-            t.name for t in mcp_app._tool_manager._tools.values()
+            t.name
+            for t in mcp_app._tool_manager._tools.values()
         ]
-        # At least some global tools should be present
         assert len(tool_names) > 14

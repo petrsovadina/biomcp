@@ -107,7 +107,7 @@ class TestSuklDrugGetter:
         mock_drug_api_response,
         mock_doc_metadata_spc,
     ):
-        """Get SmPC returns document info."""
+        """Get SmPC returns dual output with doc info."""
         from biomcp.czech.sukl.getter import _sukl_spc_getter
 
         with patch(
@@ -118,13 +118,18 @@ class TestSuklDrugGetter:
             "biomcp.czech.sukl.getter._fetch_doc_metadata",
             new_callable=AsyncMock,
             return_value=mock_doc_metadata_spc,
+        ), patch(
+            "biomcp.czech.sukl.getter._fetch_doc_html",
+            new_callable=AsyncMock,
+            return_value=None,
         ):
             result = json.loads(
                 await _sukl_spc_getter("0000123")
             )
-            assert result["sukl_code"] == "0000123"
-            assert "spc_url" in result
-            assert result["source"] == "SUKL"
+            sc = result["structuredContent"]
+            assert sc["sukl_code"] == "0000123"
+            assert sc["url"] != ""
+            assert sc["source"] == "SUKL"
 
     @pytest.mark.asyncio
     async def test_get_pil(
@@ -132,7 +137,7 @@ class TestSuklDrugGetter:
         mock_drug_api_response,
         mock_doc_metadata_pil,
     ):
-        """Get PIL returns document info."""
+        """Get PIL returns dual output with doc info."""
         from biomcp.czech.sukl.getter import _sukl_pil_getter
 
         with patch(
@@ -143,13 +148,18 @@ class TestSuklDrugGetter:
             "biomcp.czech.sukl.getter._fetch_doc_metadata",
             new_callable=AsyncMock,
             return_value=mock_doc_metadata_pil,
+        ), patch(
+            "biomcp.czech.sukl.getter._fetch_doc_html",
+            new_callable=AsyncMock,
+            return_value=None,
         ):
             result = json.loads(
                 await _sukl_pil_getter("0000123")
             )
-            assert result["sukl_code"] == "0000123"
-            assert "pil_url" in result
-            assert result["source"] == "SUKL"
+            sc = result["structuredContent"]
+            assert sc["sukl_code"] == "0000123"
+            assert sc["url"] != ""
+            assert sc["source"] == "SUKL"
 
     @pytest.mark.asyncio
     async def test_get_spc_not_available(
@@ -170,7 +180,4 @@ class TestSuklDrugGetter:
             result = json.loads(
                 await _sukl_spc_getter("0000123")
             )
-            assert (
-                "error" in result
-                or result.get("spc_text") is None
-            )
+            assert "error" in result

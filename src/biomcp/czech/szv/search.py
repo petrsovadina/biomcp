@@ -15,6 +15,7 @@ import openpyxl
 
 from biomcp.constants import (
     CACHE_TTL_DAY,
+    CZECH_HTTP_TIMEOUT,
     DEFAULT_CACHE_TIMEOUT,
 )
 from biomcp.czech.diacritics import normalize_query
@@ -44,7 +45,7 @@ async def _download_excel() -> list[dict]:
         return json.loads(cached)
 
     async with httpx.AsyncClient(
-        timeout=60.0,
+        timeout=CZECH_HTTP_TIMEOUT,
         follow_redirects=True,
     ) as client:
         resp = await client.get(_SZV_EXPORT_URL)
@@ -64,7 +65,7 @@ async def _download_excel() -> list[dict]:
     headers = [str(h or "").strip() for h in rows[0]]
     procedures = []
     for row in rows[1:]:
-        entry = dict(zip(headers, row))
+        entry = dict(zip(headers, row, strict=False))
         if entry.get("Kód"):
             procedures.append(entry)
 

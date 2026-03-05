@@ -31,6 +31,45 @@ class CodebookEntry(BaseModel):
     source: str = Field(default="VZP")
 
 
+class DrugReimbursement(BaseModel):
+    """VZP drug reimbursement details."""
+
+    sukl_code: str
+    name: str
+    reimbursement_group: str | None = None
+    max_price: float | None = None
+    reimbursement_amount: float | None = None
+    patient_copay: float | None = None
+    prescription_conditions: str | None = None
+    valid_from: str | None = None
+    source: str = "VZP"
+
+
+class DrugAlternative(BaseModel):
+    """A single drug alternative in comparison."""
+
+    sukl_code: str
+    name: str
+    patient_copay: float | None = None
+    savings_vs_reference: float | None = None
+    is_generic: bool = False
+    availability_status: str = "unknown"
+
+
+class AlternativeComparison(BaseModel):
+    """Drug alternative comparison result."""
+
+    reference_sukl_code: str
+    reference_name: str
+    reference_copay: float | None = None
+    atc_code: str | None = None
+    alternatives: list[DrugAlternative] = Field(
+        default_factory=list
+    )
+    total_alternatives: int = 0
+    source: str = "SUKL+VZP"
+
+
 class CodebookSearchResult(BaseModel):
     """Paginated VZP codebook search results."""
 

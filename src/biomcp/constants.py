@@ -55,6 +55,45 @@ VZP_BASE_URL = "https://www.vzp.cz"
 MKN10_BROWSER_URL = "https://mkn10.uzis.cz"
 CZECH_HTTP_TIMEOUT = 30.0  # Default timeout for Czech API calls
 
+# Czech Healthcare APIs — Extensions (CzechMedMCP)
+SUKL_OPENDATA_BASE = "https://opendata.sukl.cz/api/v1"
+SUKL_REIMBURSEMENT_URL = f"{SUKL_OPENDATA_BASE}/uhrada"
+SUKL_PHARMACY_URL = f"{SUKL_OPENDATA_BASE}/lecebna-zarizeni"
+NZIP_STATS_URL = (
+    "https://reporting.uzis.cz/cr/index.php"
+    "?pg=statisticke-vystupy--mzdy-a-platy"
+)
+NZIP_CSV_BASE_URL = "https://reporting.uzis.cz/cr/data"
+
+# Insurance rate table (CZK per point, by insurer code)
+INSURANCE_RATE_TABLE: dict[str, float] = {
+    "111": 1.15,  # VZP
+    "201": 1.10,  # VoZP
+    "205": 1.12,  # ČPZP
+    "207": 1.11,  # OZP
+    "209": 1.09,  # ZPŠ
+    "211": 1.13,  # ZPMV
+    "213": 1.08,  # RBP
+}
+
+# Diagnosis chapter → recommended specialty mapping
+DIAGNOSIS_SPECIALTY_MAP: dict[str, str] = {
+    "I": "kardiologie",
+    "II": "onkologie",
+    "III": "hematologie",
+    "IV": "endokrinologie",
+    "V": "psychiatrie",
+    "VI": "neurologie",
+    "VII": "oftalmologie",
+    "VIII": "otorinolaryngologie",
+    "IX": "kardiologie",
+    "X": "pneumologie",
+    "XI": "gastroenterologie",
+    "XII": "dermatologie",
+    "XIII": "revmatologie",
+    "XIV": "urologie",
+}
+
 # External Resource URLs
 PUBMED_BASE_URL = "https://pubmed.ncbi.nlm.nih.gov/"
 PMC_BASE_URL = "https://www.ncbi.nlm.nih.gov/pmc/articles/"

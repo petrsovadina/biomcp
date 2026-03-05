@@ -60,6 +60,37 @@ class HealthcareProvider(BaseModel):
     source: str = Field(default="NRPZS")
 
 
+class CodebookItem(BaseModel):
+    """Single item in an NRPZS codebook."""
+
+    code: str
+    name: str
+
+
+class Codebook(BaseModel):
+    """NRPZS reference codebook."""
+
+    codebook_type: str
+    items: list[CodebookItem] = Field(
+        default_factory=list
+    )
+    total: int = 0
+    source: str = "NRPZS"
+
+
+class ReferralResult(BaseModel):
+    """Referral assistant result."""
+
+    diagnosis_code: str
+    diagnosis_name: str = ""
+    recommended_specialty: str = ""
+    city: str = ""
+    providers: list[dict] = Field(
+        default_factory=list
+    )
+    source: str = "NRPZS"
+
+
 class ProviderSummary(BaseModel):
     """Summary provider info for search results."""
 

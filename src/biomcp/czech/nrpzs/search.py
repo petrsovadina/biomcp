@@ -16,6 +16,7 @@ import httpx
 from biomcp.constants import (
     CACHE_TTL_DAY,
     CZECH_HTTP_TIMEOUT,
+    compute_skip,
 )
 from biomcp.czech.diacritics import normalize_query
 from biomcp.http_client import (
@@ -234,7 +235,7 @@ async def _nrpzs_search(
     )
 
     # Paginate: skip to correct page
-    skip = (page - 1) * page_size
+    skip = compute_skip(page, page_size)
     matches: list[dict] = []
     total = 0
 
@@ -281,4 +282,82 @@ async def _nrpzs_get(provider_id: str) -> str:
     return json.dumps(
         {"error": f"Provider not found: {provider_id}"},
         ensure_ascii=False,
+    )
+
+
+_CODEBOOK_COLUMNS: dict[str, str] = {
+    "specialties": "ZZ_obor_pece",
+    "care_forms": "ZZ_forma_pece",
+    "care_types": "ZZ_druh_pece",
+}
+
+
+async def _get_codebooks(codebook_type: str) -> str:
+    """Get NRPZS reference codebook.
+
+    Args:
+        codebook_type: specialties, care_forms, or
+            care_types.
+
+    Returns:
+        JSON string with codebook items.
+    """
+    from biomcp.czech.response import format_czech_response
+
+    col = _CODEBOOK_COLUMNS.get(codebook_type)
+    if not col:
+        return json.dumps(
+            {
+                "error": (
+                    f"Unknown codebook: {codebook_type}"
+                    f". Use: specialties, care_forms, "
+                    f"care_types"
+                ),
+            },
+            ensure_ascii=False,
+        )
+
+    try:
+        providers = await _get_providers()
+    except Exception as exc:
+        logger.error(
+            "Failed to load NRPZS data: %s", exc
+        )
+        return json.dumps(
+            {"error": f"NRPZS data unavailable: {exc}"},
+            ensure_ascii=False,
+        )
+
+    unique: set[str] = set()
+    for row in providers:
+        val = row.get(col, "")
+        for item in str(val).split(","):
+            item = item.strip()
+            if item:
+                unique.add(item)
+
+    items = [
+        {"code": v, "name": v}
+        for v in sorted(unique)
+    ]
+
+    data = {
+        "codebook_type": codebook_type,
+        "items": items,
+        "total": len(items),
+    }
+
+    lines = [
+        f"## Číselník: {codebook_type}",
+        "",
+        "| Kód | Název |",
+        "|-----|-------|",
+    ]
+    for it in items:
+        lines.append(f"| {it['code']} | {it['name']} |")
+
+    return format_czech_response(
+        data=data,
+        tool_name="get_codebooks",
+        markdown_template="\n".join(lines),
     )

@@ -37,6 +37,26 @@ class HealthProcedure(BaseModel):
     source: str = Field(default="MZCR/SZV")
 
 
+class ReimbursementCalculation(BaseModel):
+    """Reimbursement calculation for a procedure."""
+
+    procedure_code: str
+    procedure_name: str
+    point_value: int
+    insurance_code: str
+    insurance_name: str
+    rate_per_point: float
+    count: int = 1
+    unit_price_czk: float = Field(
+        description="Points * rate"
+    )
+    total_czk: float = Field(
+        description="unit_price * count"
+    )
+    patient_copay_czk: float = 0.0
+    source: str = "MZCR/SZV"
+
+
 class ProcedureSearchResult(BaseModel):
     """Paginated health procedure search results."""
 

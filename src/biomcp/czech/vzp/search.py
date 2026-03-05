@@ -16,6 +16,7 @@ import httpx
 
 from biomcp.constants import (
     CACHE_TTL_DAY,
+    CZECH_HTTP_TIMEOUT,
     DEFAULT_CACHE_TIMEOUT,
 )
 from biomcp.czech.diacritics import normalize_query
@@ -57,7 +58,7 @@ async def _download_codebook() -> list[dict]:
         return json.loads(cached)
 
     async with httpx.AsyncClient(
-        timeout=60.0,
+        timeout=CZECH_HTTP_TIMEOUT,
         follow_redirects=True,
     ) as client:
         resp = await client.get(_VZP_ZIP_URL)
@@ -72,7 +73,7 @@ async def _download_codebook() -> list[dict]:
     entries = []
     for row in reader:
         if len(row) >= len(_VZP_FIELDS):
-            entry = dict(zip(_VZP_FIELDS, row))
+            entry = dict(zip(_VZP_FIELDS, row, strict=False))
             # Skip empty/header rows
             if entry["KOD"] and entry["KOD"] != "KOD":
                 entries.append(entry)

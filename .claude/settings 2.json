@@ -1,0 +1,12 @@
+{
+  "enabledPlugins": {
+    "agent-development@context-engineering-marketplace": true,
+    "feature-dev@claude-plugins-official": true,
+    "planning-with-files@planning-with-files": true,
+    "serverless-eda@aws-skills": false,
+    "typescript-lsp@claude-plugins-official": true
+  },
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  }
+}

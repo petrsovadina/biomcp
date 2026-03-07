@@ -176,7 +176,7 @@ Use with Claude Desktop for conversational biomedical research with sequential t
 
 ### Built for AI Integration
 
-- 51 specialized MCP tools (37 global + 14 Czech)
+- 60 specialized MCP tools (37 global + 23 Czech)
 - Sequential thinking for complex analysis
 - Streaming responses for real-time updates
 - Context preservation across queries

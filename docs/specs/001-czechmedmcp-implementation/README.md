@@ -31,7 +31,7 @@
 
 **Cíl:** CzechMedMCP — rozšíření BioMCP forku o kompletní české zdravotnické moduly (SUKL, MKN-10, NRPZS, SZV, VZP) se 23 českými nástroji, 3 workflow orchestracemi. Cílový stav: MCP server s 63 nástroji pro české lékaře v platformě Medevio.
 
-**Aktuální stav:** BioMCP v0.4.6 na branch `kunda`, 51 nástrojů (14 českých + 37 globálních). 4/5 českých modulů funkčních, VZP rozbitý. Chybí 9 nástrojů, 3 workflow, dokumentace.
+**Aktuální stav:** CzechMedMCP v0.7.3 na branch `python-main`, 60 nástrojů (23 českých + 37 globálních). Všech 5 českých modulů funkčních, 3 workflow orchestrace, dokumentace aktualizována.
 
 **Constitution:** `.specify/memory/constitution.md` v1.1.0 — MCP Protocol First, Modular Domain Architecture, Authoritative Data Sources.
 

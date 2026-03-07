@@ -1,1 +1,0 @@
-"""SZV health procedures module."""

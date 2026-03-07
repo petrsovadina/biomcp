@@ -30,7 +30,7 @@
         <span>Google OAuth authentication</span>
       </div>
       <div class="feature-item">
-        <strong>🛠️ 51 Tools</strong>
+        <strong>🛠️ 60 Tools</strong>
         <span>Full suite of biomedical + Czech healthcare tools</span>
       </div>
     </div>

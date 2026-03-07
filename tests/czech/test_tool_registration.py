@@ -33,7 +33,7 @@ class TestToolRegistration:
     ]
 
     def test_all_czech_tools_registered(self):
-        """All 14 Czech tools must be registered."""
+        """All 23 Czech tools must be registered."""
         import biomcp.czech.czech_tools  # noqa: F401
         from biomcp.core import mcp_app
 
@@ -48,7 +48,7 @@ class TestToolRegistration:
             )
 
     def test_czech_tool_count(self):
-        """Exactly 22 Czech tools registered."""
+        """Exactly 23 Czech tools registered."""
         import biomcp.czech.czech_tools  # noqa: F401
         from biomcp.core import mcp_app
 

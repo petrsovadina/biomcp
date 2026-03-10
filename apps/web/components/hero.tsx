@@ -115,9 +115,9 @@ export function Hero() {
             </div>
             <div className="p-6 text-left font-mono text-sm leading-relaxed">
               <p className="text-white/30"># Instalace za 10 sekund</p>
-              <p className="text-emerald-400">$ pip install biomcp-python</p>
+              <p className="text-emerald-400">$ pip install czechmedmcp</p>
               <p className="mt-4 text-white/30"># Spuštění MCP serveru</p>
-              <p className="text-emerald-400">$ biomcp run</p>
+              <p className="text-emerald-400">$ czechmedmcp run</p>
               <p className="mt-2 text-white/50">
                 CzechMedMCP v0.7.3 — 60 nástrojů připraveno
               </p>

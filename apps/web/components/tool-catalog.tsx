@@ -18,17 +18,17 @@ const tools = [
 ]
 
 const groupColors: Record<string, string> = {
-  'SUKL': 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-  'MKN-10': 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-  'NRPZS': 'bg-violet-500/10 text-violet-400 border-violet-500/20',
-  'SZV': 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-  'Workflow': 'bg-rose-500/10 text-rose-400 border-rose-500/20',
+  'SUKL': 'bg-blue-500/15 text-blue-400 border-blue-500/20',
+  'MKN-10': 'bg-emerald-500/15 text-emerald-400 border-emerald-500/20',
+  'NRPZS': 'bg-violet-500/15 text-violet-400 border-violet-500/20',
+  'SZV': 'bg-amber-500/15 text-amber-400 border-amber-500/20',
+  'Workflow': 'bg-rose-500/15 text-rose-400 border-rose-500/20',
   'Global': 'bg-white/5 text-white/50 border-white/10',
 }
 
 export function ToolCatalog() {
   return (
-    <section id="nastroje" className="py-24 md:py-32">
+    <section id="nastroje" className="border-t border-white/[0.06] py-24 md:py-32">
       <div className="mx-auto max-w-6xl px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -36,10 +36,10 @@ export function ToolCatalog() {
           viewport={{ once: true }}
           className="text-center"
         >
-          <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
+          <h2 className="text-3xl font-bold tracking-tight text-white md:text-4xl">
             Ukázka nástrojů
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
+          <p className="mx-auto mt-4 max-w-2xl text-white/50">
             12 z 60 dostupných nástrojů. Každý přijímá strukturované parametry
             a vrací formátovaný markdown.
           </p>
@@ -53,15 +53,15 @@ export function ToolCatalog() {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.05 }}
-              className="rounded-xl border border-border bg-card p-4"
+              className="rounded-xl border border-white/[0.08] bg-white/[0.03] p-4 transition hover:border-white/[0.15]"
             >
               <div className="flex items-start justify-between gap-2">
-                <code className="text-sm font-medium text-foreground">{t.name}</code>
+                <code className="text-sm font-medium text-white/90">{t.name}</code>
                 <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-medium ${groupColors[t.group]}`}>
                   {t.group}
                 </span>
               </div>
-              <p className="mt-2 text-xs text-muted-foreground">{t.desc}</p>
+              <p className="mt-2 text-xs text-white/40">{t.desc}</p>
             </motion.div>
           ))}
         </div>

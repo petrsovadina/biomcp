@@ -23,7 +23,7 @@ const items = [
 
 export function ProblemSolution() {
   return (
-    <section className="py-24 md:py-32">
+    <section className="border-t border-white/[0.06] py-24 md:py-32">
       <div className="mx-auto max-w-6xl px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -31,10 +31,10 @@ export function ProblemSolution() {
           viewport={{ once: true }}
           className="text-center"
         >
-          <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
+          <h2 className="text-3xl font-bold tracking-tight text-white md:text-4xl">
             Problém → Řešení
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
+          <p className="mx-auto mt-4 max-w-2xl text-white/50">
             AI asistenti jsou mocní, ale bez přístupu k českým zdravotnickým
             datům jsou slepí. CzechMedMCP jim dává oči.
           </p>
@@ -48,12 +48,12 @@ export function ProblemSolution() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.1 }}
-              className="rounded-2xl border border-border bg-card p-6"
+              className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-6"
             >
-              <p className="text-muted-foreground line-through decoration-red-400/50">
+              <p className="text-white/40 line-through decoration-red-400/50">
                 {item.problem}
               </p>
-              <p className="mt-3 font-semibold text-foreground">
+              <p className="mt-3 font-semibold text-white">
                 {item.solution}
               </p>
             </motion.div>

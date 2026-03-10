@@ -311,104 +311,6 @@ wheels = [
 ]
 
 [[package]]
-name = "biomcp-python"
-version = "0.7.3"
-source = { editable = "." }
-dependencies = [
-    { name = "alphagenome" },
-    { name = "certifi" },
-    { name = "diskcache" },
-    { name = "httpx" },
-    { name = "lxml" },
-    { name = "mcp", extra = ["cli"] },
-    { name = "openpyxl" },
-    { name = "platformdirs" },
-    { name = "psutil" },
-    { name = "pydantic" },
-    { name = "python-dotenv" },
-    { name = "rich" },
-    { name = "typer" },
-    { name = "uvicorn" },
-]
-
-[package.optional-dependencies]
-worker = [
-    { name = "fastapi" },
-    { name = "starlette" },
-    { name = "uvicorn" },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "anyio" },
-    { name = "assertpy" },
-    { name = "deptry" },
-    { name = "mkdocs" },
-    { name = "mkdocs-material" },
-    { name = "mkdocstrings", extra = ["python"] },
-    { name = "mypy" },
-    { name = "pandas" },
-    { name = "pre-commit" },
-    { name = "pydantic-ai" },
-    { name = "pytest" },
-    { name = "pytest-asyncio" },
-    { name = "pytest-bdd" },
-    { name = "pytest-cov" },
-    { name = "pytest-xdist" },
-    { name = "pyyaml" },
-    { name = "ruff" },
-    { name = "tomlkit" },
-    { name = "tox-uv" },
-    { name = "twine" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "alphagenome", specifier = ">=0.1.0" },
-    { name = "certifi", specifier = ">=2025.1.31" },
-    { name = "diskcache", specifier = ">=5.6.3" },
-    { name = "fastapi", marker = "extra == 'worker'", specifier = ">=0.110.0" },
-    { name = "httpx", specifier = ">=0.28.1" },
-    { name = "lxml", specifier = ">=5.0.0" },
-    { name = "mcp", extras = ["cli"], specifier = ">=1.12.3,<2.0.0" },
-    { name = "openpyxl", specifier = ">=3.1.0" },
-    { name = "platformdirs", specifier = ">=4.3.6" },
-    { name = "psutil", specifier = ">=7.0.0" },
-    { name = "pydantic", specifier = ">=2.10.6" },
-    { name = "python-dotenv", specifier = ">=1.0.0" },
-    { name = "rich", specifier = ">=14.0.0" },
-    { name = "starlette", marker = "extra == 'worker'", specifier = ">=0.36.0" },
-    { name = "typer", specifier = ">=0.15.2" },
-    { name = "uvicorn", specifier = ">=0.34.2" },
-    { name = "uvicorn", marker = "extra == 'worker'", specifier = ">=0.28.0" },
-]
-provides-extras = ["api", "worker"]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "anyio", specifier = ">=4.8.0" },
-    { name = "assertpy", specifier = ">=1.1" },
-    { name = "deptry", specifier = ">=0.22.0" },
-    { name = "mkdocs", specifier = ">=1.4.2" },
-    { name = "mkdocs-material", specifier = ">=8.5.10" },
-    { name = "mkdocstrings", extras = ["python"], specifier = ">=0.26.1" },
-    { name = "mypy", specifier = ">=0.991" },
-    { name = "pandas", specifier = ">=2.0.0" },
-    { name = "pre-commit", specifier = ">=2.20.0" },
-    { name = "pydantic-ai", specifier = ">=0.0.14" },
-    { name = "pytest", specifier = ">=7.2.0" },
-    { name = "pytest-asyncio", specifier = ">=0.24.0" },
-    { name = "pytest-bdd", specifier = ">=8.1.0" },
-    { name = "pytest-cov", specifier = ">=4.0.0" },
-    { name = "pytest-xdist", specifier = ">=3.5.0" },
-    { name = "pyyaml", specifier = ">=6.0.0" },
-    { name = "ruff", specifier = ">=0.9.2" },
-    { name = "tomlkit", specifier = ">=0.13.2" },
-    { name = "tox-uv", specifier = ">=1.11.3" },
-    { name = "twine", specifier = ">=4.0.0" },
-]
-
-[[package]]
 name = "boto3"
 version = "1.40.28"
 source = { registry = "https://pypi.org/simple" }
@@ -832,6 +734,104 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/a9/95/a3dbbb5028f35eafb79008e7522a75244477d2838f38cbb722248dabc2a8/cycler-0.12.1.tar.gz", hash = "sha256:88bb128f02ba341da8ef447245a9e138fae777f6a23943da4540077d3601eb1c", size = 7615, upload-time = "2023-10-07T05:32:18.335Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/e7/05/c19819d5e3d95294a6f5947fb9b9629efb316b96de511b418c53d245aae6/cycler-0.12.1-py3-none-any.whl", hash = "sha256:85cef7cff222d8644161529808465972e51340599459b8ac3ccbac5a854e0d30", size = 8321, upload-time = "2023-10-07T05:32:16.783Z" },
+]
+
+[[package]]
+name = "czechmedmcp"
+version = "0.8.0"
+source = { editable = "." }
+dependencies = [
+    { name = "alphagenome" },
+    { name = "certifi" },
+    { name = "diskcache" },
+    { name = "httpx" },
+    { name = "lxml" },
+    { name = "mcp", extra = ["cli"] },
+    { name = "openpyxl" },
+    { name = "platformdirs" },
+    { name = "psutil" },
+    { name = "pydantic" },
+    { name = "python-dotenv" },
+    { name = "rich" },
+    { name = "typer" },
+    { name = "uvicorn" },
+]
+
+[package.optional-dependencies]
+worker = [
+    { name = "fastapi" },
+    { name = "starlette" },
+    { name = "uvicorn" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "anyio" },
+    { name = "assertpy" },
+    { name = "deptry" },
+    { name = "mkdocs" },
+    { name = "mkdocs-material" },
+    { name = "mkdocstrings", extra = ["python"] },
+    { name = "mypy" },
+    { name = "pandas" },
+    { name = "pre-commit" },
+    { name = "pydantic-ai" },
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "pytest-bdd" },
+    { name = "pytest-cov" },
+    { name = "pytest-xdist" },
+    { name = "pyyaml" },
+    { name = "ruff" },
+    { name = "tomlkit" },
+    { name = "tox-uv" },
+    { name = "twine" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "alphagenome", specifier = ">=0.1.0" },
+    { name = "certifi", specifier = ">=2025.1.31" },
+    { name = "diskcache", specifier = ">=5.6.3" },
+    { name = "fastapi", marker = "extra == 'worker'", specifier = ">=0.110.0" },
+    { name = "httpx", specifier = ">=0.28.1" },
+    { name = "lxml", specifier = ">=5.0.0" },
+    { name = "mcp", extras = ["cli"], specifier = ">=1.12.3,<2.0.0" },
+    { name = "openpyxl", specifier = ">=3.1.0" },
+    { name = "platformdirs", specifier = ">=4.3.6" },
+    { name = "psutil", specifier = ">=7.0.0" },
+    { name = "pydantic", specifier = ">=2.10.6" },
+    { name = "python-dotenv", specifier = ">=1.0.0" },
+    { name = "rich", specifier = ">=14.0.0" },
+    { name = "starlette", marker = "extra == 'worker'", specifier = ">=0.36.0" },
+    { name = "typer", specifier = ">=0.15.2" },
+    { name = "uvicorn", specifier = ">=0.34.2" },
+    { name = "uvicorn", marker = "extra == 'worker'", specifier = ">=0.28.0" },
+]
+provides-extras = ["api", "worker"]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "anyio", specifier = ">=4.8.0" },
+    { name = "assertpy", specifier = ">=1.1" },
+    { name = "deptry", specifier = ">=0.22.0" },
+    { name = "mkdocs", specifier = ">=1.4.2" },
+    { name = "mkdocs-material", specifier = ">=8.5.10" },
+    { name = "mkdocstrings", extras = ["python"], specifier = ">=0.26.1" },
+    { name = "mypy", specifier = ">=0.991" },
+    { name = "pandas", specifier = ">=2.0.0" },
+    { name = "pre-commit", specifier = ">=2.20.0" },
+    { name = "pydantic-ai", specifier = ">=0.0.14" },
+    { name = "pytest", specifier = ">=7.2.0" },
+    { name = "pytest-asyncio", specifier = ">=0.24.0" },
+    { name = "pytest-bdd", specifier = ">=8.1.0" },
+    { name = "pytest-cov", specifier = ">=4.0.0" },
+    { name = "pytest-xdist", specifier = ">=3.5.0" },
+    { name = "pyyaml", specifier = ">=6.0.0" },
+    { name = "ruff", specifier = ">=0.9.2" },
+    { name = "tomlkit", specifier = ">=0.13.2" },
+    { name = "tox-uv", specifier = ">=1.11.3" },
+    { name = "twine", specifier = ">=4.0.0" },
 ]
 
 [[package]]

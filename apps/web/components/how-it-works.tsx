@@ -7,13 +7,13 @@ const steps = [
     num: '01',
     title: 'Instalace',
     desc: 'Jeden příkaz a MCP server je připraven.',
-    code: 'pip install biomcp-python',
+    code: 'pip install czechmedmcp',
   },
   {
     num: '02',
     title: 'Propojení',
     desc: 'Přidejte server do Claude Desktop, Cursor nebo jiného klienta.',
-    code: '{ "mcpServers": { "czechmed": { "command": "biomcp", "args": ["run"] } } }',
+    code: '{ "mcpServers": { "czechmed": { "command": "czechmedmcp", "args": ["run"] } } }',
   },
   {
     num: '03',

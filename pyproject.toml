@@ -1,8 +1,11 @@
 [project]
-name = "biomcp-python"
-version = "0.7.3"
-description = "CzechMedMCP: Czech Healthcare MCP Server (fork of BioMCP with Czech medical data sources)"
-authors = [{ name = "Ian Maurer", email = "imaurer@gmail.com" }]
+name = "czechmedmcp"
+version = "0.8.0"
+description = "CzechMedMCP: AI napojení na české zdravotnictví — MCP server s 60 nástroji pro SUKL, MKN-10, PubMed a další"
+authors = [
+    { name = "Petr Sovadina", email = "petr.sovadina9@gmail.com" },
+    { name = "Ian Maurer", email = "imaurer@gmail.com" },
+]
 readme = "README.md"
 keywords = ['python']
 requires-python = ">=3.10,<4.0"
@@ -84,6 +87,7 @@ where = ["src"]
 biomcp = ["resources/*.md"]
 
 [project.scripts]
+czechmedmcp = "biomcp.__main__:main"
 biomcp = "biomcp.__main__:main"
 
 [tool.mypy]

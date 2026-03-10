@@ -88,7 +88,7 @@ class TestEndpointRegistry:
         report = registry.generate_markdown_report()
 
         # Check report contains expected sections
-        assert "# Third-Party Endpoints Used by BioMCP" in report
+        assert "# Third-Party Endpoints Used by CzechMedMCP" in report
         assert "## Overview" in report
         assert "## Endpoints by Category" in report
         assert "## Domain Summary" in report
@@ -115,7 +115,7 @@ class TestEndpointRegistry:
 
         # Read and verify content
         content = output_path.read_text()
-        assert "Third-Party Endpoints Used by BioMCP" in content
+        assert "Third-Party Endpoints Used by CzechMedMCP" in content
 
 
 class TestEndpointTracking:

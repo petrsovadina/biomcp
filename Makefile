@@ -42,13 +42,13 @@ publish: build ## Publish a release to PyPI.
 	@echo "🚀 Publishing."
 	@uvx twine upload -r pypi dist/*
 
-.PHONY: docs-test
-docs-test: ## Test if documentation can be built without warnings or errors
-	@uv run mkdocs build -s
-
 .PHONY: docs
-docs: ## Build and serve the documentation
-	@uv run mkdocs serve
+docs: ## Build and serve the documentation (Nextra)
+	@cd apps/docs && npm run dev
+
+.PHONY: web
+web: ## Build and serve the landing page
+	@cd apps/web && npm run dev
 
 .PHONY: help
 help:
@@ -60,7 +60,7 @@ help:
 .PHONY: inspector
 inspector:
 	@echo "🚀 Starting MCP Inspector"
-	npx @modelcontextprotocol/inspector uv run --with . biomcp run
+	npx @modelcontextprotocol/inspector uv run --with . czechmedmcp run
 
 .PHONY: pbdiff
 pbdiff: ## Copy git diff to clipboard

@@ -14,7 +14,7 @@ export function Footer() {
           </div>
 
           <div className="flex gap-8 text-sm text-white/40">
-            <a href="/docs" className="transition hover:text-white">
+            <a href="https://docs-sovadina.vercel.app" className="transition hover:text-white">
               Dokumentace
             </a>
             <a

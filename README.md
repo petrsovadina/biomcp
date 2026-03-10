@@ -1,17 +1,13 @@
-# CzechMedMCP: Český zdravotnický MCP server
+# CzechMedMCP: AI napojení na české zdravotnictví
 
-> Fork projektu [genomoncology/biomcp](https://github.com/genomoncology/biomcp) rozšířený o české zdravotnické datové zdroje pro platformu [Medevio](https://medevio.com)...
+Open source MCP server se **60 nástroji** pro české i globální zdravotnické zdroje. Propojuje Claude, Cursor a další AI asistenty s SUKL, MKN-10, PubMed a dalšími databázemi.
 
-CzechMedMCP je open source (MIT) MCP server se **60 biomedicínskými a zdravotnickými nástroji** — 23 českých + 37 globálních. Postavený na [Model Context Protocol](https://modelcontextprotocol.io/), slouží jako datová vrstva pro AI asistenty lékařů.
+**[Landing page](https://web-sovadina.vercel.app)** · **[Dokumentace](https://docs-sovadina.vercel.app)** · **[GitHub](https://github.com/petrsovadina/biomcp)**
 
 ## Rychlý start
 
-### Instalace
-
 ```bash
-pip install biomcp-python
-# nebo
-uv pip install biomcp-python
+pip install czechmedmcp
 ```
 
 ### Claude Desktop / Cursor / VS Code
@@ -22,8 +18,8 @@ Přidejte do konfigurace MCP serverů:
 {
   "mcpServers": {
     "czechmedmcp": {
-      "command": "uv",
-      "args": ["run", "--with", "biomcp-python", "biomcp", "run"]
+      "command": "czechmedmcp",
+      "args": ["run"]
     }
   }
 }
@@ -33,16 +29,16 @@ Přidejte do konfigurace MCP serverů:
 
 ```bash
 # STDIO (lokální vývoj, Claude Desktop)
-biomcp run
+czechmedmcp run
 
 # HTTP (remote, Medevio integrace)
-biomcp run --mode streamable_http --host 0.0.0.0 --port 8080
+czechmedmcp run --mode streamable_http --host 0.0.0.0 --port 8080
 ```
 
 ### MCP Inspector (testování)
 
 ```bash
-npx @modelcontextprotocol/inspector uv run --with biomcp-python biomcp run
+npx @modelcontextprotocol/inspector czechmedmcp run
 ```
 
 ## Katalog nástrojů (60)
@@ -92,7 +88,7 @@ cp .env.example .env
 # Instalace a nastavení
 uv sync --all-extras && uv run pre-commit install
 
-# Spuštění testů
+# Spuštění testů (736 testů)
 uv run python -m pytest -x --ff -n auto --dist loadscope
 
 # Lint + formátování
@@ -102,20 +98,11 @@ uv run ruff check src tests && uv run ruff format src tests
 make check
 ```
 
-## Dokumentace
-
-Kompletní dokumentace je dostupná na [docs-site](https://petrsovadina.github.io/biomcp/):
-
-- [Uživatelská příručka](https://petrsovadina.github.io/biomcp/czech-user-guide/)
-- [API Reference](https://petrsovadina.github.io/biomcp/czech-api-reference/)
-- [Architektura](https://petrsovadina.github.io/biomcp/czech-architecture/)
-- [Přehled nástrojů](https://petrsovadina.github.io/biomcp/czech-tools/)
-
 ## Licence
 
 MIT — plná svoboda komerčního využití.
 
 ---
 
-*CzechMedMCP je fork [BioMCP](https://github.com/genomoncology/biomcp) (MIT) rozšířený o české zdravotnické zdroje.*
-*GitHub: [petrsovadina/biomcp](https://github.com/petrsovadina/biomcp)*
+*Postaveno pro [Medevio](https://medevio.com) — AI asistent pro české lékaře.*
+*Založeno na [BioMCP](https://github.com/genomoncology/biomcp) (MIT).*

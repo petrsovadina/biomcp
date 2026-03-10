@@ -7,7 +7,7 @@ const links = [
   { label: 'Funkce', href: '#funkce' },
   { label: 'Nástroje', href: '#nastroje' },
   { label: 'Jak to funguje', href: '#jak-to-funguje' },
-  { label: 'Dokumentace', href: '/docs' },
+  { label: 'Dokumentace', href: 'https://docs-sovadina.vercel.app' },
 ]
 
 export function Navbar() {

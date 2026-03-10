@@ -40,7 +40,7 @@ export function CTA() {
               Zobrazit na GitHub
             </a>
             <a
-              href="/docs"
+              href="https://docs-sovadina.vercel.app"
               className="w-full rounded-xl border border-white/[0.1] px-8 py-4 text-center font-semibold text-white/70 transition hover:border-white/20 hover:text-white sm:w-auto"
             >
               Dokumentace

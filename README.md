@@ -1,6 +1,6 @@
 # CzechMedMCP: Český zdravotnický MCP server
 
-> Fork projektu [genomoncology/biomcp](https://github.com/genomoncology/biomcp) rozšířený o české zdravotnické datové zdroje pro platformu [Medevio](https://medevio.com).
+> Fork projektu [genomoncology/biomcp](https://github.com/genomoncology/biomcp) rozšířený o české zdravotnické datové zdroje pro platformu [Medevio](https://medevio.com)...
 
 CzechMedMCP je open source (MIT) MCP server se **60 biomedicínskými a zdravotnickými nástroji** — 23 českých + 37 globálních. Postavený na [Model Context Protocol](https://modelcontextprotocol.io/), slouží jako datová vrstva pro AI asistenty lékařů.
 

@@ -1,23 +1,23 @@
 """SUKL drug search implementation.
 
-Uses SUKL DLP API v1 (prehledy.sukl.cz) with diskcache for
-response caching and offline fallback.
+Uses an in-memory DrugIndex (lazy-loaded, refreshed daily)
+for fast sub-second search instead of fetching all 68K drug
+details on every query.
 """
 
-import asyncio
 import json
 import logging
 
 import httpx
 
 from biomcp.constants import CACHE_TTL_DAY, compute_skip
-from biomcp.czech.diacritics import normalize_query
 from biomcp.czech.sukl.client import (
     SUKL_DLP_V1,
     SUKL_HTTP_TIMEOUT,
 )
-from biomcp.czech.sukl.client import (
-    fetch_drug_detail as _fetch_drug_detail,
+from biomcp.czech.sukl.drug_index import (
+    get_drug_index,
+    search_index,
 )
 from biomcp.http_client import (
     cache_response,
@@ -30,62 +30,14 @@ logger = logging.getLogger(__name__)
 _DRUG_LIST_CACHE_TTL = CACHE_TTL_DAY
 
 
-async def _fetch_drug_list(
-    typ_seznamu: str = "dlpo",
-) -> list[str]:
-    """Fetch list of SUKL codes from DLP API."""
-    cache_key = generate_cache_key(
-        "GET",
-        f"{SUKL_DLP_V1}/lecive-pripravky",
-        {"typSeznamu": typ_seznamu, "uvedeneCeny": "false"},
-    )
-    cached = get_cached_response(cache_key)
-    if cached:
-        return json.loads(cached)
-
-    async with httpx.AsyncClient(
-        timeout=SUKL_HTTP_TIMEOUT
-    ) as client:
-        resp = await client.get(
-            f"{SUKL_DLP_V1}/lecive-pripravky",
-            params={
-                "typSeznamu": typ_seznamu,
-                "uvedeneCeny": "false",
-            },
-        )
-        resp.raise_for_status()
-        codes = resp.json()
-
-    cache_response(cache_key, json.dumps(codes), _DRUG_LIST_CACHE_TTL)
-    return codes
-
-
-def _matches_query(detail: dict, normalized_q: str) -> bool:
-    """Check if a drug detail matches the search query."""
-    if not detail:
-        return False
-
-    name = normalize_query(detail.get("nazev", ""))
-    supplement = normalize_query(detail.get("doplnek", ""))
-    atc = (detail.get("ATCkod") or "").lower()
-    holder = (detail.get("drzitelKod") or "").lower()
-
-    return (
-        normalized_q in name
-        or normalized_q in supplement
-        or normalized_q == atc
-        or normalized_q in holder
-    )
-
-
-def _detail_to_summary(detail: dict) -> dict:
-    """Convert API drug detail to DrugSummary dict."""
+def _entry_to_summary(entry) -> dict:
+    """Convert DrugIndexEntry to DrugSummary dict."""
     return {
-        "sukl_code": detail.get("kodSUKL", ""),
-        "name": detail.get("nazev", ""),
-        "strength": detail.get("sila"),
-        "atc_code": detail.get("ATCkod"),
-        "pharmaceutical_form": detail.get("lekovaFormaKod"),
+        "sukl_code": entry.sukl_code,
+        "name": entry.name,
+        "strength": entry.strength,
+        "atc_code": entry.atc_code,
+        "pharmaceutical_form": entry.form,
     }
 
 
@@ -96,6 +48,9 @@ async def _sukl_drug_search(
 ) -> str:
     """Search Czech drug registry by name, substance, or ATC code.
 
+    Uses an in-memory drug index for fast search. The index is
+    built on first query and refreshed daily (CACHE_TTL_DAY).
+
     Args:
         query: Drug name, active substance, or ATC code
         page: Page number (1-based)
@@ -105,9 +60,9 @@ async def _sukl_drug_search(
         JSON string with search results
     """
     try:
-        codes = await _fetch_drug_list()
+        index = await get_drug_index()
     except Exception as e:
-        logger.error("Failed to fetch drug list: %s", e)
+        logger.error("Failed to build drug index: %s", e)
         return json.dumps(
             {
                 "total": 0,
@@ -119,35 +74,18 @@ async def _sukl_drug_search(
             ensure_ascii=False,
         )
 
-    normalized_q = normalize_query(query)
-
-    # Fetch details concurrently with bounded parallelism
-    sem = asyncio.Semaphore(10)
-
-    async def _fetch_one(code: str):
-        async with sem:
-            return await _fetch_drug_detail(code)
-
-    details = await asyncio.gather(
-        *(_fetch_one(c) for c in codes)
+    results, total = search_index(
+        index, query, page, page_size
     )
-    matches = [
-        _detail_to_summary(d)
-        for d in details
-        if d and _matches_query(d, normalized_q)
-    ]
-
-    total = len(matches)
-    start = compute_skip(page, page_size)
-    end = start + page_size
-    page_results = matches[start:end]
 
     return json.dumps(
         {
             "total": total,
             "page": page,
             "page_size": page_size,
-            "results": page_results,
+            "results": [
+                _entry_to_summary(e) for e in results
+            ],
         },
         ensure_ascii=False,
     )
@@ -241,6 +179,11 @@ async def _fetch_pharmacies(
             resp = await client.get(
                 _PHARMACY_URL, params=params
             )
+            if resp.status_code == 504:
+                logger.warning(
+                    "SUKL pharmacy API returned 504"
+                )
+                return []
             if not resp.is_success:
                 return []
             data = resp.json()

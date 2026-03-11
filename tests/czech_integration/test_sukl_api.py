@@ -4,6 +4,7 @@ Run with: pytest tests/czech_integration/ -m integration -v
 """
 
 import json
+import time
 
 import pytest
 
@@ -17,14 +18,32 @@ class TestSuklApiIntegration:
         """Search for a common drug returns results."""
         from biomcp.czech.sukl.search import _sukl_drug_search
 
-        result = json.loads(await _sukl_drug_search("IBUPROFEN"))
+        result = json.loads(
+            await _sukl_drug_search("IBUPROFEN")
+        )
         assert result["total"] >= 1
         assert len(result["results"]) >= 1
 
     @pytest.mark.asyncio
+    async def test_search_returns_expected_fields(self):
+        """Search results contain expected fields."""
+        from biomcp.czech.sukl.search import _sukl_drug_search
+
+        result = json.loads(
+            await _sukl_drug_search("IBUPROFEN")
+        )
+        assert result["total"] >= 1
+        drug = result["results"][0]
+        assert "sukl_code" in drug
+        assert "name" in drug
+        assert "atc_code" in drug
+
+    @pytest.mark.asyncio
     async def test_get_drug_detail(self):
         """Get drug detail by SUKL code."""
-        from biomcp.czech.sukl.search import _fetch_drug_list
+        from biomcp.czech.sukl.drug_index import (
+            _fetch_drug_list,
+        )
 
         codes = await _fetch_drug_list()
         assert len(codes) > 0
@@ -38,7 +57,9 @@ class TestSuklApiIntegration:
     @pytest.mark.asyncio
     async def test_availability_check(self):
         """Check availability for a known drug."""
-        from biomcp.czech.sukl.search import _fetch_drug_list
+        from biomcp.czech.sukl.drug_index import (
+            _fetch_drug_list,
+        )
 
         codes = await _fetch_drug_list()
         assert len(codes) > 0

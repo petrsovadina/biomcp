@@ -229,3 +229,42 @@ class TestFindPharmacies:
 
         sc = json.loads(raw)["structuredContent"]
         assert sc["total"] == 3
+
+    async def test_504_returns_empty_results(self):
+        """504 Gateway Timeout returns empty list."""
+        from biomcp.czech.sukl.search import (
+            _find_pharmacies,
+        )
+
+        mock_client = AsyncMock()
+        mock_client.get = AsyncMock(
+            return_value=_MockResp([], status=504),
+        )
+        mock_client.__aenter__ = AsyncMock(
+            return_value=mock_client,
+        )
+        mock_client.__aexit__ = AsyncMock(
+            return_value=False,
+        )
+
+        with (
+            patch(
+                "biomcp.czech.sukl.search"
+                ".httpx.AsyncClient",
+                return_value=mock_client,
+            ),
+            patch(
+                "biomcp.czech.sukl.search"
+                ".get_cached_response",
+                return_value=None,
+            ),
+            patch(
+                "biomcp.czech.sukl.search"
+                ".cache_response",
+            ),
+        ):
+            raw = await _find_pharmacies(city="Praha")
+
+        sc = json.loads(raw)["structuredContent"]
+        assert sc["total"] == 0
+        assert sc["results"] == []

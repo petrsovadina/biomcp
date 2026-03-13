@@ -50,13 +50,13 @@
 
 **Independent Test**: `git log python-main --oneline -5` ukazuje DrugIndex commit.
 
-- [ ] T007 [US3] Mergovat branch `001-fix-sukl-search` do `python-main` — `git checkout python-main && git merge 001-fix-sukl-search --no-ff -m "Merge 001-fix-sukl-search: DrugIndex for SUKL search"`
+- [x] T007 [US3] Mergovat branch `001-fix-sukl-search` do `python-main` — `git checkout python-main && git merge 001-fix-sukl-search --no-ff -m "Merge 001-fix-sukl-search: DrugIndex for SUKL search"`
 
-- [ ] T008 [US3] Ověřit test suite po merge: `uv run python -m pytest -x --ff -n auto --dist loadscope -m "not integration"` — 713+ testů
+- [x] T008 [US3] Ověřit test suite po merge: `uv run python -m pytest -x --ff -n auto --dist loadscope -m "not integration"` — 713+ testů
 
-- [ ] T009 [US3] Vyhodnotit stash `stash@{0}` (WIP: docs restructure) — rozhodnout co ponechat (README.md, pyproject.toml změny) a co zahodit (smazané docs soubory z neexistujícího `apps/docs/`)
+- [x] T009 [US3] Vyhodnotit stash `stash@{0}` (WIP: docs restructure) — rozhodnout co ponechat (README.md, pyproject.toml změny) a co zahodit (smazané docs soubory z neexistujícího `apps/docs/`)
 
-- [ ] T010 [US3] Rebase `002-codebase-stabilization` na aktuální `python-main`: `git checkout 002-codebase-stabilization && git rebase python-main`
+- [x] T010 [US3] Rebase `002-codebase-stabilization` na aktuální `python-main`: `git checkout 002-codebase-stabilization && git rebase python-main`
 
 **Checkpoint**: `python-main` obsahuje DrugIndex commit, branch `002-codebase-stabilization` je rebasovaný.
 
@@ -70,17 +70,17 @@
 
 **Independent Test**: Všechny cesty a příkazy zmíněné v CLAUDE.md existují a fungují.
 
-- [ ] T011 [P] [US1] Aktualizovat CLAUDE.md — Monorepo sekce:
+- [x] T011 [P] [US1] Aktualizovat CLAUDE.md — Monorepo sekce:
   - Odstranit Turborepo tabulku s `apps/web/` a `apps/docs/`
   - Popsat skutečnou strukturu: root Next.js landing page (`app/`, `components/`), Python MCP server (`src/biomcp/`)
   - Aktualizovat příkazy: `npm run dev` (landing page), `uv run biomcp run` (server)
   - Odstranit `npx turbo dev`, `npm run dev:web`, `npm run dev:docs`
 
-- [ ] T012 [P] [US1] Aktualizovat CLAUDE.md — CI sekce:
+- [x] T012 [P] [US1] Aktualizovat CLAUDE.md — CI sekce:
   - Přidat sekci popisující existující `.github/workflows/ci.yml`
   - Dokumentovat dostupné CI joby (quality, tests, build-package, test-mcp, integration-tests)
 
-- [ ] T013 [US1] Aktualizovat README.md — odstranit odkaz na `docs-sovadina.vercel.app` pokud docs web nefunguje, ponechat pouze funkční odkazy
+- [x] T013 [US1] Aktualizovat README.md — odstranit odkaz na `docs-sovadina.vercel.app` pokud docs web nefunguje, ponechat pouze funkční odkazy
 
 **Checkpoint**: `grep -r "apps/web\|apps/docs\|turbo" CLAUDE.md` vrací 0 výsledků.
 

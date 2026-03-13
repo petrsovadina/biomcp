@@ -71,7 +71,9 @@ async def _download_csv() -> str:
     return content
 
 
-def _parse_csv(csv_text: str) -> tuple[CodeIndex, TextIndex]:
+def _parse_csv(  # noqa: C901 — CSV parser with many columns
+    csv_text: str,
+) -> tuple[CodeIndex, TextIndex]:
     """Parse CSV text and return (code_index, text_index).
 
     Builds chapter nodes from unique (kod_kapitola_rozsah,

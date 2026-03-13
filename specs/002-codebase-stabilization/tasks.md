@@ -94,12 +94,12 @@
 
 **Independent Test**: `gh workflow run ci.yml` spustí pipeline, všechny joby zelené.
 
-- [ ] T014 [US2] Aktualizovat `.github/workflows/ci.yml`:
+- [x] T014 [US2] Aktualizovat `.github/workflows/ci.yml`:
   - Branch trigger: `main` → `python-main` (push i PR)
   - Ponechat `develop` pokud existuje
   - Odstranit nebo opravit `check-docs` job — `uv run mkdocs build -s` selhává protože mkdocs docs neexistují. Buď job smazat, nebo přepnout na validaci, která odpovídá aktuálnímu stavu.
 
-- [ ] T015 [US2] Ověřit, že CI workflow projde lokálně — spustit stejné příkazy jako CI:
+- [x] T015 [US2] Ověřit, že CI workflow projde lokálně — spustit stejné příkazy jako CI:
   - `uv run ruff check src tests`
   - `uv run mypy`
   - `uv run python -m pytest tests -m "not integration" -x`
@@ -115,9 +115,9 @@
 
 **Goal**: Buď funkční docs web, nebo čistě odstraněný bez orphaned souborů.
 
-- [ ] T016 [US5] Vyhodnotit stav docs — zjistit zda `docs-sovadina.vercel.app` je funkční a co servíruje. Pokud nefunguje, odstranit deploy-docs.yml workflow a všechny reference.
+- [x] T016 [US5] Vyhodnotit stav docs — zjistit zda `docs-sovadina.vercel.app` je funkční a co servíruje. Pokud nefunguje, odstranit deploy-docs.yml workflow a všechny reference.
 
-- [ ] T017 [US5] Vyčistit orphaned docs soubory — stash `stash@{0}` obsahuje 40+ smazaných souborů z `apps/docs/`. Pokud `apps/docs/` na branch neexistuje, tyto deletes jsou irelevantní a stash lze dropnout (docs část).
+- [x] T017 [US5] Vyčistit orphaned docs soubory — stash `stash@{0}` obsahuje 40+ smazaných souborů z `apps/docs/`. Pokud `apps/docs/` na branch neexistuje, tyto deletes jsou irelevantní a stash lze dropnout (docs část).
 
 **Checkpoint**: Žádné reference na nefunkční docs URL, žádné orphaned soubory.
 
@@ -131,7 +131,7 @@
 
 **Independent Test**: Všechny testy v `tests/tdd/test_router.py` prochází beze změn.
 
-- [ ] T018 [P] [US4] Vytvořit `src/biomcp/fetch_handlers.py` — extrahovat FDA domain handlery (6 bloků, řádky 865–930):
+- [x] T018 [P] [US4] Vytvořit `src/biomcp/fetch_handlers.py` — extrahovat FDA domain handlery (6 bloků, řádky 865–930):
   - `handle_fda_adverse_fetch(id)`
   - `handle_fda_label_fetch(id)`
   - `handle_fda_device_fetch(id)`
@@ -140,21 +140,21 @@
   - `handle_fda_shortage_fetch(id)`
   - Každý handler vrací stejný typ jako aktuální inline kód
 
-- [ ] T019 [P] [US4] Extrahovat NCI fetch handlery do `src/biomcp/fetch_handlers.py`:
+- [x] T019 [P] [US4] Extrahovat NCI fetch handlery do `src/biomcp/fetch_handlers.py`:
   - `handle_nci_organization_fetch(id)`
   - `handle_nci_intervention_fetch(id)`
   - `handle_nci_disease_fetch(id)`
 
-- [ ] T020 [P] [US4] Extrahovat české fetch handlery do `src/biomcp/fetch_handlers.py`:
+- [x] T020 [P] [US4] Extrahovat české fetch handlery do `src/biomcp/fetch_handlers.py`:
   - `handle_sukl_drug_fetch(id)`
   - `handle_mkn_diagnosis_fetch(id)`
   - `handle_nrpzs_provider_fetch(id)`
   - `handle_szv_procedure_fetch(id)`
   - `handle_vzp_reimbursement_fetch(id)`
 
-- [ ] T021 [US4] Extrahovat core domain fetch handlery (article, trial, variant, gene, drug, disease) do `src/biomcp/fetch_handlers.py` — tyto jsou nejdelší a mají nejvíce logiky
+- [x] T021 [US4] Extrahovat core domain fetch handlery (article, trial, variant, gene, drug, disease) do `src/biomcp/fetch_handlers.py` — tyto jsou nejdelší a mají nejvíce logiky
 
-- [ ] T022 [US4] Refaktorovat `fetch()` v `src/biomcp/router.py` — nahradit inline domain bloky dispatch table voláním handlerů z `fetch_handlers.py`:
+- [x] T022 [US4] Refaktorovat `fetch()` v `src/biomcp/router.py` — nahradit inline domain bloky dispatch table voláním handlerů z `fetch_handlers.py`:
   ```python
   FETCH_HANDLERS = {
       "article": handle_article_fetch,
@@ -166,9 +166,9 @@
       return await handler(id, ...)
   ```
 
-- [ ] T023 [US4] Ověřit, že `router.py` je pod 1 000 řádků: `wc -l src/biomcp/router.py`
+- [x] T023 [US4] Ověřit, že `router.py` je pod 1 000 řádků: `wc -l src/biomcp/router.py`
 
-- [ ] T024 [US4] Ověřit plnou zpětnou kompatibilitu — spustit celou test suite: `uv run python -m pytest -x --ff -n auto --dist loadscope -m "not integration"` — 713+ testů
+- [x] T024 [US4] Ověřit plnou zpětnou kompatibilitu — spustit celou test suite: `uv run python -m pytest -x --ff -n auto --dist loadscope -m "not integration"` — 713+ testů
 
 **Checkpoint**: `wc -l src/biomcp/router.py` < 1000, všechny testy zelené.
 

@@ -32,7 +32,6 @@ def _make_httpx_response(status_code, data=None):
 
 def _patch_http(status_code=200, data=None):
     """Patch httpx.AsyncClient for reimbursement tests."""
-    import httpx
 
     resp = _make_httpx_response(status_code, data)
 

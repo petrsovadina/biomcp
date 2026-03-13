@@ -1,7 +1,7 @@
 """Unit tests for MKN-10 search, getter, and browse functions."""
 
 import json
-from unittest.mock import AsyncMock, patch
+from unittest.mock import patch
 
 import pytest
 

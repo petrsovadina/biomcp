@@ -239,7 +239,9 @@ class CBioPortalMutationClient(CBioPortalCoreClient):
 
             cancer_type_client = get_cancer_type_client()
 
-            async def _resolve_cancer_type(s: dict) -> str:
+            async def _resolve_cancer_type(
+                s: dict[str, Any],
+            ) -> str:
                 ct_id = s.get("cancerTypeId", "")
                 if ct_id and ct_id != "unknown":
                     return await (
@@ -253,8 +255,17 @@ class CBioPortalMutationClient(CBioPortalCoreClient):
                     )
                 )
 
+            # API returns list but adapter types as dict
+            study_list: list[dict[str, Any]] = (
+                studies
+                if isinstance(studies, list)
+                else [studies]
+            )
             cancer_types = await asyncio.gather(
-                *(_resolve_cancer_type(s) for s in studies)
+                *(
+                    _resolve_cancer_type(s)
+                    for s in study_list
+                )
             )
 
             return {
@@ -262,7 +273,9 @@ class CBioPortalMutationClient(CBioPortalCoreClient):
                     "name": s.get("name", ""),
                     "cancer_type": ct,
                 }
-                for s, ct in zip(studies, cancer_types, strict=False)
+                for s, ct in zip(
+                    study_list, cancer_types, strict=False
+                )
             }
         except Exception as e:
             logger.error(f"Error fetching studies: {e}")

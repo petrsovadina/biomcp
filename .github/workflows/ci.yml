@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main, develop]
+    branches: [python-main]
   pull_request:
-    branches: [main]
+    branches: [python-main]
   workflow_dispatch:
 
 env:
@@ -72,31 +72,6 @@ jobs:
 
       - name: Upload coverage reports to Codecov with GitHub Action on Python 3.11
         uses: codecov/codecov-action@v5
-
-  # Documentation check from main.yml
-  check-docs:
-    runs-on: ubuntu-latest
-    name: Check Docs
-    steps:
-      - name: Check out
-        uses: actions/checkout@v6
-
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v7
-        with:
-          version: ${{ env.UV_VERSION }}
-
-      - name: Install dependencies
-        run: |
-          uv sync --group dev
-
-      - name: Check if documentation can be built
-        run: uv run mkdocs build -s
 
   # Build package check
   build-package:

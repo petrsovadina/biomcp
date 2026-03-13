@@ -150,7 +150,8 @@ class TestUnifiedBioThingsFetch:
                 return GeneInfo(**mock_gene_info)
 
         monkeypatch.setattr(
-            "biomcp.router.BioThingsClient", MockBioThingsClient
+            "biomcp.integrations.biothings_client.BioThingsClient",
+            MockBioThingsClient,
         )
 
         # Test gene fetch
@@ -183,7 +184,8 @@ class TestUnifiedBioThingsFetch:
                 return DrugInfo(**mock_drug_info)
 
         monkeypatch.setattr(
-            "biomcp.router.BioThingsClient", MockBioThingsClient
+            "biomcp.integrations.biothings_client.BioThingsClient",
+            MockBioThingsClient,
         )
 
         # Test drug fetch
@@ -218,7 +220,8 @@ class TestUnifiedBioThingsFetch:
                 return DiseaseInfo(**mock_disease_info)
 
         monkeypatch.setattr(
-            "biomcp.router.BioThingsClient", MockBioThingsClient
+            "biomcp.integrations.biothings_client.BioThingsClient",
+            MockBioThingsClient,
         )
 
         # Test disease fetch

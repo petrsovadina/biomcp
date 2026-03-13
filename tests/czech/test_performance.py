@@ -6,7 +6,6 @@ Verifies:
 - SC-004: MKN-10 accuracy >= 95% against sample codes
 """
 
-import json
 import time
 from unittest.mock import patch
 
@@ -21,23 +20,34 @@ class TestSearchLatency:
     @pytest.mark.asyncio
     async def test_sukl_search_cached_under_100ms(self):
         """Cached SUKL search should return in < 100ms."""
+        from unittest.mock import AsyncMock
+
+        from biomcp.czech.sukl.drug_index import (
+            DrugIndex,
+            _detail_to_entry,
+        )
         from biomcp.czech.sukl.search import _sukl_drug_search
 
-        with (
-            patch(
-                "biomcp.czech.sukl.search.get_cached_response",
-                return_value=json.dumps(["001", "002"]),
-            ),
-            patch(
-                "biomcp.czech.sukl.search._fetch_drug_detail",
-                return_value=None,
-            ),
+        idx = DrugIndex()
+        idx._entries = [
+            _detail_to_entry({
+                "kodSUKL": "001",
+                "nazev": "TEST DRUG",
+            }),
+        ]
+        idx._built_at = 9999999999.0
+
+        with patch(
+            "biomcp.czech.sukl.search.get_drug_index",
+            new_callable=AsyncMock,
+            return_value=idx,
         ):
             start = time.monotonic()
             await _sukl_drug_search("test")
             elapsed = time.monotonic() - start
             assert elapsed < 0.1, (
-                f"Cached search took {elapsed:.3f}s (> 100ms)"
+                f"Cached search took {elapsed:.3f}s"
+                " (> 100ms)"
             )
 
     @pytest.mark.asyncio

@@ -151,7 +151,13 @@ class CBioPortalSearchClient(CBioPortalCoreClient):
             )
             if not error and cancer_types:
                 # Build lookup by ID
-                for ct in cancer_types:
+                # API returns list but adapter types as dict
+                ct_list: list[dict[str, Any]] = (
+                    cancer_types
+                    if isinstance(cancer_types, list)
+                    else [cancer_types]
+                )
+                for ct in ct_list:
                     ct_id = ct.get("cancerTypeId")
                     if ct_id:
                         _cancer_type_cache[ct_id] = ct

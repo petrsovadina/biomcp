@@ -7,67 +7,120 @@ import pytest
 
 
 class TestSuklSearchInternals:
-    """Test internal search functions."""
+    """Test internal search functions via DrugIndex."""
 
-    def test_matches_query_by_name(self):
-        from biomcp.czech.sukl.search import _matches_query
+    def test_search_matches_by_name(self):
+        from biomcp.czech.sukl.drug_index import (
+            DrugIndex,
+            _detail_to_entry,
+            search_index,
+        )
 
-        detail = {
+        entry = _detail_to_entry({
+            "kodSUKL": "0000123",
             "nazev": "NUROFEN 400MG",
             "doplnek": "",
             "ATCkod": "",
             "drzitelKod": "",
-        }
-        assert _matches_query(detail, "nurofen") is True
+        })
+        idx = DrugIndex()
+        idx._entries = [entry]
+        idx._built_at = 9999999999.0
+        results, total = search_index(idx, "nurofen")
+        assert total == 1
 
-    def test_matches_query_by_atc(self):
-        from biomcp.czech.sukl.search import _matches_query
+    def test_search_matches_by_atc(self):
+        from biomcp.czech.sukl.drug_index import (
+            DrugIndex,
+            _detail_to_entry,
+            search_index,
+        )
 
-        detail = {
+        entry = _detail_to_entry({
+            "kodSUKL": "0000123",
             "nazev": "",
             "doplnek": "",
             "ATCkod": "M01AE01",
             "drzitelKod": "",
-        }
-        assert _matches_query(detail, "m01ae01") is True
+        })
+        idx = DrugIndex()
+        idx._entries = [entry]
+        idx._built_at = 9999999999.0
+        results, total = search_index(idx, "m01ae01")
+        assert total == 1
 
-    def test_matches_query_by_holder(self):
-        from biomcp.czech.sukl.search import _matches_query
+    def test_search_matches_by_holder(self):
+        from biomcp.czech.sukl.drug_index import (
+            DrugIndex,
+            _detail_to_entry,
+            search_index,
+        )
 
-        detail = {
+        entry = _detail_to_entry({
+            "kodSUKL": "0000123",
             "nazev": "",
             "doplnek": "",
             "ATCkod": "",
             "drzitelKod": "Reckitt Benckiser",
-        }
-        assert _matches_query(detail, "reckitt") is True
+        })
+        idx = DrugIndex()
+        idx._entries = [entry]
+        idx._built_at = 9999999999.0
+        results, total = search_index(idx, "reckitt")
+        assert total == 1
 
-    def test_matches_query_no_match(self):
-        from biomcp.czech.sukl.search import _matches_query
+    def test_search_no_match(self):
+        from biomcp.czech.sukl.drug_index import (
+            DrugIndex,
+            _detail_to_entry,
+            search_index,
+        )
 
-        detail = {
+        entry = _detail_to_entry({
+            "kodSUKL": "0000123",
             "nazev": "ABC",
             "doplnek": "",
             "ATCkod": "",
             "drzitelKod": "",
-        }
-        assert _matches_query(detail, "xyz") is False
+        })
+        idx = DrugIndex()
+        idx._entries = [entry]
+        idx._built_at = 9999999999.0
+        results, total = search_index(idx, "xyz")
+        assert total == 0
 
-    def test_matches_query_none_detail(self):
-        from biomcp.czech.sukl.search import _matches_query
+    def test_search_empty_query(self):
+        from biomcp.czech.sukl.drug_index import (
+            DrugIndex,
+            _detail_to_entry,
+            search_index,
+        )
 
-        assert _matches_query(None, "test") is False
+        entry = _detail_to_entry({
+            "kodSUKL": "0000123",
+            "nazev": "TEST",
+        })
+        idx = DrugIndex()
+        idx._entries = [entry]
+        idx._built_at = 9999999999.0
+        results, total = search_index(idx, "")
+        assert total == 0
 
-    def test_detail_to_summary(self):
-        from biomcp.czech.sukl.search import _detail_to_summary
+    def test_entry_to_summary(self):
+        from biomcp.czech.sukl.drug_index import (
+            _detail_to_entry,
+        )
+        from biomcp.czech.sukl.search import (
+            _entry_to_summary,
+        )
 
-        detail = {
+        entry = _detail_to_entry({
             "kodSUKL": "0000123",
             "nazev": "NUROFEN",
             "ATCkod": "M01AE01",
             "lekovaFormaKod": "TBL FLM",
-        }
-        s = _detail_to_summary(detail)
+        })
+        s = _entry_to_summary(entry)
         assert s["sukl_code"] == "0000123"
         assert s["name"] == "NUROFEN"
         assert s["atc_code"] == "M01AE01"

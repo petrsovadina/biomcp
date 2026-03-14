@@ -103,8 +103,29 @@ def run_http_server(host: str, port: int, mode: ServerMode):
             async def health_check(request):
                 return JSONResponse({"status": "healthy"})
 
-            health_route = Route("/health", health_check, methods=["GET"])
+            health_route = Route(
+                "/health", health_check, methods=["GET"]
+            )
             app.routes.append(health_route)
+
+            # Serve static landing page if available
+            import pathlib
+
+            static_dir = pathlib.Path("/app/static")
+            if static_dir.is_dir():
+                from starlette.staticfiles import StaticFiles
+
+                app.mount(
+                    "/",
+                    StaticFiles(
+                        directory=str(static_dir),
+                        html=True,
+                    ),
+                    name="static",
+                )
+                logger.info(
+                    f"Serving landing page from {static_dir}"
+                )
 
         uvicorn.run(
             app,

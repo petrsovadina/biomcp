@@ -7,7 +7,7 @@ thinking capabilities.
 
 import json
 import logging
-from typing import Annotated, Any, Literal
+from typing import Annotated, Literal
 
 from pydantic import Field
 
@@ -16,10 +16,8 @@ from biomcp.constants import (
     DEFAULT_PAGE_SIZE,
     DEFAULT_TITLE,
     ERROR_DOMAIN_REQUIRED,
-    ESTIMATED_ADDITIONAL_RESULTS,
     MAX_RESULTS_PER_DOMAIN_DEFAULT,
     VALID_DOMAINS,
-    compute_skip,
 )
 from biomcp.core import mcp_app
 from biomcp.domain_handlers import get_domain_handler
@@ -27,11 +25,9 @@ from biomcp.exceptions import (
     InvalidDomainError,
     InvalidParameterError,
     QueryParsingError,
-    ResultParsingError,
     SearchExecutionError,
 )
 from biomcp.fetch_handlers import FETCH_HANDLERS
-from biomcp.integrations.biothings_client import BioThingsClient
 from biomcp.metrics import track_performance
 from biomcp.parameter_parser import ParameterParser
 from biomcp.query_parser import QueryParser
@@ -120,7 +116,7 @@ def format_results(
 # ────────────────────────────
 @mcp_app.tool()
 @track_performance("biomcp.search")
-async def search(  # noqa: C901
+async def search(
     query: Annotated[
         str,
         "Unified search query (e.g., 'gene:BRAF AND trials.condition:melanoma'). If provided, other parameters are ignored.",
@@ -368,539 +364,46 @@ async def search(  # noqa: C901
         f"genes={genes}, diseases={diseases}, variants={variants}"
     )
 
-    if domain == "article":
-        from .router_handlers import handle_article_search
-
-        items, total = await handle_article_search(
-            genes=genes,
-            diseases=diseases,
-            variants=variants,
-            chemicals=chemicals,
-            keywords=keywords,
-            page=page,
-            page_size=page_size,
-        )
-
-        return format_results(
-            items,
-            domain="article",
-            page=page,
-            page_size=page_size,
-            total=total,
-        )
-
-    elif domain == "trial":
-        logger.info("Executing trial search")
-        # Build the trial search parameters
-        search_params: dict[str, Any] = {}
-        if conditions:
-            search_params["conditions"] = conditions
-        if interventions:
-            search_params["interventions"] = interventions
-        if recruiting_status:
-            search_params["recruiting_status"] = recruiting_status
-        if phase:
-            try:
-                search_params["phase"] = ParameterParser.normalize_phase(phase)
-            except InvalidParameterError:
-                raise
-        if keywords:
-            search_params["keywords"] = keywords
-        if lat is not None:
-            search_params["lat"] = lat
-        if long is not None:
-            search_params["long"] = long
-        if distance is not None:
-            search_params["distance"] = distance
-
-        try:
-            from biomcp.trials.search import TrialQuery, search_trials
-
-            # Convert search_params to TrialQuery
-            trial_query = TrialQuery(**search_params, page_size=page_size)
-            result_str = await search_trials(trial_query, output_json=True)
-        except Exception as e:
-            logger.error(f"Trial search failed: {e}")
-            raise SearchExecutionError("trial", e) from e
-
-        # Parse the JSON results
-        try:
-            results = json.loads(result_str)
-        except (json.JSONDecodeError, TypeError) as e:
-            logger.error(f"Failed to parse trial results: {e}")
-            raise ResultParsingError("trial", e) from e
-
-        # Handle different response formats from the trials API
-        # The API can return either a dict with 'studies' key or a direct list
-        if isinstance(results, dict):
-            # ClinicalTrials.gov API v2 format with studies array
-            if "studies" in results:
-                items = results["studies"]
-                total = len(items)  # API doesn't provide total count
-            # Legacy format or error
-            elif "error" in results:
-                logger.warning(
-                    f"Trial API returned error: {results.get('error')}"
-                )
-                return format_results(
-                    [], domain="trial", page=page, page_size=page_size, total=0
-                )
-            else:
-                # Assume the dict itself is a single result
-                items = [results]
-                total = 1
-        elif isinstance(results, list):
-            # Direct list of results
-            items = results
-            total = len(items)
-        else:
-            items = []
-            total = 0
-
-        logger.info(f"Trial search returned {total} total results")
-
-        return format_results(
-            items, domain="trial", page=page, page_size=page_size, total=total
-        )
-
-    elif domain == "variant":
-        logger.info("Executing variant search")
-        # Build the variant search parameters
-        # Note: variant searcher expects single gene, not list
-        gene = genes[0] if genes else None
-
-        # Use keywords to search for significance if provided
-        keyword_list = keywords or []
-        if significance:
-            keyword_list.append(significance)
-
-        try:
-            from biomcp.variants.search import VariantQuery, search_variants
-
-            variant_query = VariantQuery(
-                gene=gene,
-                significance=significance,
-                size=page_size,
-                offset=compute_skip(page, page_size),
-            )
-            result_str = await search_variants(variant_query, output_json=True)
-        except Exception as e:
-            logger.error(f"Variant search failed: {e}")
-            raise SearchExecutionError("variant", e) from e
-
-        # Parse the JSON results
-        try:
-            all_results = json.loads(result_str)
-        except (json.JSONDecodeError, TypeError) as e:
-            logger.error(f"Failed to parse variant results: {e}")
-            raise ResultParsingError("variant", e) from e
-
-        # For variants, the results are already paginated by the API
-        # We need to estimate total based on whether we got a full page
-        items = all_results if isinstance(all_results, list) else []
-        # Rough estimate: if we got a full page, there might be more
-        total = len(items) + (
-            ESTIMATED_ADDITIONAL_RESULTS if len(items) == page_size else 0
-        )
-
-        logger.info(f"Variant search returned {len(items)} results")
-
-        return format_results(
-            items,
-            domain="variant",
-            page=page,
-            page_size=page_size,
-            total=total,
-        )
-
-    elif domain == "gene":
-        logger.info("Executing gene search")
-        # Build the gene search query
-        query_str = keywords[0] if keywords else genes[0] if genes else ""
-
-        if not query_str:
-            raise InvalidParameterError(
-                "keywords or genes", None, "a gene symbol or search term"
-            )
-
-        try:
-            client = BioThingsClient()
-            # For search, query by symbol/name
-            results = await client._query_gene(query_str)
-
-            if not results:
-                items = []
-                total = 0
-            else:
-                # Fetch full details for each result (limited by page_size)
-                items = []
-                for result in results[:page_size]:
-                    gene_id = result.get("_id")
-                    if gene_id:
-                        full_gene = await client._get_gene_by_id(gene_id)
-                        if full_gene:
-                            items.append(full_gene.model_dump())
-
-                total = len(results)
-
-        except Exception as e:
-            logger.error(f"Gene search failed: {e}")
-            raise SearchExecutionError("gene", e) from e
-
-        logger.info(f"Gene search returned {len(items)} results")
-
-        return format_results(
-            items,
-            domain="gene",
-            page=page,
-            page_size=page_size,
-            total=total,
-        )
-
-    elif domain == "drug":
-        logger.info("Executing drug search")
-        # Build the drug search query
-        query_str = (
-            keywords[0] if keywords else chemicals[0] if chemicals else ""
-        )
-
-        if not query_str:
-            raise InvalidParameterError(
-                "keywords or chemicals", None, "a drug name or search term"
-            )
-
-        try:
-            client = BioThingsClient()
-            # For search, query by name
-            results = await client._query_drug(query_str)
-
-            if not results:
-                items = []
-                total = 0
-            else:
-                # Fetch full details for each result (limited by page_size)
-                items = []
-                for result in results[:page_size]:
-                    drug_id = result.get("_id")
-                    if drug_id:
-                        full_drug = await client._get_drug_by_id(drug_id)
-                        if full_drug:
-                            items.append(full_drug.model_dump(by_alias=True))
-
-                total = len(results)
-
-        except Exception as e:
-            logger.error(f"Drug search failed: {e}")
-            raise SearchExecutionError("drug", e) from e
-
-        logger.info(f"Drug search returned {len(items)} results")
-
-        return format_results(
-            items,
-            domain="drug",
-            page=page,
-            page_size=page_size,
-            total=total,
-        )
-
-    elif domain == "disease":
-        logger.info("Executing disease search")
-        # Build the disease search query
-        query_str = (
-            keywords[0] if keywords else diseases[0] if diseases else ""
-        )
-
-        if not query_str:
-            raise InvalidParameterError(
-                "keywords or diseases", None, "a disease name or search term"
-            )
-
-        try:
-            client = BioThingsClient()
-            # For search, query by name
-            results = await client._query_disease(query_str)
-
-            if not results:
-                items = []
-                total = 0
-            else:
-                # Fetch full details for each result (limited by page_size)
-                items = []
-                for result in results[:page_size]:
-                    disease_id = result.get("_id")
-                    if disease_id:
-                        full_disease = await client._get_disease_by_id(
-                            disease_id
-                        )
-                        if full_disease:
-                            items.append(
-                                full_disease.model_dump(by_alias=True)
-                            )
-
-                total = len(results)
-
-        except Exception as e:
-            logger.error(f"Disease search failed: {e}")
-            raise SearchExecutionError("disease", e) from e
-
-        logger.info(f"Disease search returned {len(items)} results")
-
-        return format_results(
-            items,
-            domain="disease",
-            page=page,
-            page_size=page_size,
-            total=total,
-        )
-
-    elif domain == "nci_organization":
-        from .router_handlers import handle_nci_organization_search
-
-        # Extract NCI-specific parameters
-        organization_type = keywords[0] if keywords else None
-        city = None
-        state = None
-        name = keywords[0] if keywords else None
-
-        # Try to parse location from keywords
-        if keywords and len(keywords) >= 2:
-            # Assume last two keywords might be city, state
-            city = keywords[-2]
-            state = keywords[-1]
-            if len(state) == 2 and state.isupper():
-                # Likely a state code
-                name = " ".join(keywords[:-2]) if len(keywords) > 2 else None
-            else:
-                # Not a state code, use all as name
-                city = None
-                state = None
-                name = " ".join(keywords)
-
-        items, total = await handle_nci_organization_search(
-            name=name,
-            organization_type=organization_type,
-            city=city,
-            state=state,
-            api_key=api_key,
-            page=page,
-            page_size=page_size,
-        )
-
-        return format_results(
-            items,
-            domain="nci_organization",
-            page=page,
-            page_size=page_size,
-            total=total,
-        )
-
-    elif domain == "nci_intervention":
-        from .router_handlers import handle_nci_intervention_search
-
-        # Extract parameters
-        name = keywords[0] if keywords else None
-        intervention_type = None  # Could be parsed from additional params
-
-        items, total = await handle_nci_intervention_search(
-            name=name,
-            intervention_type=intervention_type,
-            synonyms=True,
-            api_key=api_key,
-            page=page,
-            page_size=page_size,
-        )
-
-        return format_results(
-            items,
-            domain="nci_intervention",
-            page=page,
-            page_size=page_size,
-            total=total,
-        )
-
-    elif domain == "nci_biomarker":
-        from .router_handlers import handle_nci_biomarker_search
-
-        # Extract parameters
-        name = keywords[0] if keywords else None
-        gene = genes[0] if genes else None
-
-        items, total = await handle_nci_biomarker_search(
-            name=name,
-            gene=gene,
-            biomarker_type=None,
-            assay_type=None,
-            api_key=api_key,
-            page=page,
-            page_size=page_size,
-        )
-
-        return format_results(
-            items,
-            domain="nci_biomarker",
-            page=page,
-            page_size=page_size,
-            total=total,
-        )
-
-    elif domain == "nci_disease":
-        from .router_handlers import handle_nci_disease_search
-
-        # Extract parameters
-        name = diseases[0] if diseases else keywords[0] if keywords else None
-
-        items, total = await handle_nci_disease_search(
-            name=name,
-            include_synonyms=True,
-            category=None,
-            api_key=api_key,
-            page=page,
-            page_size=page_size,
-        )
-
-        return format_results(
-            items,
-            domain="nci_disease",
-            page=page,
-            page_size=page_size,
-            total=total,
-        )
-
-    # OpenFDA domains
-    elif domain == "fda_adverse":
-        from biomcp.openfda import search_adverse_events
-
-        drug_name = (
-            chemicals[0] if chemicals else keywords[0] if keywords else None
-        )
-        skip = compute_skip(page, page_size)
-        fda_result = await search_adverse_events(
-            drug=drug_name,
-            limit=page_size,
-            skip=skip,
-            api_key=api_key,
-        )
-        # Parse the markdown result to extract items
-        # For simplicity, return the result as a single item
-        return {"results": [{"content": fda_result}]}
-
-    elif domain == "fda_label":
-        from biomcp.openfda import search_drug_labels
-
-        drug_name = (
-            chemicals[0] if chemicals else keywords[0] if keywords else None
-        )
-        skip = compute_skip(page, page_size)
-        fda_result = await search_drug_labels(
-            name=drug_name,
-            limit=page_size,
-            skip=skip,
-            api_key=api_key,
-        )
-        return {"results": [{"content": fda_result}]}
-
-    elif domain == "fda_device":
-        from biomcp.openfda import search_device_events
-
-        device_name = keywords[0] if keywords else None
-        skip = compute_skip(page, page_size)
-        fda_result = await search_device_events(
-            device=device_name,
-            limit=page_size,
-            skip=skip,
-            api_key=api_key,
-        )
-        return {"results": [{"content": fda_result}]}
-
-    elif domain == "fda_approval":
-        from biomcp.openfda import search_drug_approvals
-
-        drug_name = (
-            chemicals[0] if chemicals else keywords[0] if keywords else None
-        )
-        skip = compute_skip(page, page_size)
-        fda_result = await search_drug_approvals(
-            drug=drug_name,
-            limit=page_size,
-            skip=skip,
-            api_key=api_key,
-        )
-        return {"results": [{"content": fda_result}]}
-
-    elif domain == "fda_recall":
-        from biomcp.openfda import search_drug_recalls
-
-        drug_name = (
-            chemicals[0] if chemicals else keywords[0] if keywords else None
-        )
-        skip = compute_skip(page, page_size)
-        fda_result = await search_drug_recalls(
-            drug=drug_name,
-            limit=page_size,
-            skip=skip,
-            api_key=api_key,
-        )
-        return {"results": [{"content": fda_result}]}
-
-    elif domain == "fda_shortage":
-        from biomcp.openfda import search_drug_shortages
-
-        drug_name = (
-            chemicals[0] if chemicals else keywords[0] if keywords else None
-        )
-        skip = compute_skip(page, page_size)
-        fda_result = await search_drug_shortages(
-            drug=drug_name,
-            limit=page_size,
-            skip=skip,
-            api_key=api_key,
-        )
-        return {"results": [{"content": fda_result}]}
-
-    # Czech healthcare domains
-    elif domain == "sukl_drug":
-        from biomcp.czech.sukl.search import _sukl_drug_search
-
-        query_str = keywords[0] if keywords else query
-        czech_result: str = await _sukl_drug_search(query_str, page, page_size)
-        return {"results": [{"content": czech_result}]}
-
-    elif domain == "mkn_diagnosis":
-        from biomcp.czech.mkn.search import _mkn_search
-
-        query_str = keywords[0] if keywords else query
-        czech_result = await _mkn_search(query_str, page_size)
-        return {"results": [{"content": czech_result}]}
-
-    elif domain == "nrpzs_provider":
-        from biomcp.czech.nrpzs.search import _nrpzs_search
-
-        query_str = keywords[0] if keywords else query
-        city = None
-        specialty = None
-        czech_result = await _nrpzs_search(
-            query_str, city, specialty, page, page_size
-        )
-        return {"results": [{"content": czech_result}]}
-
-    elif domain == "szv_procedure":
-        from biomcp.czech.szv.search import _szv_search
-
-        query_str = keywords[0] if keywords else query
-        czech_result = await _szv_search(query_str, page_size)
-        return {"results": [{"content": czech_result}]}
-
-    elif domain == "vzp_reimbursement":
-        from biomcp.czech.vzp.drug_reimbursement import (
-            _get_vzp_drug_reimbursement,
-        )
-
-        query_str = keywords[0] if keywords else query
-        czech_result = await _get_vzp_drug_reimbursement(query_str)
-        return {"results": [{"content": czech_result}]}
-
-    else:
+    # Dispatch to domain-specific search handler
+    from .router_handlers import SEARCH_HANDLERS
+
+    handler = SEARCH_HANDLERS.get(domain)
+    if handler is None:
         raise InvalidDomainError(domain, VALID_DOMAINS)
+
+    result = await handler(
+        query=query,
+        genes=genes,
+        diseases=diseases,
+        variants=variants,
+        chemicals=chemicals,
+        keywords=keywords,
+        conditions=conditions,
+        interventions=interventions,
+        recruiting_status=recruiting_status,
+        phase=phase,
+        significance=significance,
+        lat=lat,
+        long=long,
+        distance=distance,
+        api_key=api_key,
+        page=page,
+        page_size=page_size,
+    )
+
+    # Handlers return either (items, total) tuple
+    # or a dict (raw response for FDA/Czech domains)
+    if isinstance(result, tuple):
+        items, total = result
+        return format_results(
+            items,
+            domain=domain,
+            page=page,
+            page_size=page_size,
+            total=total,
+        )
+
+    return result
 
 
 # ────────────────────────────
@@ -923,7 +426,6 @@ async def fetch(
             "disease",
             "nci_organization",
             "nci_intervention",
-            "nci_biomarker",
             "nci_disease",
             "fda_adverse",
             "fda_label",

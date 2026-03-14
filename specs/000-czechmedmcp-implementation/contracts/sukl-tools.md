@@ -2,11 +2,11 @@
 
 ## Existing Tools (rename only)
 
-### czechmed_search_drug (was: sukl_drug_searcher)
+### czechmed_search_medicine (was: sukl_drug_searcher → czechmed_search_drug → v2.1 rename)
 
 ```python
 @mcp_app.tool()
-async def czechmed_search_drug(
+async def czechmed_search_medicine(
     query: Annotated[str, Field(description="Drug name, active substance, SUKL code, or ATC code")],
     page: Annotated[int, Field(description="Page number (1-based)", ge=1)] = 1,
     page_size: Annotated[int, Field(description="Results per page", ge=1, le=100)] = 10,
@@ -14,11 +14,11 @@ async def czechmed_search_drug(
     """Search Czech drug registry (SUKL). Supports diacritics-insensitive search."""
 ```
 
-### czechmed_get_drug_detail (was: sukl_drug_getter)
+### czechmed_get_medicine_detail (was: sukl_drug_getter → czechmed_get_drug_detail → v2.1 rename)
 
 ```python
 @mcp_app.tool()
-async def czechmed_get_drug_detail(
+async def czechmed_get_medicine_detail(
     sukl_code: Annotated[str, Field(description="7-digit SUKL code", pattern=r"^\d{7}$")],
 ) -> str:
     """Get complete drug details from SUKL registry by SUKL code."""

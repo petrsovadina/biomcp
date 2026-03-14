@@ -1,6 +1,12 @@
 # Tasks: CzechMedMCP Implementation
 
-**Input**: Design documents from `/specs/001-czechmedmcp-implementation/`
+> **Stav (2026-03-13)**: Fáze 1-11 implementovány (14→23 českých nástrojů).
+> Tool názvy přejmenovány v rámci v2.1 spec (viz kontrakty).
+> Task tracker nebyl průběžně aktualizován — skutečný stav implementace
+> je o dost dále než ukazují checkboxy níže. Viz `specs/002-codebase-stabilization/`
+> pro aktuální stabilizační práce.
+
+**Input**: Design documents from `/specs/000-czechmedmcp-implementation/`
 **Prerequisites**: plan.md, spec.md, research.md, data-model.md, contracts/
 
 **Tests**: Unit tests included per Constitution Principle V (Testing Rigor) — all new features MUST include unit tests with mocked HTTP.

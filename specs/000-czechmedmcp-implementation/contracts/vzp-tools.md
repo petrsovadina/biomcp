@@ -2,11 +2,11 @@
 
 ## Repurposed Tools
 
-### czechmed_get_vzp_reimbursement (was: vzp_codebook_searcher — repurposed)
+### czechmed_get_drug_reimbursement (was: vzp_codebook_searcher → czechmed_get_vzp_reimbursement → v2.1 rename)
 
 ```python
 @mcp_app.tool()
-async def czechmed_get_vzp_reimbursement(
+async def czechmed_get_drug_reimbursement(
     sukl_code: Annotated[str, Field(description="7-digit SUKL code", pattern=r"^\d{7}$")],
 ) -> str:
     """Get VZP drug reimbursement details — group, max price, coverage, copay, prescription conditions."""

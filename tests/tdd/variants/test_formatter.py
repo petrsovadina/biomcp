@@ -1,6 +1,6 @@
 """Tests for variant formatter module."""
 
-from biomcp.variants.formatter import (
+from czechmedmcp.variants.formatter import (
     _consolidate_clinical,
     _consolidate_databases,
     _consolidate_external,

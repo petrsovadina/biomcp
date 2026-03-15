@@ -2,8 +2,8 @@
 
 import pytest
 
-from biomcp.utils.mutation_filter import MutationFilter
-from biomcp.variants.cbioportal_mutations import (
+from czechmedmcp.utils.mutation_filter import MutationFilter
+from czechmedmcp.variants.cbioportal_mutations import (
     CBioPortalMutationClient,
     MutationHit,
     StudyMutationSummary,
@@ -141,7 +141,7 @@ class TestCBioPortalMutationSearch:
 
     def test_format_mutation_search_result(self):
         """Test formatting of mutation search results."""
-        from biomcp.variants.cbioportal_mutations import MutationSearchResult
+        from czechmedmcp.variants.cbioportal_mutations import MutationSearchResult
 
         result = MutationSearchResult(
             gene="SRSF2",

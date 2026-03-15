@@ -5,7 +5,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from biomcp.openfda.drug_shortages import (
+from czechmedmcp.openfda.drug_shortages import (
     get_drug_shortage,
     search_drug_shortages,
 )
@@ -18,7 +18,7 @@ class TestDrugShortages:
     async def test_search_drug_shortages_no_data_available(self):
         """Test drug shortage search when FDA data is unavailable."""
         with patch(
-            "biomcp.openfda.drug_shortages._get_cached_shortage_data",
+            "czechmedmcp.openfda.drug_shortages._get_cached_shortage_data",
             new_callable=AsyncMock,
         ) as mock_get_data:
             mock_get_data.return_value = None
@@ -40,7 +40,7 @@ class TestDrugShortages:
     async def test_get_drug_shortage_no_data_available(self):
         """Test getting specific drug shortage when FDA data is unavailable."""
         with patch(
-            "biomcp.openfda.drug_shortages._get_cached_shortage_data",
+            "czechmedmcp.openfda.drug_shortages._get_cached_shortage_data",
             new_callable=AsyncMock,
         ) as mock_get_data:
             mock_get_data.return_value = None
@@ -55,7 +55,7 @@ class TestDrugShortages:
     async def test_mock_data_not_used_in_production(self):
         """Test that mock data is never returned in production scenarios."""
         with patch(
-            "biomcp.openfda.drug_shortages._get_cached_shortage_data",
+            "czechmedmcp.openfda.drug_shortages._get_cached_shortage_data",
             new_callable=AsyncMock,
         ) as mock_get_data:
             # Simulate no data available (cache miss and fetch failure)
@@ -102,7 +102,7 @@ class TestDrugShortages:
         }
 
         with patch(
-            "biomcp.openfda.drug_shortages._get_cached_shortage_data",
+            "czechmedmcp.openfda.drug_shortages._get_cached_shortage_data",
             new_callable=AsyncMock,
         ) as mock_get_data:
             mock_get_data.return_value = mock_data
@@ -146,7 +146,7 @@ class TestDrugShortages:
         }
 
         with patch(
-            "biomcp.openfda.drug_shortages._get_cached_shortage_data",
+            "czechmedmcp.openfda.drug_shortages._get_cached_shortage_data",
             new_callable=AsyncMock,
         ) as mock_get_data:
             mock_get_data.return_value = mock_data
@@ -173,7 +173,7 @@ class TestDrugShortages:
         }
 
         with patch(
-            "biomcp.openfda.drug_shortages._get_cached_shortage_data",
+            "czechmedmcp.openfda.drug_shortages._get_cached_shortage_data",
             new_callable=AsyncMock,
         ) as mock_get_data:
             mock_get_data.return_value = mock_data
@@ -198,7 +198,7 @@ class TestDrugShortages:
         }
 
         with patch(
-            "biomcp.openfda.drug_shortages._get_cached_shortage_data",
+            "czechmedmcp.openfda.drug_shortages._get_cached_shortage_data",
             new_callable=AsyncMock,
         ) as mock_get_data:
             mock_get_data.return_value = mock_data

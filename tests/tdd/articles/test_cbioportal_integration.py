@@ -4,8 +4,8 @@ import json
 
 import pytest
 
-from biomcp.articles.search import PubmedRequest
-from biomcp.articles.unified import search_articles_unified
+from czechmedmcp.articles.search import PubmedRequest
+from czechmedmcp.articles.unified import search_articles_unified
 
 
 class TestArticleCBioPortalIntegration:

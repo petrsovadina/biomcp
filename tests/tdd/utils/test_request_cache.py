@@ -4,7 +4,7 @@ import asyncio
 
 import pytest
 
-from biomcp.utils.request_cache import (
+from czechmedmcp.utils.request_cache import (
     clear_cache,
     get_cached,
     request_cache,

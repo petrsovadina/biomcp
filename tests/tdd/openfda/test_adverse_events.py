@@ -6,7 +6,7 @@ from unittest.mock import patch
 
 import pytest
 
-from biomcp.openfda.adverse_events import (
+from czechmedmcp.openfda.adverse_events import (
     get_adverse_event,
     search_adverse_events,
 )
@@ -44,7 +44,7 @@ async def test_search_adverse_events_by_drug():
     }
 
     with patch(
-        "biomcp.openfda.adverse_events.make_openfda_request"
+        "czechmedmcp.openfda.adverse_events.make_openfda_request"
     ) as mock_request:
         mock_request.return_value = (mock_response, None)
 
@@ -81,7 +81,7 @@ async def test_search_adverse_events_by_reaction():
     }
 
     with patch(
-        "biomcp.openfda.adverse_events.make_openfda_request"
+        "czechmedmcp.openfda.adverse_events.make_openfda_request"
     ) as mock_request:
         mock_request.return_value = (mock_response, None)
 
@@ -111,7 +111,7 @@ async def test_search_adverse_events_no_params():
 async def test_search_adverse_events_no_results():
     """Test handling when no results are found."""
     with patch(
-        "biomcp.openfda.adverse_events.make_openfda_request"
+        "czechmedmcp.openfda.adverse_events.make_openfda_request"
     ) as mock_request:
         mock_request.return_value = ({"results": []}, None)
 
@@ -125,7 +125,7 @@ async def test_search_adverse_events_no_results():
 async def test_search_adverse_events_error():
     """Test error handling in adverse event search."""
     with patch(
-        "biomcp.openfda.adverse_events.make_openfda_request"
+        "czechmedmcp.openfda.adverse_events.make_openfda_request"
     ) as mock_request:
         mock_request.return_value = (None, "API rate limit exceeded")
 
@@ -168,7 +168,7 @@ async def test_get_adverse_event_detail():
     }
 
     with patch(
-        "biomcp.openfda.adverse_events.make_openfda_request"
+        "czechmedmcp.openfda.adverse_events.make_openfda_request"
     ) as mock_request:
         mock_request.return_value = (mock_response, None)
 
@@ -196,7 +196,7 @@ async def test_get_adverse_event_detail():
 async def test_get_adverse_event_not_found():
     """Test handling when adverse event report is not found."""
     with patch(
-        "biomcp.openfda.adverse_events.make_openfda_request"
+        "czechmedmcp.openfda.adverse_events.make_openfda_request"
     ) as mock_request:
         mock_request.return_value = ({"results": []}, None)
 

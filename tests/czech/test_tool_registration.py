@@ -34,8 +34,8 @@ class TestToolRegistration:
 
     def test_all_czech_tools_registered(self):
         """All 23 Czech tools must be registered."""
-        import biomcp.czech.czech_tools  # noqa: F401
-        from biomcp.core import mcp_app
+        import czechmedmcp.czech.czech_tools  # noqa: F401
+        from czechmedmcp.core import mcp_app
 
         tool_names = [
             t.name
@@ -49,8 +49,8 @@ class TestToolRegistration:
 
     def test_czech_tool_count(self):
         """Exactly 23 Czech tools registered."""
-        import biomcp.czech.czech_tools  # noqa: F401
-        from biomcp.core import mcp_app
+        import czechmedmcp.czech.czech_tools  # noqa: F401
+        from czechmedmcp.core import mcp_app
 
         tool_names = [
             t.name
@@ -63,8 +63,8 @@ class TestToolRegistration:
 
     def test_global_tools_still_present(self):
         """Global BioMCP tools coexist with Czech tools."""
-        import biomcp.czech.czech_tools  # noqa: F401
-        from biomcp.core import mcp_app
+        import czechmedmcp.czech.czech_tools  # noqa: F401
+        from czechmedmcp.core import mcp_app
 
         tool_names = [
             t.name

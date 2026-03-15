@@ -2,8 +2,8 @@
 
 import asyncio
 
-from biomcp.articles.preprints import EuropePMCClient
-from biomcp.variants.external import ExternalVariantAggregator
+from czechmedmcp.articles.preprints import EuropePMCClient
+from czechmedmcp.variants.external import ExternalVariantAggregator
 
 
 async def test_preprints():

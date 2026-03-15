@@ -6,7 +6,7 @@ from unittest.mock import patch
 import pytest
 from typer.testing import CliRunner
 
-from biomcp.cli.main import app
+from czechmedmcp.cli.main import app
 
 runner = CliRunner()
 
@@ -99,7 +99,7 @@ Binds to PD-1 receptor to block interaction with PD-L1 and PD-L2...
 class TestDrugGetCommand:
     """Test the 'drug get' command."""
 
-    @patch("biomcp.cli.drugs.get_drug")
+    @patch("czechmedmcp.cli.drugs.get_drug")
     def test_get_drug_by_name_imatinib(
         self, mock_get_drug, mock_drug_info_imatinib
     ):
@@ -114,7 +114,7 @@ class TestDrugGetCommand:
         assert "ChEMBL ID**: CHEMBL941" in result.stdout
         mock_get_drug.assert_called_once()
 
-    @patch("biomcp.cli.drugs.get_drug")
+    @patch("czechmedmcp.cli.drugs.get_drug")
     def test_get_drug_by_name_aspirin(
         self, mock_get_drug, mock_drug_info_aspirin
     ):
@@ -128,7 +128,7 @@ class TestDrugGetCommand:
         assert "DrugBank ID**: DB00945" in result.stdout
         mock_get_drug.assert_called_once()
 
-    @patch("biomcp.cli.drugs.get_drug")
+    @patch("czechmedmcp.cli.drugs.get_drug")
     def test_get_drug_multiword_name_quoted(
         self, mock_get_drug, mock_drug_info_multiword
     ):
@@ -142,7 +142,7 @@ class TestDrugGetCommand:
         assert "Abecma" in result.stdout
         mock_get_drug.assert_called_once()
 
-    @patch("biomcp.cli.drugs.get_drug")
+    @patch("czechmedmcp.cli.drugs.get_drug")
     def test_get_drug_multiword_name_pembrolizumab(
         self, mock_get_drug, mock_drug_info_pembrolizumab
     ):
@@ -156,7 +156,7 @@ class TestDrugGetCommand:
         assert "Keytruda" in result.stdout
         mock_get_drug.assert_called_once()
 
-    @patch("biomcp.cli.drugs.get_drug")
+    @patch("czechmedmcp.cli.drugs.get_drug")
     def test_get_drug_multiword_name_with_spaces(
         self, mock_get_drug, mock_drug_info_multiword
     ):
@@ -173,7 +173,7 @@ class TestDrugGetCommand:
         # Get the actual call arguments
         # The first argument should be the coroutine from get_drug()
 
-    @patch("biomcp.cli.drugs.get_drug")
+    @patch("czechmedmcp.cli.drugs.get_drug")
     def test_get_drug_by_drugbank_id(
         self, mock_get_drug, mock_drug_info_imatinib
     ):
@@ -187,7 +187,7 @@ class TestDrugGetCommand:
         assert "DB00619" in result.stdout
         mock_get_drug.assert_called_once()
 
-    @patch("biomcp.cli.drugs.get_drug")
+    @patch("czechmedmcp.cli.drugs.get_drug")
     def test_get_drug_by_chembl_id(
         self, mock_get_drug, mock_drug_info_aspirin
     ):
@@ -200,7 +200,7 @@ class TestDrugGetCommand:
         assert "Aspirin" in result.stdout or "CHEMBL25" in result.stdout
         mock_get_drug.assert_called_once()
 
-    @patch("biomcp.cli.drugs.get_drug")
+    @patch("czechmedmcp.cli.drugs.get_drug")
     def test_get_drug_not_found(self, mock_get_drug):
         """Test handling of non-existent drug."""
         error_msg = "Drug 'INVALID_DRUG_XYZ' not found in MyChem.info"
@@ -211,7 +211,7 @@ class TestDrugGetCommand:
         assert result.exit_code == 0
         assert "not found" in result.stdout
 
-    @patch("biomcp.cli.drugs.get_drug")
+    @patch("czechmedmcp.cli.drugs.get_drug")
     def test_get_drug_with_json_flag(self, mock_get_drug):
         """Test getting drug info with --json flag."""
         json_output = json.dumps(
@@ -238,7 +238,7 @@ class TestDrugGetCommand:
         assert "DB00619" in result.stdout
         mock_get_drug.assert_called_once()
 
-    @patch("biomcp.cli.drugs.get_drug")
+    @patch("czechmedmcp.cli.drugs.get_drug")
     def test_get_drug_with_json_short_flag(self, mock_get_drug):
         """Test getting drug info with -j short flag."""
         json_output = json.dumps(
@@ -252,7 +252,7 @@ class TestDrugGetCommand:
         assert "Imatinib" in result.stdout
         mock_get_drug.assert_called_once()
 
-    @patch("biomcp.cli.drugs.get_drug")
+    @patch("czechmedmcp.cli.drugs.get_drug")
     def test_get_drug_multiword_with_json(self, mock_get_drug):
         """Test getting multi-word drug name with JSON output."""
         json_output = json.dumps(
@@ -279,7 +279,7 @@ class TestDrugGetCommand:
 class TestDrugSearchCommand:
     """Test the 'drug search' command."""
 
-    @patch("biomcp.cli.drugs.get_drug")
+    @patch("czechmedmcp.cli.drugs.get_drug")
     def test_search_drugs_basic(self, mock_get_drug, mock_drug_info_imatinib):
         """Test basic drug search."""
         mock_get_drug.return_value = mock_drug_info_imatinib
@@ -290,7 +290,7 @@ class TestDrugSearchCommand:
         assert "Imatinib" in result.stdout
         mock_get_drug.assert_called_once()
 
-    @patch("biomcp.cli.drugs.get_drug")
+    @patch("czechmedmcp.cli.drugs.get_drug")
     def test_search_drugs_multiword_query(
         self, mock_get_drug, mock_drug_info_multiword
     ):
@@ -304,7 +304,7 @@ class TestDrugSearchCommand:
         assert "Drug:" in result.stdout or "kinase" in result.stdout
         mock_get_drug.assert_called_once()
 
-    @patch("biomcp.cli.drugs.get_drug")
+    @patch("czechmedmcp.cli.drugs.get_drug")
     def test_search_drugs_with_page(
         self, mock_get_drug, mock_drug_info_aspirin
     ):
@@ -320,7 +320,7 @@ class TestDrugSearchCommand:
         assert "development" in result.stdout.lower()
         mock_get_drug.assert_called_once()
 
-    @patch("biomcp.cli.drugs.get_drug")
+    @patch("czechmedmcp.cli.drugs.get_drug")
     def test_search_drugs_with_page_short_flag(
         self, mock_get_drug, mock_drug_info_aspirin
     ):
@@ -333,7 +333,7 @@ class TestDrugSearchCommand:
         assert "development" in result.stdout.lower()
         mock_get_drug.assert_called_once()
 
-    @patch("biomcp.cli.drugs.get_drug")
+    @patch("czechmedmcp.cli.drugs.get_drug")
     def test_search_drugs_with_page_size(
         self, mock_get_drug, mock_drug_info_imatinib
     ):
@@ -348,7 +348,7 @@ class TestDrugSearchCommand:
         assert "development" in result.stdout.lower()
         mock_get_drug.assert_called_once()
 
-    @patch("biomcp.cli.drugs.get_drug")
+    @patch("czechmedmcp.cli.drugs.get_drug")
     def test_search_drugs_with_pagination(
         self, mock_get_drug, mock_drug_info_aspirin
     ):
@@ -364,7 +364,7 @@ class TestDrugSearchCommand:
         assert "development" in result.stdout.lower()
         mock_get_drug.assert_called_once()
 
-    @patch("biomcp.cli.drugs.get_drug")
+    @patch("czechmedmcp.cli.drugs.get_drug")
     def test_search_drugs_with_json_output(self, mock_get_drug):
         """Test drug search with JSON output."""
         json_output = json.dumps(
@@ -383,7 +383,7 @@ class TestDrugSearchCommand:
         assert "Imatinib" in result.stdout
         mock_get_drug.assert_called_once()
 
-    @patch("biomcp.cli.drugs.get_drug")
+    @patch("czechmedmcp.cli.drugs.get_drug")
     def test_search_drugs_with_json_short_flag(self, mock_get_drug):
         """Test drug search with -j short flag."""
         json_output = json.dumps(
@@ -397,7 +397,7 @@ class TestDrugSearchCommand:
         assert "Imatinib" in result.stdout
         mock_get_drug.assert_called_once()
 
-    @patch("biomcp.cli.drugs.get_drug")
+    @patch("czechmedmcp.cli.drugs.get_drug")
     def test_search_drugs_multiword_with_json(self, mock_get_drug):
         """Test drug search with multi-word query and JSON output."""
         json_output = json.dumps(
@@ -411,7 +411,7 @@ class TestDrugSearchCommand:
         assert result.exit_code == 0
         mock_get_drug.assert_called_once()
 
-    @patch("biomcp.cli.drugs.get_drug")
+    @patch("czechmedmcp.cli.drugs.get_drug")
     def test_search_drugs_not_found(self, mock_get_drug):
         """Test drug search with no results."""
         error_msg = "Drug 'INVALID_QUERY_XYZ' not found in MyChem.info"
@@ -423,7 +423,7 @@ class TestDrugSearchCommand:
         assert "not found" in result.stdout
         mock_get_drug.assert_called_once()
 
-    @patch("biomcp.cli.drugs.get_drug")
+    @patch("czechmedmcp.cli.drugs.get_drug")
     def test_search_drugs_with_all_options(self, mock_get_drug):
         """Test drug search with all available options."""
         json_output = json.dumps({"name": "Imatinib"}, indent=2)
@@ -452,7 +452,7 @@ class TestDrugSearchCommand:
 class TestDrugCliIntegration:
     """Integration-style tests for drug CLI (still using mocks)."""
 
-    @patch("biomcp.cli.drugs.get_drug")
+    @patch("czechmedmcp.cli.drugs.get_drug")
     def test_get_drug_full_flow(self, mock_get_drug, mock_drug_info_imatinib):
         """Test full drug get flow with mocked output."""
         mock_get_drug.return_value = mock_drug_info_imatinib
@@ -465,7 +465,7 @@ class TestDrugCliIntegration:
         assert "DrugBank ID**: DB00619" in result.stdout
         assert "External Links" in result.stdout
 
-    @patch("biomcp.cli.drugs.get_drug")
+    @patch("czechmedmcp.cli.drugs.get_drug")
     def test_get_drug_with_trade_names(
         self, mock_get_drug, mock_drug_info_aspirin
     ):
@@ -478,7 +478,7 @@ class TestDrugCliIntegration:
         assert "Aspirin" in result.stdout
         assert "Trade Names" in result.stdout
 
-    @patch("biomcp.cli.drugs.get_drug")
+    @patch("czechmedmcp.cli.drugs.get_drug")
     def test_drug_command_error_handling(self, mock_get_drug):
         """Test error handling in drug commands."""
         error_msg = "Error retrieving drug information: API connection error"
@@ -521,7 +521,7 @@ class TestDrugCliIntegration:
 class TestDrugMultiWordUrlEncoding:
     """Specific tests for multi-word drug name URL encoding fix."""
 
-    @patch("biomcp.cli.drugs.get_drug")
+    @patch("czechmedmcp.cli.drugs.get_drug")
     def test_multiword_drug_idecabtagene_vicleucel(
         self, mock_get_drug, mock_drug_info_multiword
     ):
@@ -534,7 +534,7 @@ class TestDrugMultiWordUrlEncoding:
         assert "Idecabtagene Vicleucel" in result.stdout
         mock_get_drug.assert_called_once()
 
-    @patch("biomcp.cli.drugs.get_drug")
+    @patch("czechmedmcp.cli.drugs.get_drug")
     def test_multiword_drug_with_three_words(self, mock_get_drug):
         """Test drug name with three words."""
         mock_response = """## Drug: Test Drug Name
@@ -547,7 +547,7 @@ class TestDrugMultiWordUrlEncoding:
         assert "Drug:" in result.stdout
         mock_get_drug.assert_called_once()
 
-    @patch("biomcp.cli.drugs.get_drug")
+    @patch("czechmedmcp.cli.drugs.get_drug")
     def test_multiword_search_query(
         self, mock_get_drug, mock_drug_info_imatinib
     ):
@@ -561,7 +561,7 @@ class TestDrugMultiWordUrlEncoding:
         assert result.exit_code == 0
         mock_get_drug.assert_called_once()
 
-    @patch("biomcp.cli.drugs.get_drug")
+    @patch("czechmedmcp.cli.drugs.get_drug")
     def test_multiword_with_special_characters(self, mock_get_drug):
         """Test drug name with special characters (hyphens, etc)."""
         mock_response = """## Drug: Test-Drug-Name

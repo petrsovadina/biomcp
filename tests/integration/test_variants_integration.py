@@ -4,12 +4,12 @@ import asyncio
 
 import pytest
 
-from biomcp.variants.external import (
+from czechmedmcp.variants.external import (
     ExternalVariantAggregator,
     TCGAClient,
     ThousandGenomesClient,
 )
-from biomcp.variants.getter import get_variant
+from czechmedmcp.variants.getter import get_variant
 
 
 class TestTCGAIntegration:

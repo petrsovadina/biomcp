@@ -1,6 +1,6 @@
 """Tests for mutation filter utility."""
 
-from biomcp.utils.mutation_filter import MutationFilter
+from czechmedmcp.utils.mutation_filter import MutationFilter
 
 
 class MockMutation:

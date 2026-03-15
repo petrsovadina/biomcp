@@ -11,12 +11,12 @@ class TestFetchDrugList:
 
     @pytest.mark.asyncio
     async def test_fetch_cached(self):
-        from biomcp.czech.sukl.drug_index import (
+        from czechmedmcp.czech.sukl.drug_index import (
             _fetch_drug_list,
         )
 
         with patch(
-            "biomcp.czech.sukl.drug_index"
+            "czechmedmcp.czech.sukl.drug_index"
             ".get_cached_response",
             return_value=json.dumps(["001", "002"]),
         ):
@@ -25,7 +25,7 @@ class TestFetchDrugList:
 
     @pytest.mark.asyncio
     async def test_fetch_from_api(self):
-        from biomcp.czech.sukl.drug_index import (
+        from czechmedmcp.czech.sukl.drug_index import (
             _fetch_drug_list,
         )
 
@@ -42,15 +42,15 @@ class TestFetchDrugList:
         mock_client.__aexit__ = AsyncMock(return_value=False)
 
         with patch(
-            "biomcp.czech.sukl.drug_index"
+            "czechmedmcp.czech.sukl.drug_index"
             ".get_cached_response",
             return_value=None,
         ), patch(
-            "biomcp.czech.sukl.drug_index"
+            "czechmedmcp.czech.sukl.drug_index"
             ".httpx.AsyncClient",
             return_value=mock_client,
         ), patch(
-            "biomcp.czech.sukl.drug_index.cache_response",
+            "czechmedmcp.czech.sukl.drug_index.cache_response",
         ):
             result = await _fetch_drug_list()
             assert result == ["001", "002"]
@@ -61,13 +61,13 @@ class TestFetchDrugDetailClient:
 
     @pytest.mark.asyncio
     async def test_fetch_cached(self):
-        from biomcp.czech.sukl.client import (
+        from czechmedmcp.czech.sukl.client import (
             fetch_drug_detail,
         )
 
         data = {"kodSukl": "001", "nazev": "Test"}
         with patch(
-            "biomcp.czech.sukl.client.get_cached_response",
+            "czechmedmcp.czech.sukl.client.get_cached_response",
             return_value=json.dumps(data),
         ):
             result = await fetch_drug_detail("001")
@@ -75,7 +75,7 @@ class TestFetchDrugDetailClient:
 
     @pytest.mark.asyncio
     async def test_fetch_from_api(self):
-        from biomcp.czech.sukl.client import (
+        from czechmedmcp.czech.sukl.client import (
             fetch_drug_detail,
         )
 
@@ -93,20 +93,20 @@ class TestFetchDrugDetailClient:
         mock_client.__aexit__ = AsyncMock(return_value=False)
 
         with patch(
-            "biomcp.czech.sukl.client.get_cached_response",
+            "czechmedmcp.czech.sukl.client.get_cached_response",
             return_value=None,
         ), patch(
-            "biomcp.czech.sukl.client.httpx.AsyncClient",
+            "czechmedmcp.czech.sukl.client.httpx.AsyncClient",
             return_value=mock_client,
         ), patch(
-            "biomcp.czech.sukl.client.cache_response",
+            "czechmedmcp.czech.sukl.client.cache_response",
         ):
             result = await fetch_drug_detail("001")
             assert result["kodSukl"] == "001"
 
     @pytest.mark.asyncio
     async def test_fetch_404(self):
-        from biomcp.czech.sukl.client import (
+        from czechmedmcp.czech.sukl.client import (
             fetch_drug_detail,
         )
 
@@ -121,10 +121,10 @@ class TestFetchDrugDetailClient:
         mock_client.__aexit__ = AsyncMock(return_value=False)
 
         with patch(
-            "biomcp.czech.sukl.client.get_cached_response",
+            "czechmedmcp.czech.sukl.client.get_cached_response",
             return_value=None,
         ), patch(
-            "biomcp.czech.sukl.client.httpx.AsyncClient",
+            "czechmedmcp.czech.sukl.client.httpx.AsyncClient",
             return_value=mock_client,
         ):
             result = await fetch_drug_detail("999")
@@ -136,13 +136,13 @@ class TestFetchDrugDetailGetter:
 
     @pytest.mark.asyncio
     async def test_fetch_cached(self):
-        from biomcp.czech.sukl.getter import (
+        from czechmedmcp.czech.sukl.getter import (
             _fetch_drug_detail,
         )
 
         data = {"kodSukl": "001", "nazev": "Test"}
         with patch(
-            "biomcp.czech.sukl.client.get_cached_response",
+            "czechmedmcp.czech.sukl.client.get_cached_response",
             return_value=json.dumps(data),
         ):
             result = await _fetch_drug_detail("001")
@@ -150,7 +150,7 @@ class TestFetchDrugDetailGetter:
 
     @pytest.mark.asyncio
     async def test_fetch_from_api(self):
-        from biomcp.czech.sukl.getter import (
+        from czechmedmcp.czech.sukl.getter import (
             _fetch_drug_detail,
         )
 
@@ -168,20 +168,20 @@ class TestFetchDrugDetailGetter:
         mock_client.__aexit__ = AsyncMock(return_value=False)
 
         with patch(
-            "biomcp.czech.sukl.client.get_cached_response",
+            "czechmedmcp.czech.sukl.client.get_cached_response",
             return_value=None,
         ), patch(
-            "biomcp.czech.sukl.client.httpx.AsyncClient",
+            "czechmedmcp.czech.sukl.client.httpx.AsyncClient",
             return_value=mock_client,
         ), patch(
-            "biomcp.czech.sukl.client.cache_response",
+            "czechmedmcp.czech.sukl.client.cache_response",
         ):
             result = await _fetch_drug_detail("001")
             assert result["kodSukl"] == "001"
 
     @pytest.mark.asyncio
     async def test_fetch_404(self):
-        from biomcp.czech.sukl.getter import (
+        from czechmedmcp.czech.sukl.getter import (
             _fetch_drug_detail,
         )
 
@@ -196,10 +196,10 @@ class TestFetchDrugDetailGetter:
         mock_client.__aexit__ = AsyncMock(return_value=False)
 
         with patch(
-            "biomcp.czech.sukl.client.get_cached_response",
+            "czechmedmcp.czech.sukl.client.get_cached_response",
             return_value=None,
         ), patch(
-            "biomcp.czech.sukl.client.httpx.AsyncClient",
+            "czechmedmcp.czech.sukl.client.httpx.AsyncClient",
             return_value=mock_client,
         ):
             result = await _fetch_drug_detail("999")
@@ -207,7 +207,7 @@ class TestFetchDrugDetailGetter:
 
     @pytest.mark.asyncio
     async def test_fetch_composition_from_api(self):
-        from biomcp.czech.sukl.getter import (
+        from czechmedmcp.czech.sukl.getter import (
             _fetch_composition,
         )
 
@@ -225,20 +225,20 @@ class TestFetchDrugDetailGetter:
         mock_client.__aexit__ = AsyncMock(return_value=False)
 
         with patch(
-            "biomcp.czech.sukl.client.get_cached_response",
+            "czechmedmcp.czech.sukl.client.get_cached_response",
             return_value=None,
         ), patch(
-            "biomcp.czech.sukl.getter.httpx.AsyncClient",
+            "czechmedmcp.czech.sukl.getter.httpx.AsyncClient",
             return_value=mock_client,
         ), patch(
-            "biomcp.czech.sukl.getter.cache_response",
+            "czechmedmcp.czech.sukl.getter.cache_response",
         ):
             result = await _fetch_composition("001")
             assert len(result) == 1
 
     @pytest.mark.asyncio
     async def test_fetch_doc_metadata_from_api(self):
-        from biomcp.czech.sukl.getter import (
+        from czechmedmcp.czech.sukl.getter import (
             _fetch_doc_metadata,
         )
 
@@ -256,13 +256,13 @@ class TestFetchDrugDetailGetter:
         mock_client.__aexit__ = AsyncMock(return_value=False)
 
         with patch(
-            "biomcp.czech.sukl.client.get_cached_response",
+            "czechmedmcp.czech.sukl.client.get_cached_response",
             return_value=None,
         ), patch(
-            "biomcp.czech.sukl.getter.httpx.AsyncClient",
+            "czechmedmcp.czech.sukl.getter.httpx.AsyncClient",
             return_value=mock_client,
         ), patch(
-            "biomcp.czech.sukl.getter.cache_response",
+            "czechmedmcp.czech.sukl.getter.cache_response",
         ):
             result = await _fetch_doc_metadata("001")
             assert len(result) == 1

@@ -3,7 +3,7 @@
 import json
 from unittest.mock import patch
 
-from biomcp.czech.vzp.drug_reimbursement import (
+from czechmedmcp.czech.vzp.drug_reimbursement import (
     _compare_alternatives,
     _get_vzp_drug_reimbursement,
 )
@@ -47,7 +47,7 @@ MOCK_REIMB_ALT = json.dumps({
 
 def _patch_detail(data=MOCK_DRUG):
     return patch(
-        "biomcp.czech.vzp.drug_reimbursement."
+        "czechmedmcp.czech.vzp.drug_reimbursement."
         "_fetch_drug_detail",
         return_value=data,
     )
@@ -55,7 +55,7 @@ def _patch_detail(data=MOCK_DRUG):
 
 def _patch_reimb(rv=MOCK_REIMB):
     return patch(
-        "biomcp.czech.sukl.reimbursement."
+        "czechmedmcp.czech.sukl.reimbursement."
         "_get_reimbursement",
         return_value=rv,
     )
@@ -63,7 +63,7 @@ def _patch_reimb(rv=MOCK_REIMB):
 
 def _patch_search(rv=MOCK_SEARCH):
     return patch(
-        "biomcp.czech.sukl.search."
+        "czechmedmcp.czech.sukl.search."
         "_sukl_drug_search",
         return_value=rv,
     )

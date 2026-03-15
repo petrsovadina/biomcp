@@ -8,14 +8,14 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from biomcp.enrichr import EnrichrClient, get_database_name
-from biomcp.enrichr.databases import ENRICHR_DATABASES
+from czechmedmcp.enrichr import EnrichrClient, get_database_name
+from czechmedmcp.enrichr.databases import ENRICHR_DATABASES
 
 
 @pytest.fixture
 def mock_http_client():
     """Mock the http_client.request_api function."""
-    with patch("biomcp.enrichr.client.http_client") as mock:
+    with patch("czechmedmcp.enrichr.client.http_client") as mock:
         yield mock
 
 

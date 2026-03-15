@@ -4,7 +4,7 @@ import json
 
 import pytest
 
-from biomcp.drugs.getter import get_drug
+from czechmedmcp.drugs.getter import get_drug
 
 
 class TestDrugGetter:
@@ -52,7 +52,7 @@ class TestDrugGetter:
             call_count += 1
             return result
 
-        monkeypatch.setattr("biomcp.http_client.request_api", mock_request_api)
+        monkeypatch.setattr("czechmedmcp.http_client.request_api", mock_request_api)
 
         result = await get_drug("imatinib")
 
@@ -72,7 +72,7 @@ class TestDrugGetter:
         async def mock_request_api(url, request, method, domain):
             return (mock_drug_response, None)
 
-        monkeypatch.setattr("biomcp.http_client.request_api", mock_request_api)
+        monkeypatch.setattr("czechmedmcp.http_client.request_api", mock_request_api)
 
         result = await get_drug("DB00619")
 
@@ -87,7 +87,7 @@ class TestDrugGetter:
         async def mock_request_api(url, request, method, domain):
             return (mock_drug_response, None)
 
-        monkeypatch.setattr("biomcp.http_client.request_api", mock_request_api)
+        monkeypatch.setattr("czechmedmcp.http_client.request_api", mock_request_api)
 
         result = await get_drug("DB00619", output_json=True)
         data = json.loads(result)
@@ -108,7 +108,7 @@ class TestDrugGetter:
         async def mock_request_api(url, request, method, domain):
             return ({"hits": []}, None)
 
-        monkeypatch.setattr("biomcp.http_client.request_api", mock_request_api)
+        monkeypatch.setattr("czechmedmcp.http_client.request_api", mock_request_api)
 
         result = await get_drug("INVALID_DRUG_XYZ")
 
@@ -127,7 +127,7 @@ class TestDrugGetter:
         async def mock_request_api(url, request, method, domain):
             return (mock_response, None)
 
-        monkeypatch.setattr("biomcp.http_client.request_api", mock_request_api)
+        monkeypatch.setattr("czechmedmcp.http_client.request_api", mock_request_api)
 
         result = await get_drug("DB99999")
 
@@ -143,7 +143,7 @@ class TestDrugGetter:
         async def mock_request_api(url, request, method, domain):
             raise Exception("API error")
 
-        monkeypatch.setattr("biomcp.http_client.request_api", mock_request_api)
+        monkeypatch.setattr("czechmedmcp.http_client.request_api", mock_request_api)
 
         result = await get_drug("imatinib")
 

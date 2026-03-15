@@ -6,7 +6,7 @@ from unittest.mock import patch
 
 import pytest
 
-from biomcp.openfda.device_events import get_device_event, search_device_events
+from czechmedmcp.openfda.device_events import get_device_event, search_device_events
 
 
 @pytest.mark.asyncio
@@ -38,7 +38,7 @@ async def test_search_device_events_by_device():
     }
 
     with patch(
-        "biomcp.openfda.device_events.make_openfda_request"
+        "czechmedmcp.openfda.device_events.make_openfda_request"
     ) as mock_request:
         mock_request.return_value = (mock_response, None)
 
@@ -66,7 +66,7 @@ async def test_search_device_events_genomics_filter():
     mock_response = {"meta": {"results": {"total": 5}}, "results": []}
 
     with patch(
-        "biomcp.openfda.device_events.make_openfda_request"
+        "czechmedmcp.openfda.device_events.make_openfda_request"
     ) as mock_request:
         mock_request.return_value = (mock_response, None)
 
@@ -87,7 +87,7 @@ async def test_search_device_events_no_genomics_filter():
     mock_response = {"meta": {"results": {"total": 10}}, "results": []}
 
     with patch(
-        "biomcp.openfda.device_events.make_openfda_request"
+        "czechmedmcp.openfda.device_events.make_openfda_request"
     ) as mock_request:
         mock_request.return_value = (mock_response, None)
 
@@ -123,7 +123,7 @@ async def test_search_device_events_by_problem():
     }
 
     with patch(
-        "biomcp.openfda.device_events.make_openfda_request"
+        "czechmedmcp.openfda.device_events.make_openfda_request"
     ) as mock_request:
         mock_request.return_value = (mock_response, None)
 
@@ -198,7 +198,7 @@ async def test_get_device_event_detail():
     }
 
     with patch(
-        "biomcp.openfda.device_events.make_openfda_request"
+        "czechmedmcp.openfda.device_events.make_openfda_request"
     ) as mock_request:
         mock_request.return_value = (mock_response, None)
 
@@ -230,7 +230,7 @@ async def test_get_device_event_detail():
 async def test_get_device_event_not_found():
     """Test handling when device event report is not found."""
     with patch(
-        "biomcp.openfda.device_events.make_openfda_request"
+        "czechmedmcp.openfda.device_events.make_openfda_request"
     ) as mock_request:
         mock_request.return_value = ({"results": []}, None)
 
@@ -244,7 +244,7 @@ async def test_get_device_event_not_found():
 async def test_search_device_events_error():
     """Test error handling in device event search."""
     with patch(
-        "biomcp.openfda.device_events.make_openfda_request"
+        "czechmedmcp.openfda.device_events.make_openfda_request"
     ) as mock_request:
         mock_request.return_value = (None, "Network timeout")
 

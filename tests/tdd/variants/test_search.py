@@ -1,6 +1,6 @@
 import pytest
 
-from biomcp.variants.search import (
+from czechmedmcp.variants.search import (
     ClinicalSignificance,
     PolyPhenPrediction,
     SiftPrediction,

@@ -4,8 +4,8 @@ from unittest.mock import patch
 
 import pytest
 
-from biomcp.trials.getter import Module, get_trial, get_trial_unified
-from biomcp.trials.search import (
+from czechmedmcp.trials.getter import Module, get_trial, get_trial_unified
+from czechmedmcp.trials.search import (
     TrialQuery,
     search_trials,
     search_trials_unified,
@@ -20,7 +20,7 @@ class TestTrialSearchBackwardCompatibility:
         """Test that search_trials still defaults to ClinicalTrials.gov."""
         query = TrialQuery(conditions=["diabetes"])
 
-        with patch("biomcp.http_client.request_api") as mock_request:
+        with patch("czechmedmcp.http_client.request_api") as mock_request:
             mock_request.return_value = (
                 {
                     "studies": [
@@ -50,7 +50,7 @@ class TestTrialSearchBackwardCompatibility:
         # This test ensures the function can still be called without source
         query = TrialQuery(conditions=["cancer"])
 
-        with patch("biomcp.http_client.request_api") as mock_request:
+        with patch("czechmedmcp.http_client.request_api") as mock_request:
             mock_request.return_value = ({"studies": []}, None)
 
             # Should not raise TypeError about unexpected keyword argument
@@ -63,7 +63,7 @@ class TestTrialSearchBackwardCompatibility:
         query = TrialQuery(conditions=["melanoma"])
 
         # Test with ClinicalTrials.gov
-        with patch("biomcp.trials.search.search_trials") as mock_ct:
+        with patch("czechmedmcp.trials.search.search_trials") as mock_ct:
             mock_ct.return_value = "CT results"
 
             result = await search_trials_unified(
@@ -74,9 +74,9 @@ class TestTrialSearchBackwardCompatibility:
 
         # Test with NCI
         with (
-            patch("biomcp.trials.nci_search.search_trials_nci") as mock_nci,
+            patch("czechmedmcp.trials.nci_search.search_trials_nci") as mock_nci,
             patch(
-                "biomcp.trials.nci_search.format_nci_trial_results"
+                "czechmedmcp.trials.nci_search.format_nci_trial_results"
             ) as mock_format,
         ):
             mock_nci.return_value = {"source": "nci", "trials": []}
@@ -95,7 +95,7 @@ class TestTrialGetterBackwardCompatibility:
     @pytest.mark.asyncio
     async def test_get_trial_defaults_to_clinicaltrials(self):
         """Test that get_trial still defaults to ClinicalTrials.gov."""
-        with patch("biomcp.http_client.request_api") as mock_request:
+        with patch("czechmedmcp.http_client.request_api") as mock_request:
             mock_request.return_value = (
                 {
                     "protocolSection": {
@@ -119,7 +119,7 @@ class TestTrialGetterBackwardCompatibility:
     @pytest.mark.asyncio
     async def test_get_trial_no_source_parameter(self):
         """Test that get_trial function signature hasn't changed."""
-        with patch("biomcp.http_client.request_api") as mock_request:
+        with patch("czechmedmcp.http_client.request_api") as mock_request:
             mock_request.return_value = (
                 {
                     "protocolSection": {
@@ -137,7 +137,7 @@ class TestTrialGetterBackwardCompatibility:
     async def test_get_trial_unified_with_source(self):
         """Test unified function supports source parameter."""
         # Test with ClinicalTrials.gov - uses private functions
-        with patch("biomcp.trials.getter._trial_protocol") as mock_protocol:
+        with patch("czechmedmcp.trials.getter._trial_protocol") as mock_protocol:
             mock_protocol.return_value = "CT trial details"
 
             result = await get_trial_unified(
@@ -151,9 +151,9 @@ class TestTrialGetterBackwardCompatibility:
 
         # Test with NCI
         with (
-            patch("biomcp.trials.nci_getter.get_trial_nci") as mock_nci,
+            patch("czechmedmcp.trials.nci_getter.get_trial_nci") as mock_nci,
             patch(
-                "biomcp.trials.nci_getter.format_nci_trial_details"
+                "czechmedmcp.trials.nci_getter.format_nci_trial_details"
             ) as mock_format,
         ):
             mock_nci.return_value = {"nct_id": "NCT12345", "source": "nci"}
@@ -176,7 +176,7 @@ class TestTrialGetterBackwardCompatibility:
         ]
 
         for module in modules_to_test:
-            with patch("biomcp.http_client.request_api") as mock_request:
+            with patch("czechmedmcp.http_client.request_api") as mock_request:
                 mock_request.return_value = (
                     {
                         "protocolSection": {
@@ -198,7 +198,7 @@ class TestCLIBackwardCompatibility:
     def test_cli_imports_exist(self):
         """Test that CLI still imports the expected functions."""
         # These imports should not raise ImportError
-        from biomcp.cli.trials import get_trial_cli, search_trials_cli
+        from czechmedmcp.cli.trials import get_trial_cli, search_trials_cli
 
         assert search_trials_cli is not None
         assert get_trial_cli is not None
@@ -207,11 +207,11 @@ class TestCLIBackwardCompatibility:
         """Test CLI search works without source parameter."""
         from typer.testing import CliRunner
 
-        from biomcp.cli.main import app
+        from czechmedmcp.cli.main import app
 
         runner = CliRunner()
 
-        with patch("biomcp.cli.trials.asyncio.run") as mock_run:
+        with patch("czechmedmcp.cli.trials.asyncio.run") as mock_run:
             mock_run.return_value = None
 
             # Run CLI command without --source

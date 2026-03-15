@@ -3,7 +3,7 @@
 import json
 from unittest.mock import patch
 
-from biomcp.czech.mkn.stats import _get_diagnosis_stats
+from czechmedmcp.czech.mkn.stats import _get_diagnosis_stats
 
 MOCK_CSV = (
     "mkn;nazev;pohlavi;vekova_skupina;kraj;pocet\n"
@@ -34,7 +34,7 @@ def _patch_nzip(csv_text=MOCK_CSV, status=200):
             return MockResp()
 
     return patch(
-        "biomcp.czech.mkn.stats.httpx.AsyncClient",
+        "czechmedmcp.czech.mkn.stats.httpx.AsyncClient",
         return_value=MockClient(),
     )
 
@@ -46,12 +46,12 @@ class TestGetDiagnosisStats:
         """Result must have content + structuredContent."""
         with (
             patch(
-                "biomcp.czech.mkn.stats."
+                "czechmedmcp.czech.mkn.stats."
                 "get_cached_response",
                 return_value=None,
             ),
             patch(
-                "biomcp.czech.mkn.stats.cache_response"
+                "czechmedmcp.czech.mkn.stats.cache_response"
             ),
             _patch_nzip(),
         ):
@@ -65,12 +65,12 @@ class TestGetDiagnosisStats:
         """Total cases should sum matching rows."""
         with (
             patch(
-                "biomcp.czech.mkn.stats."
+                "czechmedmcp.czech.mkn.stats."
                 "get_cached_response",
                 return_value=None,
             ),
             patch(
-                "biomcp.czech.mkn.stats.cache_response"
+                "czechmedmcp.czech.mkn.stats.cache_response"
             ),
             _patch_nzip(),
         ):
@@ -85,12 +85,12 @@ class TestGetDiagnosisStats:
         """Male/female counts should be aggregated."""
         with (
             patch(
-                "biomcp.czech.mkn.stats."
+                "czechmedmcp.czech.mkn.stats."
                 "get_cached_response",
                 return_value=None,
             ),
             patch(
-                "biomcp.czech.mkn.stats.cache_response"
+                "czechmedmcp.czech.mkn.stats.cache_response"
             ),
             _patch_nzip(),
         ):
@@ -105,12 +105,12 @@ class TestGetDiagnosisStats:
         """A00 should not be included in J06 stats."""
         with (
             patch(
-                "biomcp.czech.mkn.stats."
+                "czechmedmcp.czech.mkn.stats."
                 "get_cached_response",
                 return_value=None,
             ),
             patch(
-                "biomcp.czech.mkn.stats.cache_response"
+                "czechmedmcp.czech.mkn.stats.cache_response"
             ),
             _patch_nzip(),
         ):
@@ -123,12 +123,12 @@ class TestGetDiagnosisStats:
         """Should return zero stats on HTTP error."""
         with (
             patch(
-                "biomcp.czech.mkn.stats."
+                "czechmedmcp.czech.mkn.stats."
                 "get_cached_response",
                 return_value=None,
             ),
             patch(
-                "biomcp.czech.mkn.stats.cache_response"
+                "czechmedmcp.czech.mkn.stats.cache_response"
             ),
             _patch_nzip(status=500),
         ):
@@ -141,12 +141,12 @@ class TestGetDiagnosisStats:
         """Content should contain Czech stats."""
         with (
             patch(
-                "biomcp.czech.mkn.stats."
+                "czechmedmcp.czech.mkn.stats."
                 "get_cached_response",
                 return_value=None,
             ),
             patch(
-                "biomcp.czech.mkn.stats.cache_response"
+                "czechmedmcp.czech.mkn.stats.cache_response"
             ),
             _patch_nzip(),
         ):

@@ -6,8 +6,8 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from biomcp.http_client import RequestError
-from biomcp.oncokb_helper import (
+from czechmedmcp.http_client import RequestError
+from czechmedmcp.oncokb_helper import (
     get_oncokb_annotation_for_variant,
     get_oncokb_summary_for_genes,
 )
@@ -39,7 +39,7 @@ class TestGetOncoKBAnnotationForVariant:
         ]
 
         with patch(
-            "biomcp.variants.oncokb_client.OncoKBClient"
+            "czechmedmcp.variants.oncokb_client.OncoKBClient"
         ) as mock_client_class:
             mock_client = mock_client_class.return_value
             mock_client.get_variant_annotation = AsyncMock(
@@ -94,7 +94,7 @@ class TestGetOncoKBAnnotationForVariant:
         error_response = RequestError(code=404, message="Variant not found")
 
         with patch(
-            "biomcp.variants.oncokb_client.OncoKBClient"
+            "czechmedmcp.variants.oncokb_client.OncoKBClient"
         ) as mock_client_class:
             mock_client = mock_client_class.return_value
             mock_client.get_variant_annotation = AsyncMock(
@@ -109,7 +109,7 @@ class TestGetOncoKBAnnotationForVariant:
     async def test_variant_annotation_none_response(self):
         """Test graceful handling when API returns None."""
         with patch(
-            "biomcp.variants.oncokb_client.OncoKBClient"
+            "czechmedmcp.variants.oncokb_client.OncoKBClient"
         ) as mock_client_class:
             mock_client = mock_client_class.return_value
             mock_client.get_variant_annotation = AsyncMock(
@@ -124,7 +124,7 @@ class TestGetOncoKBAnnotationForVariant:
     async def test_variant_annotation_exception_handling(self):
         """Test graceful handling of exceptions."""
         with patch(
-            "biomcp.variants.oncokb_client.OncoKBClient"
+            "czechmedmcp.variants.oncokb_client.OncoKBClient"
         ) as mock_client_class:
             mock_client = mock_client_class.return_value
             mock_client.get_variant_annotation = AsyncMock(
@@ -152,7 +152,7 @@ class TestGetOncoKBAnnotationForVariant:
         }
 
         with patch(
-            "biomcp.variants.oncokb_client.OncoKBClient"
+            "czechmedmcp.variants.oncokb_client.OncoKBClient"
         ) as mock_client_class:
             mock_client = mock_client_class.return_value
             mock_client.get_variant_annotation = AsyncMock(
@@ -177,7 +177,7 @@ class TestGetOncoKBSummaryForGenes:
         curated_genes = mock_responses["genesByHugoSymbol"]
 
         with patch(
-            "biomcp.variants.oncokb_client.OncoKBClient"
+            "czechmedmcp.variants.oncokb_client.OncoKBClient"
         ) as mock_client_class:
             mock_client = mock_client_class.return_value
             mock_client.get_curated_genes = AsyncMock(
@@ -225,7 +225,7 @@ class TestGetOncoKBSummaryForGenes:
         curated_genes = mock_responses["genesByHugoSymbol"]
 
         with patch(
-            "biomcp.variants.oncokb_client.OncoKBClient"
+            "czechmedmcp.variants.oncokb_client.OncoKBClient"
         ) as mock_client_class:
             mock_client = mock_client_class.return_value
             mock_client.get_curated_genes = AsyncMock(
@@ -244,7 +244,7 @@ class TestGetOncoKBSummaryForGenes:
         curated_genes = mock_responses["genesByHugoSymbol"]
 
         with patch(
-            "biomcp.variants.oncokb_client.OncoKBClient"
+            "czechmedmcp.variants.oncokb_client.OncoKBClient"
         ) as mock_client_class:
             mock_client = mock_client_class.return_value
             mock_client.get_curated_genes = AsyncMock(
@@ -268,7 +268,7 @@ class TestGetOncoKBSummaryForGenes:
     async def test_gene_summary_all_failures(self):
         """Test that all failures returns None."""
         with patch(
-            "biomcp.variants.oncokb_client.OncoKBClient"
+            "czechmedmcp.variants.oncokb_client.OncoKBClient"
         ) as mock_client_class:
             mock_client = mock_client_class.return_value
             mock_client.get_gene_annotation = AsyncMock(
@@ -289,7 +289,7 @@ class TestGetOncoKBSummaryForGenes:
     async def test_gene_summary_exception_handling(self):
         """Test graceful handling of exceptions in parallel calls."""
         with patch(
-            "biomcp.variants.oncokb_client.OncoKBClient"
+            "czechmedmcp.variants.oncokb_client.OncoKBClient"
         ) as mock_client_class:
             mock_client = mock_client_class.return_value
             mock_client.get_curated_genes = AsyncMock(
@@ -307,7 +307,7 @@ class TestGetOncoKBSummaryForGenes:
         curated_genes = mock_responses["genesByHugoSymbol"]
 
         with patch(
-            "biomcp.variants.oncokb_client.OncoKBClient"
+            "czechmedmcp.variants.oncokb_client.OncoKBClient"
         ) as mock_client_class:
             mock_client = mock_client_class.return_value
 
@@ -345,7 +345,7 @@ class TestGetOncoKBSummaryForGenes:
         ]
 
         with patch(
-            "biomcp.variants.oncokb_client.OncoKBClient"
+            "czechmedmcp.variants.oncokb_client.OncoKBClient"
         ) as mock_client_class:
             mock_client = mock_client_class.return_value
             mock_client.get_curated_genes = AsyncMock(
@@ -376,7 +376,7 @@ class TestGetOncoKBSummaryForGenes:
         ]
 
         with patch(
-            "biomcp.variants.oncokb_client.OncoKBClient"
+            "czechmedmcp.variants.oncokb_client.OncoKBClient"
         ) as mock_client_class:
             mock_client = mock_client_class.return_value
             mock_client.get_curated_genes = AsyncMock(
@@ -403,7 +403,7 @@ class TestGetOncoKBSummaryForGenes:
         ]
 
         with patch(
-            "biomcp.variants.oncokb_client.OncoKBClient"
+            "czechmedmcp.variants.oncokb_client.OncoKBClient"
         ) as mock_client_class:
             mock_client = mock_client_class.return_value
             mock_client.get_curated_genes = AsyncMock(
@@ -438,7 +438,7 @@ class TestFormattingHelpers:
         ]
 
         with patch(
-            "biomcp.variants.oncokb_client.OncoKBClient"
+            "czechmedmcp.variants.oncokb_client.OncoKBClient"
         ) as mock_client_class:
             mock_client = mock_client_class.return_value
             mock_client.get_variant_annotation = AsyncMock(
@@ -467,7 +467,7 @@ class TestFormattingHelpers:
         result_dict = mock_annotation["mutationEffect"]
         if len(result_dict.get("description", "")) > 200:
             with patch(
-                "biomcp.variants.oncokb_client.OncoKBClient"
+                "czechmedmcp.variants.oncokb_client.OncoKBClient"
             ) as mock_client_class:
                 mock_client = mock_client_class.return_value
                 mock_client.get_variant_annotation = AsyncMock(
@@ -490,7 +490,7 @@ class TestFormattingHelpers:
 
         # Annotation has 3 treatments, all should be shown
         with patch(
-            "biomcp.variants.oncokb_client.OncoKBClient"
+            "czechmedmcp.variants.oncokb_client.OncoKBClient"
         ) as mock_client_class:
             mock_client = mock_client_class.return_value
             mock_client.get_variant_annotation = AsyncMock(

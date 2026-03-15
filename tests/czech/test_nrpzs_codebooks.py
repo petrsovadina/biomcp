@@ -3,7 +3,7 @@
 import json
 from unittest.mock import patch
 
-from biomcp.czech.nrpzs.search import _get_codebooks
+from czechmedmcp.czech.nrpzs.search import _get_codebooks
 
 MOCK_PROVIDERS = [
     {
@@ -26,7 +26,7 @@ MOCK_PROVIDERS = [
 
 def _patch_providers(data=MOCK_PROVIDERS):
     return patch(
-        "biomcp.czech.nrpzs.search._get_providers",
+        "czechmedmcp.czech.nrpzs.search._get_providers",
         return_value=data,
     )
 

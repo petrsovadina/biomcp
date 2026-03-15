@@ -5,7 +5,7 @@ from unittest.mock import patch
 
 from typer.testing import CliRunner
 
-from biomcp.cli.main import app
+from czechmedmcp.cli.main import app
 
 runner = CliRunner()
 
@@ -34,7 +34,7 @@ class TestGeneCLI:
         assert "gene" in output.lower()
         assert "--json" in output
 
-    @patch("biomcp.cli.genes.get_gene")
+    @patch("czechmedmcp.cli.genes.get_gene")
     def test_gene_get_success(self, mock_get_gene):
         """Test successful gene retrieval."""
         mock_get_gene.return_value = "## Gene: TP53\n- **Symbol**: TP53"
@@ -45,7 +45,7 @@ class TestGeneCLI:
         assert "TP53" in result.stdout
         mock_get_gene.assert_called_once()
 
-    @patch("biomcp.cli.genes.get_gene")
+    @patch("czechmedmcp.cli.genes.get_gene")
     def test_gene_get_json_output(self, mock_get_gene):
         """Test gene retrieval with JSON output."""
         mock_get_gene.return_value = (
@@ -61,7 +61,7 @@ class TestGeneCLI:
         assert call_args.kwargs.get("gene_id_or_symbol") == "TP53"
         assert call_args.kwargs.get("output_json") is True
 
-    @patch("biomcp.cli.genes.get_gene")
+    @patch("czechmedmcp.cli.genes.get_gene")
     def test_gene_get_not_found(self, mock_get_gene):
         """Test gene not found response."""
         mock_get_gene.return_value = '{"error": "Gene \'INVALID\' not found"}'
@@ -99,7 +99,7 @@ class TestDrugCLI:
         assert "drug" in output.lower()
         assert "--json" in output
 
-    @patch("biomcp.cli.drugs.get_drug")
+    @patch("czechmedmcp.cli.drugs.get_drug")
     def test_drug_get_success(self, mock_get_drug):
         """Test successful drug retrieval."""
         mock_get_drug.return_value = (
@@ -114,7 +114,7 @@ class TestDrugCLI:
         )
         mock_get_drug.assert_called_once()
 
-    @patch("biomcp.cli.drugs.get_drug")
+    @patch("czechmedmcp.cli.drugs.get_drug")
     def test_drug_get_json_output(self, mock_get_drug):
         """Test drug retrieval with JSON output."""
         mock_get_drug.return_value = (
@@ -129,7 +129,7 @@ class TestDrugCLI:
         assert call_args[0][0] == "imatinib"
         assert call_args[1]["output_json"] is True
 
-    @patch("biomcp.cli.drugs.get_drug")
+    @patch("czechmedmcp.cli.drugs.get_drug")
     def test_drug_get_by_drugbank_id(self, mock_get_drug):
         """Test drug retrieval by DrugBank ID."""
         mock_get_drug.return_value = (
@@ -141,7 +141,7 @@ class TestDrugCLI:
         assert result.exit_code == 0
         mock_get_drug.assert_called_once_with("DB00619", output_json=False)
 
-    @patch("biomcp.cli.drugs.get_drug")
+    @patch("czechmedmcp.cli.drugs.get_drug")
     def test_drug_get_not_found(self, mock_get_drug):
         """Test drug not found response."""
         mock_get_drug.return_value = "Drug 'INVALID' not found in MyChem.info"

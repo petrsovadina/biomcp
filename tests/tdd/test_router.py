@@ -5,13 +5,13 @@ from unittest.mock import patch
 
 import pytest
 
-from biomcp.exceptions import (
+from czechmedmcp.exceptions import (
     InvalidDomainError,
     InvalidParameterError,
     QueryParsingError,
     SearchExecutionError,
 )
-from biomcp.router import fetch, format_results, search
+from czechmedmcp.router import fetch, format_results, search
 
 
 class TestFormatResults:
@@ -29,7 +29,7 @@ class TestFormatResults:
         ]
 
         # Mock thinking tracker to prevent reminder
-        with patch("biomcp.router.get_thinking_reminder", return_value=""):
+        with patch("czechmedmcp.router.get_thinking_reminder", return_value=""):
             formatted = format_results(results, "article", 1, 10, 1)
 
         assert "results" in formatted
@@ -59,7 +59,7 @@ class TestFormatResults:
         ]
 
         # Mock thinking tracker to prevent reminder
-        with patch("biomcp.router.get_thinking_reminder", return_value=""):
+        with patch("czechmedmcp.router.get_thinking_reminder", return_value=""):
             formatted = format_results(results, "trial", 1, 10, 1)
 
         assert "results" in formatted
@@ -83,7 +83,7 @@ class TestFormatResults:
         ]
 
         # Mock thinking tracker to prevent reminder
-        with patch("biomcp.router.get_thinking_reminder", return_value=""):
+        with patch("czechmedmcp.router.get_thinking_reminder", return_value=""):
             formatted = format_results(results, "trial", 1, 10, 1)
 
         assert "results" in formatted
@@ -105,7 +105,7 @@ class TestFormatResults:
         ]
 
         # Mock thinking tracker to prevent reminder
-        with patch("biomcp.router.get_thinking_reminder", return_value=""):
+        with patch("czechmedmcp.router.get_thinking_reminder", return_value=""):
             formatted = format_results(results, "variant", 1, 10, 1)
 
         assert "results" in formatted
@@ -134,7 +134,7 @@ class TestFormatResults:
         ]
 
         # Mock thinking tracker to prevent reminder
-        with patch("biomcp.router.get_thinking_reminder", return_value=""):
+        with patch("czechmedmcp.router.get_thinking_reminder", return_value=""):
             formatted = format_results(results, "article", 1, 10, 3)
 
         # Should skip None but include the third (treated as preprint with empty fields)
@@ -154,12 +154,12 @@ class TestSearchFunction:
         ])
 
         with patch(
-            "biomcp.articles.unified.search_articles_unified"
+            "czechmedmcp.articles.unified.search_articles_unified"
         ) as mock_search:
             mock_search.return_value = mock_result
 
             # Mock thinking tracker to prevent reminder
-            with patch("biomcp.router.get_thinking_reminder", return_value=""):
+            with patch("czechmedmcp.router.get_thinking_reminder", return_value=""):
                 result = await search(
                     query="",
                     domain="article",
@@ -184,11 +184,11 @@ class TestSearchFunction:
             ]
         })
 
-        with patch("biomcp.trials.search.search_trials") as mock_search:
+        with patch("czechmedmcp.trials.search.search_trials") as mock_search:
             mock_search.return_value = mock_result
 
             # Mock thinking tracker to prevent reminder
-            with patch("biomcp.router.get_thinking_reminder", return_value=""):
+            with patch("czechmedmcp.router.get_thinking_reminder", return_value=""):
                 result = await search(
                     query="",
                     domain="trial",
@@ -206,11 +206,11 @@ class TestSearchFunction:
             {"_id": "rs123", "gene": {"symbol": "BRAF"}}
         ])
 
-        with patch("biomcp.variants.search.search_variants") as mock_search:
+        with patch("czechmedmcp.variants.search.search_variants") as mock_search:
             mock_search.return_value = mock_result
 
             # Mock thinking tracker to prevent reminder
-            with patch("biomcp.router.get_thinking_reminder", return_value=""):
+            with patch("czechmedmcp.router.get_thinking_reminder", return_value=""):
                 result = await search(
                     query="",
                     domain="variant",
@@ -224,7 +224,7 @@ class TestSearchFunction:
 
     async def test_search_unified_query(self):
         """Test search with unified query language."""
-        with patch("biomcp.router._unified_search") as mock_unified:
+        with patch("czechmedmcp.router._unified_search") as mock_unified:
             mock_unified.return_value = {
                 "results": [{"id": "1", "title": "Test"}]
             }
@@ -280,7 +280,7 @@ class TestSearchFunction:
         mock_result = json.dumps([])
 
         with patch(
-            "biomcp.articles.unified.search_articles_unified"
+            "czechmedmcp.articles.unified.search_articles_unified"
         ) as mock_search:
             mock_search.return_value = mock_result
 
@@ -313,7 +313,7 @@ class TestFetchFunction:
             }
         ])
 
-        with patch("biomcp.articles.fetch.fetch_articles") as mock_fetch:
+        with patch("czechmedmcp.articles.fetch.fetch_articles") as mock_fetch:
             mock_fetch.return_value = mock_result
 
             result = await fetch(
@@ -349,10 +349,10 @@ class TestFetchFunction:
         mock_references = json.dumps({"references": [{"pmid": "456"}]})
 
         with (
-            patch("biomcp.trials.getter._trial_protocol") as mock_p,
-            patch("biomcp.trials.getter._trial_locations") as mock_l,
-            patch("biomcp.trials.getter._trial_outcomes") as mock_o,
-            patch("biomcp.trials.getter._trial_references") as mock_r,
+            patch("czechmedmcp.trials.getter._trial_protocol") as mock_p,
+            patch("czechmedmcp.trials.getter._trial_locations") as mock_l,
+            patch("czechmedmcp.trials.getter._trial_outcomes") as mock_o,
+            patch("czechmedmcp.trials.getter._trial_references") as mock_r,
         ):
             mock_p.return_value = mock_protocol
             mock_l.return_value = mock_locations
@@ -390,7 +390,7 @@ class TestFetchFunction:
             }
         ])
 
-        with patch("biomcp.variants.getter.get_variant") as mock_get:
+        with patch("czechmedmcp.variants.getter.get_variant") as mock_get:
             mock_get.return_value = mock_result
 
             result = await fetch(domain="variant", id="rs123")
@@ -405,7 +405,7 @@ class TestFetchFunction:
             {"_id": "rs123", "gene": {"symbol": "BRAF"}}
         ])
 
-        with patch("biomcp.variants.getter.get_variant") as mock_get:
+        with patch("czechmedmcp.variants.getter.get_variant") as mock_get:
             mock_get.return_value = mock_result
 
             result = await fetch(domain="variant", id="rs123")
@@ -419,7 +419,7 @@ class TestFetchFunction:
 
     async def test_fetch_error_handling(self):
         """Test fetch error handling."""
-        with patch("biomcp.articles.fetch.fetch_articles") as mock_fetch:
+        with patch("czechmedmcp.articles.fetch.fetch_articles") as mock_fetch:
             mock_fetch.side_effect = Exception("API Error")
 
             with pytest.raises(SearchExecutionError) as exc_info:
@@ -429,7 +429,7 @@ class TestFetchFunction:
 
     async def test_fetch_domain_auto_detection_pmid(self):
         """Test domain auto-detection for PMID."""
-        with patch("biomcp.articles.fetch._article_details") as mock_fetch:
+        with patch("czechmedmcp.articles.fetch._article_details") as mock_fetch:
             mock_fetch.return_value = json.dumps([
                 {"pmid": "12345", "title": "Test"}
             ])
@@ -441,7 +441,7 @@ class TestFetchFunction:
 
     async def test_fetch_domain_auto_detection_nct(self):
         """Test domain auto-detection for NCT ID."""
-        with patch("biomcp.trials.getter.get_trial") as mock_get:
+        with patch("czechmedmcp.trials.getter.get_trial") as mock_get:
             mock_get.return_value = json.dumps({
                 "protocolSection": {
                     "identificationModule": {"briefTitle": "Test Trial"}
@@ -455,7 +455,7 @@ class TestFetchFunction:
 
     async def test_fetch_domain_auto_detection_doi(self):
         """Test domain auto-detection for DOI."""
-        with patch("biomcp.articles.fetch._article_details") as mock_fetch:
+        with patch("czechmedmcp.articles.fetch._article_details") as mock_fetch:
             mock_fetch.return_value = json.dumps([
                 {"doi": "10.1038/nature12345", "title": "Test"}
             ])
@@ -466,7 +466,7 @@ class TestFetchFunction:
 
     async def test_fetch_domain_auto_detection_variant(self):
         """Test domain auto-detection for variant IDs."""
-        with patch("biomcp.variants.getter.get_variant") as mock_get:
+        with patch("czechmedmcp.variants.getter.get_variant") as mock_get:
             mock_get.return_value = json.dumps([{"_id": "rs12345"}])
 
             # rsID should auto-detect as variant
@@ -474,7 +474,7 @@ class TestFetchFunction:
             mock_get.assert_called_once()
 
         # Test HGVS notation
-        with patch("biomcp.variants.getter.get_variant") as mock_get:
+        with patch("czechmedmcp.variants.getter.get_variant") as mock_get:
             mock_get.return_value = json.dumps([
                 {"_id": "chr7:g.140453136A>T"}
             ])
@@ -489,7 +489,7 @@ class TestUnifiedSearch:
 
     async def test_unified_search_explain_query(self):
         """Test unified search with explain_query flag."""
-        from biomcp.router import _unified_search
+        from czechmedmcp.router import _unified_search
 
         result = await _unified_search(
             query="gene:BRAF AND disease:cancer", explain_query=True
@@ -502,9 +502,9 @@ class TestUnifiedSearch:
 
     async def test_unified_search_execution(self):
         """Test unified search normal execution."""
-        from biomcp.router import _unified_search
+        from czechmedmcp.router import _unified_search
 
-        with patch("biomcp.query_router.execute_routing_plan") as mock_execute:
+        with patch("czechmedmcp.query_router.execute_routing_plan") as mock_execute:
             mock_execute.return_value = {
                 "articles": json.dumps([{"pmid": "123", "title": "Article 1"}])
             }
@@ -518,9 +518,9 @@ class TestUnifiedSearch:
 
     async def test_unified_search_parse_error(self):
         """Test unified search with invalid query."""
-        from biomcp.router import _unified_search
+        from czechmedmcp.router import _unified_search
 
-        with patch("biomcp.query_parser.QueryParser.parse") as mock_parse:
+        with patch("czechmedmcp.query_parser.QueryParser.parse") as mock_parse:
             mock_parse.side_effect = Exception("Parse error")
 
             with pytest.raises(QueryParsingError):

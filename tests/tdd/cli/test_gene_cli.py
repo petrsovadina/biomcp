@@ -6,8 +6,8 @@ from unittest.mock import AsyncMock, patch
 import pytest
 from typer.testing import CliRunner
 
-from biomcp.cli.main import app
-from biomcp.integrations import GeneInfo
+from czechmedmcp.cli.main import app
+from czechmedmcp.integrations import GeneInfo
 
 runner = CliRunner()
 
@@ -45,7 +45,7 @@ def mock_gene_info_brca1():
 class TestGeneGetCommand:
     """Test the 'gene get' command."""
 
-    @patch("biomcp.cli.genes.get_gene")
+    @patch("czechmedmcp.cli.genes.get_gene")
     def test_get_gene_by_symbol(self, mock_get_gene):
         """Test getting gene info by symbol."""
         mock_get_gene.return_value = "# TP53\n\nTumor protein p53"
@@ -56,7 +56,7 @@ class TestGeneGetCommand:
         assert "TP53" in result.stdout
         mock_get_gene.assert_called_once()
 
-    @patch("biomcp.cli.genes.get_gene")
+    @patch("czechmedmcp.cli.genes.get_gene")
     def test_get_gene_by_id(self, mock_get_gene):
         """Test getting gene info by Entrez ID."""
         mock_get_gene.return_value = "# TP53\n\nGene ID: 7157"
@@ -67,7 +67,7 @@ class TestGeneGetCommand:
         assert "7157" in result.stdout
         mock_get_gene.assert_called_once()
 
-    @patch("biomcp.cli.genes.get_gene")
+    @patch("czechmedmcp.cli.genes.get_gene")
     def test_get_gene_not_found(self, mock_get_gene):
         """Test handling of non-existent gene."""
         error_msg = json.dumps(
@@ -84,7 +84,7 @@ class TestGeneGetCommand:
         assert result.exit_code == 0
         assert "not found" in result.stdout
 
-    @patch("biomcp.cli.genes.get_gene")
+    @patch("czechmedmcp.cli.genes.get_gene")
     def test_get_gene_with_json_flag(self, mock_get_gene):
         """Test getting gene info with --json flag."""
         json_output = json.dumps(
@@ -104,7 +104,7 @@ class TestGeneGetCommand:
         assert "7157" in result.stdout
         assert "tumor protein p53" in result.stdout
 
-    @patch("biomcp.cli.genes.get_gene")
+    @patch("czechmedmcp.cli.genes.get_gene")
     def test_get_gene_with_json_short_flag(self, mock_get_gene):
         """Test getting gene info with -j short flag."""
         json_output = json.dumps({"symbol": "TP53"}, indent=2)
@@ -114,7 +114,7 @@ class TestGeneGetCommand:
 
         assert result.exit_code == 0
 
-    @patch("biomcp.cli.genes.get_gene")
+    @patch("czechmedmcp.cli.genes.get_gene")
     def test_get_gene_with_enrich_pathway(self, mock_get_gene):
         """Test getting gene info with --enrich pathway flag."""
         mock_get_gene.return_value = "# TP53\n\nTumor protein p53"
@@ -128,7 +128,7 @@ class TestGeneGetCommand:
         assert "Enrichment Analysis" in result.stdout
         assert "pathway" in result.stdout.lower()
 
-    @patch("biomcp.cli.genes.get_gene")
+    @patch("czechmedmcp.cli.genes.get_gene")
     def test_get_gene_with_enrich_ontology(self, mock_get_gene):
         """Test getting gene info with --enrich ontology flag."""
         mock_get_gene.return_value = "# BRCA1\n\nBRCA1 DNA repair associated"
@@ -142,7 +142,7 @@ class TestGeneGetCommand:
         assert "Enrichment Analysis" in result.stdout
         assert "ontology" in result.stdout.lower()
 
-    @patch("biomcp.cli.genes.get_gene")
+    @patch("czechmedmcp.cli.genes.get_gene")
     def test_get_gene_with_enrich_kegg(self, mock_get_gene):
         """Test getting gene info with --enrich kegg flag."""
         mock_get_gene.return_value = (
@@ -156,7 +156,7 @@ class TestGeneGetCommand:
         assert result.exit_code == 0
         assert "Enrichment Analysis" in result.stdout
 
-    @patch("biomcp.cli.genes.get_gene")
+    @patch("czechmedmcp.cli.genes.get_gene")
     def test_get_gene_with_enrich_reactome(self, mock_get_gene):
         """Test getting gene info with --enrich reactome flag."""
         mock_get_gene.return_value = "# TP53\n\nGene info"
@@ -168,7 +168,7 @@ class TestGeneGetCommand:
         assert result.exit_code == 0
         assert "Enrichment Analysis" in result.stdout
 
-    @patch("biomcp.cli.genes.get_gene")
+    @patch("czechmedmcp.cli.genes.get_gene")
     def test_get_gene_with_enrich_wikipathways(self, mock_get_gene):
         """Test getting gene info with --enrich wikipathways flag."""
         mock_get_gene.return_value = "# TP53\n\nGene info"
@@ -180,7 +180,7 @@ class TestGeneGetCommand:
         assert result.exit_code == 0
         assert "Enrichment Analysis" in result.stdout
 
-    @patch("biomcp.cli.genes.get_gene")
+    @patch("czechmedmcp.cli.genes.get_gene")
     def test_get_gene_with_enrich_go_process(self, mock_get_gene):
         """Test getting gene info with --enrich go_process flag."""
         mock_get_gene.return_value = "# TP53\n\nGene info"
@@ -192,7 +192,7 @@ class TestGeneGetCommand:
         assert result.exit_code == 0
         assert "Enrichment Analysis" in result.stdout
 
-    @patch("biomcp.cli.genes.get_gene")
+    @patch("czechmedmcp.cli.genes.get_gene")
     def test_get_gene_with_enrich_go_molecular(self, mock_get_gene):
         """Test getting gene info with --enrich go_molecular flag."""
         mock_get_gene.return_value = "# TP53\n\nGene info"
@@ -204,7 +204,7 @@ class TestGeneGetCommand:
         assert result.exit_code == 0
         assert "Enrichment Analysis" in result.stdout
 
-    @patch("biomcp.cli.genes.get_gene")
+    @patch("czechmedmcp.cli.genes.get_gene")
     def test_get_gene_with_enrich_go_cellular(self, mock_get_gene):
         """Test getting gene info with --enrich go_cellular flag."""
         mock_get_gene.return_value = "# TP53\n\nGene info"
@@ -216,7 +216,7 @@ class TestGeneGetCommand:
         assert result.exit_code == 0
         assert "Enrichment Analysis" in result.stdout
 
-    @patch("biomcp.cli.genes.get_gene")
+    @patch("czechmedmcp.cli.genes.get_gene")
     def test_get_gene_with_enrich_celltypes(self, mock_get_gene):
         """Test getting gene info with --enrich celltypes flag."""
         mock_get_gene.return_value = "# TP53\n\nGene info"
@@ -228,7 +228,7 @@ class TestGeneGetCommand:
         assert result.exit_code == 0
         assert "Enrichment Analysis" in result.stdout
 
-    @patch("biomcp.cli.genes.get_gene")
+    @patch("czechmedmcp.cli.genes.get_gene")
     def test_get_gene_with_enrich_tissues(self, mock_get_gene):
         """Test getting gene info with --enrich tissues flag."""
         mock_get_gene.return_value = "# TP53\n\nGene info"
@@ -240,7 +240,7 @@ class TestGeneGetCommand:
         assert result.exit_code == 0
         assert "Enrichment Analysis" in result.stdout
 
-    @patch("biomcp.cli.genes.get_gene")
+    @patch("czechmedmcp.cli.genes.get_gene")
     def test_get_gene_with_enrich_diseases(self, mock_get_gene):
         """Test getting gene info with --enrich diseases flag."""
         mock_get_gene.return_value = "# TP53\n\nGene info"
@@ -252,7 +252,7 @@ class TestGeneGetCommand:
         assert result.exit_code == 0
         assert "Enrichment Analysis" in result.stdout
 
-    @patch("biomcp.cli.genes.get_gene")
+    @patch("czechmedmcp.cli.genes.get_gene")
     def test_get_gene_with_enrich_gwas(self, mock_get_gene):
         """Test getting gene info with --enrich gwas flag."""
         mock_get_gene.return_value = "# TP53\n\nGene info"
@@ -264,7 +264,7 @@ class TestGeneGetCommand:
         assert result.exit_code == 0
         assert "Enrichment Analysis" in result.stdout
 
-    @patch("biomcp.cli.genes.get_gene")
+    @patch("czechmedmcp.cli.genes.get_gene")
     def test_get_gene_with_enrich_transcription_factors(self, mock_get_gene):
         """Test getting gene info with --enrich transcription_factors flag."""
         mock_get_gene.return_value = "# TP53\n\nGene info"
@@ -276,7 +276,7 @@ class TestGeneGetCommand:
         assert result.exit_code == 0
         assert "Enrichment Analysis" in result.stdout
 
-    @patch("biomcp.cli.genes.get_gene")
+    @patch("czechmedmcp.cli.genes.get_gene")
     def test_get_gene_with_enrich_tf(self, mock_get_gene):
         """Test getting gene info with --enrich tf flag (alias for transcription_factors)."""
         mock_get_gene.return_value = "# TP53\n\nGene info"
@@ -295,7 +295,7 @@ class TestGeneGetCommand:
         assert result.exit_code == 1
         assert "Invalid enrichment type" in result.stdout
 
-    @patch("biomcp.cli.genes.get_gene")
+    @patch("czechmedmcp.cli.genes.get_gene")
     def test_get_gene_combined_json_and_enrich(self, mock_get_gene):
         """Test getting gene info with both --json and --enrich flags."""
         json_output = json.dumps({"symbol": "TP53"}, indent=2)
@@ -313,7 +313,7 @@ class TestGeneGetCommand:
 class TestGeneSearchCommand:
     """Test the 'gene search' command."""
 
-    @patch("biomcp.cli.genes.get_gene")
+    @patch("czechmedmcp.cli.genes.get_gene")
     def test_search_genes_basic(self, mock_get_gene):
         """Test basic gene search."""
         mock_get_gene.return_value = "# TP53\n\nTumor protein p53"
@@ -324,7 +324,7 @@ class TestGeneSearchCommand:
         assert "TP53" in result.stdout
         mock_get_gene.assert_called_once()
 
-    @patch("biomcp.cli.genes.get_gene")
+    @patch("czechmedmcp.cli.genes.get_gene")
     def test_search_genes_with_page(self, mock_get_gene):
         """Test gene search with page parameter."""
         mock_get_gene.return_value = "# kinase\n\nResults"
@@ -339,7 +339,7 @@ class TestGeneSearchCommand:
             or "development" in result.stdout
         )
 
-    @patch("biomcp.cli.genes.get_gene")
+    @patch("czechmedmcp.cli.genes.get_gene")
     def test_search_genes_with_page_short_flag(self, mock_get_gene):
         """Test gene search with -p short flag for page."""
         mock_get_gene.return_value = "# kinase\n\nResults"
@@ -348,7 +348,7 @@ class TestGeneSearchCommand:
 
         assert result.exit_code == 0
 
-    @patch("biomcp.cli.genes.get_gene")
+    @patch("czechmedmcp.cli.genes.get_gene")
     def test_search_genes_with_page_size(self, mock_get_gene):
         """Test gene search with page_size parameter."""
         mock_get_gene.return_value = "# kinase\n\nResults"
@@ -359,7 +359,7 @@ class TestGeneSearchCommand:
 
         assert result.exit_code == 0
 
-    @patch("biomcp.cli.genes.get_gene")
+    @patch("czechmedmcp.cli.genes.get_gene")
     def test_search_genes_with_pagination(self, mock_get_gene):
         """Test gene search with full pagination parameters."""
         mock_get_gene.return_value = "# kinase\n\nResults"
@@ -373,7 +373,7 @@ class TestGeneSearchCommand:
         # Should show development note when pagination is used
         assert "development" in result.stdout.lower()
 
-    @patch("biomcp.cli.genes.get_gene")
+    @patch("czechmedmcp.cli.genes.get_gene")
     def test_search_genes_with_json_output(self, mock_get_gene):
         """Test gene search with JSON output."""
         json_output = json.dumps(
@@ -387,7 +387,7 @@ class TestGeneSearchCommand:
         assert result.exit_code == 0
         assert "BRCA" in result.stdout
 
-    @patch("biomcp.cli.genes.get_gene")
+    @patch("czechmedmcp.cli.genes.get_gene")
     def test_search_genes_with_json_short_flag(self, mock_get_gene):
         """Test gene search with -j short flag."""
         json_output = json.dumps({"symbol": "BRCA1"}, indent=2)
@@ -397,7 +397,7 @@ class TestGeneSearchCommand:
 
         assert result.exit_code == 0
 
-    @patch("biomcp.cli.genes.get_gene")
+    @patch("czechmedmcp.cli.genes.get_gene")
     def test_search_genes_quoted_query(self, mock_get_gene):
         """Test gene search with quoted multi-word query."""
         mock_get_gene.return_value = "# tumor protein\n\nResults"
@@ -407,7 +407,7 @@ class TestGeneSearchCommand:
         assert result.exit_code == 0
         assert "tumor protein" in result.stdout
 
-    @patch("biomcp.cli.genes.get_gene")
+    @patch("czechmedmcp.cli.genes.get_gene")
     def test_search_genes_not_found(self, mock_get_gene):
         """Test gene search with no results."""
         error_msg = json.dumps(
@@ -424,7 +424,7 @@ class TestGeneSearchCommand:
         assert result.exit_code == 0
         assert "not found" in result.stdout
 
-    @patch("biomcp.cli.genes.get_gene")
+    @patch("czechmedmcp.cli.genes.get_gene")
     def test_search_genes_with_all_options(self, mock_get_gene):
         """Test gene search with all available options."""
         json_output = json.dumps({"symbol": "kinase"}, indent=2)
@@ -450,7 +450,7 @@ class TestGeneSearchCommand:
 class TestGeneCliIntegration:
     """Integration-style tests for gene CLI (still using mocks)."""
 
-    @patch("biomcp.integrations.biothings_client.http_client")
+    @patch("czechmedmcp.integrations.biothings_client.http_client")
     def test_get_gene_full_flow(self, mock_http_client):
         """Test full gene get flow with mocked HTTP client."""
         # Mock the API response
@@ -475,7 +475,7 @@ class TestGeneCliIntegration:
         assert "TP53" in result.stdout
         assert "tumor protein p53" in result.stdout
 
-    @patch("biomcp.integrations.biothings_client.http_client")
+    @patch("czechmedmcp.integrations.biothings_client.http_client")
     def test_get_gene_with_aliases(self, mock_http_client):
         """Test gene with multiple aliases."""
         # Mock both the query (to find BRCA1) and the get (to retrieve details)
@@ -529,7 +529,7 @@ class TestGeneCliIntegration:
         # Should show limited aliases with "and X more" message
         assert "alias" in result.stdout.lower() or "BRCC1" in result.stdout
 
-    @patch("biomcp.cli.genes.get_gene")
+    @patch("czechmedmcp.cli.genes.get_gene")
     def test_gene_command_error_handling(self, mock_get_gene):
         """Test error handling in gene commands."""
         # Simulate an error response from the API

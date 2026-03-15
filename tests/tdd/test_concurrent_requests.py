@@ -5,7 +5,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from biomcp import http_client
+from czechmedmcp import http_client
 
 
 class TestConcurrentRequests:
@@ -16,7 +16,7 @@ class TestConcurrentRequests:
         """Test multiple concurrent requests to the same domain."""
         # Use patch instead of direct replacement
         with patch(
-            "biomcp.http_client.call_http", new_callable=AsyncMock
+            "czechmedmcp.http_client.call_http", new_callable=AsyncMock
         ) as mock_call:
             # Configure mock to return success
             mock_call.return_value = (200, '{"data": "response"}')
@@ -48,7 +48,7 @@ class TestConcurrentRequests:
     async def test_concurrent_requests_different_domains(self):
         """Test concurrent requests to different domains."""
         with patch(
-            "biomcp.http_client.call_http", new_callable=AsyncMock
+            "czechmedmcp.http_client.call_http", new_callable=AsyncMock
         ) as mock_call:
             # Return different responses based on URL
             async def side_effect(method, url, *args, **kwargs):
@@ -85,7 +85,7 @@ class TestConcurrentRequests:
     async def test_concurrent_cache_access(self):
         """Test that concurrent requests properly use cache."""
         with patch(
-            "biomcp.http_client.call_http", new_callable=AsyncMock
+            "czechmedmcp.http_client.call_http", new_callable=AsyncMock
         ) as mock_call:
             mock_call.return_value = (200, '{"data": "cached"}')
 
@@ -125,7 +125,7 @@ class TestConcurrentRequests:
     async def test_concurrent_circuit_breaker(self):
         """Test circuit breaker behavior with concurrent failures."""
         with patch(
-            "biomcp.http_client.call_http", new_callable=AsyncMock
+            "czechmedmcp.http_client.call_http", new_callable=AsyncMock
         ) as mock_call:
             # Simulate failures
             mock_call.return_value = (500, "Internal Server Error")

@@ -1,0 +1,69 @@
+# Production deployment: MCP server + Caddy (auto HTTPS)
+#
+# Použití:
+#   cp .env.example .env
+#   # Nastavte DOMAIN a MCP_AUTH_TOKEN v .env
+#   docker compose -f docker-compose.prod.yml up -d
+#
+# MCP endpoint:  https://$DOMAIN/mcp
+# Landing page:  https://$DOMAIN/
+# Health check:  https://$DOMAIN/health
+
+services:
+  # Init: zkopíruje statickou landing page do sdíleného volume
+  web-init:
+    build: .
+    container_name: czechmedmcp-web-init
+    entrypoint: ["sh", "-c", "cp -r /app/static/. /srv/web/ && echo 'Web assets copied'"]
+    volumes:
+      - web-static:/srv/web
+
+  mcp-server:
+    build: .
+    container_name: czechmedmcp-server
+    restart: unless-stopped
+    expose:
+      - "8000"
+    environment:
+      - MCP_MODE=streamable_http
+      - MCP_AUTH_TOKEN=${MCP_AUTH_TOKEN:-}
+      - BIOMCP_USE_CONNECTION_POOL=true
+      - NCI_API_KEY=${NCI_API_KEY:-}
+      - OPENFDA_API_KEY=${OPENFDA_API_KEY:-}
+      - ONCOKB_TOKEN=${ONCOKB_TOKEN:-}
+      - CBIO_TOKEN=${CBIO_TOKEN:-}
+    volumes:
+      - czechmedmcp-cache:/root/.cache/czechmedmcp
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8000/health').raise_for_status()"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: czechmedmcp-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      - DOMAIN=${DOMAIN:-localhost}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - web-static:/srv/web:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      web-init:
+        condition: service_completed_successfully
+      mcp-server:
+        condition: service_healthy
+
+volumes:
+  czechmedmcp-cache:
+  web-static:
+  caddy-data:
+  caddy-config:

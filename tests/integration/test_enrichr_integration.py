@@ -7,7 +7,7 @@ They are marked with @pytest.mark.integration and are allowed to fail in CI.
 
 import pytest
 
-from biomcp.enrichr import EnrichrClient
+from czechmedmcp.enrichr import EnrichrClient
 
 
 @pytest.mark.integration

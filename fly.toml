@@ -1,0 +1,46 @@
+# Fly.io deployment — auto HTTPS, globální edge network
+#
+# Nasazení:
+#   fly launch --copy-config
+#   fly secrets set MCP_AUTH_TOKEN=$(openssl rand -hex 32)
+#   fly deploy
+#
+# MCP endpoint: https://<app-name>.fly.dev/mcp
+
+app = "czechmedmcp"
+primary_region = "fra"  # Frankfurt — nejblíže ČR
+
+[build]
+
+[env]
+  MCP_MODE = "streamable_http"
+  BIOMCP_USE_CONNECTION_POOL = "true"
+  PYTHONUNBUFFERED = "1"
+
+[http_service]
+  internal_port = 8000
+  force_https = true
+  auto_stop_machines = "suspend"
+  auto_start_machines = true
+  min_machines_running = 0
+
+  [http_service.concurrency]
+    type = "requests"
+    hard_limit = 100
+    soft_limit = 80
+
+[[http_service.checks]]
+  grace_period = "15s"
+  interval = "30s"
+  method = "GET"
+  path = "/health"
+  timeout = "5s"
+
+[[vm]]
+  memory = "1gb"
+  cpu_kind = "shared"
+  cpus = 1
+
+[mounts]
+  source = "czechmedmcp_cache"
+  destination = "/root/.cache/czechmedmcp"

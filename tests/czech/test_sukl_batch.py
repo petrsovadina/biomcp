@@ -3,7 +3,7 @@
 import json
 from unittest.mock import patch
 
-from biomcp.czech.sukl.availability import _batch_availability
+from czechmedmcp.czech.sukl.availability import _batch_availability
 
 
 def _mock_check_distribution(status_map):
@@ -34,14 +34,14 @@ class TestBatchAvailability:
         """Result must have content + structuredContent."""
         with (
             patch(
-                "biomcp.czech.sukl.availability."
+                "czechmedmcp.czech.sukl.availability."
                 "_check_distribution",
                 side_effect=_mock_check_distribution(
                     {"0012345": "available"}
                 ),
             ),
             patch(
-                "biomcp.czech.sukl.availability."
+                "czechmedmcp.czech.sukl.availability."
                 "_fetch_drug_detail",
                 side_effect=_mock_fetch_detail(
                     {"0012345": "Ibuprofen"}
@@ -70,14 +70,14 @@ class TestBatchAvailability:
 
         with (
             patch(
-                "biomcp.czech.sukl.availability."
+                "czechmedmcp.czech.sukl.availability."
                 "_check_distribution",
                 side_effect=_mock_check_distribution(
                     status_map
                 ),
             ),
             patch(
-                "biomcp.czech.sukl.availability."
+                "czechmedmcp.czech.sukl.availability."
                 "_fetch_drug_detail",
                 side_effect=_mock_fetch_detail(name_map),
             ),
@@ -99,12 +99,12 @@ class TestBatchAvailability:
 
         with (
             patch(
-                "biomcp.czech.sukl.availability."
+                "czechmedmcp.czech.sukl.availability."
                 "_check_distribution",
                 side_effect=_fail_one,
             ),
             patch(
-                "biomcp.czech.sukl.availability."
+                "czechmedmcp.czech.sukl.availability."
                 "_fetch_drug_detail",
                 side_effect=_mock_fetch_detail(
                     {"0012345": "Drug A"}
@@ -123,14 +123,14 @@ class TestBatchAvailability:
         """Content should contain Markdown table."""
         with (
             patch(
-                "biomcp.czech.sukl.availability."
+                "czechmedmcp.czech.sukl.availability."
                 "_check_distribution",
                 side_effect=_mock_check_distribution(
                     {"0012345": "available"}
                 ),
             ),
             patch(
-                "biomcp.czech.sukl.availability."
+                "czechmedmcp.czech.sukl.availability."
                 "_fetch_drug_detail",
                 side_effect=_mock_fetch_detail(
                     {"0012345": "Ibuprofen"}
@@ -148,14 +148,14 @@ class TestBatchAvailability:
         """Single code should still work."""
         with (
             patch(
-                "biomcp.czech.sukl.availability."
+                "czechmedmcp.czech.sukl.availability."
                 "_check_distribution",
                 side_effect=_mock_check_distribution(
                     {"0012345": "available"}
                 ),
             ),
             patch(
-                "biomcp.czech.sukl.availability."
+                "czechmedmcp.czech.sukl.availability."
                 "_fetch_drug_detail",
                 side_effect=_mock_fetch_detail(
                     {"0012345": "Drug"}

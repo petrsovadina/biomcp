@@ -7,7 +7,7 @@ from unittest.mock import patch
 
 import pytest
 
-from biomcp.metrics import (
+from czechmedmcp.metrics import (
     MetricSample,
     MetricsCollector,
     MetricSummary,
@@ -26,9 +26,9 @@ def enable_metrics(monkeypatch):
     # Force reload of the module to pick up the new env var
     import importlib
 
-    import biomcp.metrics
+    import czechmedmcp.metrics
 
-    importlib.reload(biomcp.metrics)
+    importlib.reload(czechmedmcp.metrics)
 
 
 def test_metric_sample():
@@ -124,7 +124,7 @@ async def test_metrics_collector():
 async def test_global_metrics_functions():
     """Test global metrics functions."""
     # Clear any existing metrics
-    from biomcp.metrics import _metrics_collector
+    from czechmedmcp.metrics import _metrics_collector
 
     await _metrics_collector.clear()
 
@@ -146,7 +146,7 @@ async def test_global_metrics_functions():
 @pytest.mark.asyncio
 async def test_track_performance_decorator_async():
     """Test track_performance decorator on async functions."""
-    from biomcp.metrics import _metrics_collector
+    from czechmedmcp.metrics import _metrics_collector
 
     await _metrics_collector.clear()
 
@@ -169,7 +169,7 @@ async def test_track_performance_decorator_async():
 @pytest.mark.asyncio
 async def test_track_performance_decorator_async_error():
     """Test track_performance decorator on async functions with errors."""
-    from biomcp.metrics import _metrics_collector
+    from czechmedmcp.metrics import _metrics_collector
 
     await _metrics_collector.clear()
 
@@ -199,7 +199,7 @@ def test_track_performance_decorator_sync():
 
     # Need to run in an event loop context
     async def run_test():
-        from biomcp.metrics import _metrics_collector
+        from czechmedmcp.metrics import _metrics_collector
 
         await _metrics_collector.clear()
 
@@ -220,7 +220,7 @@ def test_track_performance_decorator_sync():
 @pytest.mark.asyncio
 async def test_timer_context_manager():
     """Test Timer context manager."""
-    from biomcp.metrics import _metrics_collector
+    from czechmedmcp.metrics import _metrics_collector
 
     await _metrics_collector.clear()
 
@@ -249,7 +249,7 @@ async def test_timer_context_manager():
 @pytest.mark.asyncio
 async def test_timer_with_exception():
     """Test Timer context manager with exceptions."""
-    from biomcp.metrics import _metrics_collector
+    from czechmedmcp.metrics import _metrics_collector
 
     await _metrics_collector.clear()
 
@@ -269,7 +269,7 @@ async def test_timer_with_exception():
 def test_timer_without_event_loop():
     """Test Timer when no event loop is running."""
     # This simulates using Timer in a non-async context
-    with patch("biomcp.metrics.logger") as mock_logger:
+    with patch("czechmedmcp.metrics.logger") as mock_logger:
         with Timer("test_no_loop"):
             time.sleep(0.01)
 

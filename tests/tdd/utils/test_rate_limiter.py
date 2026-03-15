@@ -5,7 +5,7 @@ import time
 
 import pytest
 
-from biomcp.utils.rate_limiter import RateLimiter
+from czechmedmcp.utils.rate_limiter import RateLimiter
 
 
 class TestRateLimiter:

@@ -8,11 +8,11 @@ import os
 
 import pytest
 
-from biomcp.openfda.adverse_events import search_adverse_events
-from biomcp.openfda.device_events import search_device_events
-from biomcp.openfda.drug_approvals import search_drug_approvals
-from biomcp.openfda.drug_labels import search_drug_labels
-from biomcp.openfda.drug_recalls import search_drug_recalls
+from czechmedmcp.openfda.adverse_events import search_adverse_events
+from czechmedmcp.openfda.device_events import search_device_events
+from czechmedmcp.openfda.drug_approvals import search_drug_approvals
+from czechmedmcp.openfda.drug_labels import search_drug_labels
+from czechmedmcp.openfda.drug_recalls import search_drug_recalls
 
 
 @pytest.mark.integration

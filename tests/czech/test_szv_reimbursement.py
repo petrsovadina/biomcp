@@ -3,7 +3,7 @@
 import json
 from unittest.mock import patch
 
-from biomcp.czech.szv.reimbursement import (
+from czechmedmcp.czech.szv.reimbursement import (
     _calculate_reimbursement,
 )
 
@@ -18,7 +18,7 @@ MOCK_PROCEDURE = {
 def _patch_szv_get(data=MOCK_PROCEDURE):
     """Patch _szv_get to return mock procedure."""
     return patch(
-        "biomcp.czech.szv.reimbursement._szv_get",
+        "czechmedmcp.czech.szv.reimbursement._szv_get",
         return_value=json.dumps(
             data, ensure_ascii=False
         ),

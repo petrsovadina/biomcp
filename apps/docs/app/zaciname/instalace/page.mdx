@@ -18,13 +18,13 @@ biomcp --help
 ## Alternativa: pip
 
 ```bash
-pip install biomcp-python
+pip install czechmedmcp
 ```
 
 ## Pro vývojáře (editovatelná instalace)
 
 ```bash
-git clone https://github.com/petrsovadina/biomcp.git
+git clone https://github.com/petrsovadina/czechmedmcp.git
 cd biomcp
 git checkout python-main
 uv sync --all-extras
@@ -35,10 +35,10 @@ uv run pre-commit install
 
 ```bash
 # Spuštění serveru
-biomcp run
+czechmedmcp run
 
 # Nebo přes uv
-uv run biomcp run
+uv run czechmedmcp run
 ```
 
 Server se spustí na stdio transportu a čeká na MCP klienta.

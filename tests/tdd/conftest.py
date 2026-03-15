@@ -2,7 +2,7 @@ from pathlib import Path
 
 from pytest import fixture
 
-from biomcp import http_client
+from czechmedmcp import http_client
 
 
 @fixture

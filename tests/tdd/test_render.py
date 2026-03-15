@@ -1,4 +1,4 @@
-from biomcp import render
+from czechmedmcp import render
 
 
 def test_render_full_json(data_dir):

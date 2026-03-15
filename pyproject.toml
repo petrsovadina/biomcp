@@ -37,9 +37,9 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/petrsovadina/biomcp"
-Repository = "https://github.com/petrsovadina/biomcp"
-Documentation = "https://petrsovadina.github.io/biomcp/"
+Homepage = "https://github.com/petrsovadina/czechmedmcp"
+Repository = "https://github.com/petrsovadina/czechmedmcp"
+Documentation = "https://petrsovadina.github.io/czechmedmcp/"
 
 [dependency-groups]
 dev = [
@@ -84,11 +84,10 @@ build-backend = "setuptools.build_meta"
 where = ["src"]
 
 [tool.setuptools.package-data]
-biomcp = ["resources/*.md"]
+czechmedmcp = ["resources/*.md"]
 
 [project.scripts]
-czechmedmcp = "biomcp.__main__:main"
-biomcp = "biomcp.__main__:main"
+czechmedmcp = "czechmedmcp.__main__:main"
 
 [tool.mypy]
 files = ["src"]
@@ -178,7 +177,7 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["S101"]
 "__init__.py" = ["I001"]
-"src/biomcp/variants/external.py" = ["C901"]  # Complex API interactions are acceptable
+"src/czechmedmcp/variants/external.py" = ["C901"]  # Complex API interactions are acceptable
 
 [tool.ruff.format]
 preview = true
@@ -220,4 +219,4 @@ exclude = [
 [tool.deptry.per_rule_ignores]
 DEP001 = ["alphagenome"]  # Optional dependency, must be installed manually
 DEP002 = ["uvicorn"]
-DEP003 = ["biomcp", "alphagenome"]
+DEP003 = ["czechmedmcp", "alphagenome"]

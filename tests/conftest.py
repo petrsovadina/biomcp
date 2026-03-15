@@ -37,7 +37,7 @@ def pytest_collection_modifyitems(config, items):
 def mock_cbioportal_api():
     """Mock cBioPortal API responses for testing."""
     with patch(
-        "biomcp.variants.cbioportal_search.CBioPortalSearchClient.get_gene_search_summary"
+        "czechmedmcp.variants.cbioportal_search.CBioPortalSearchClient.get_gene_search_summary"
     ) as mock:
         # Return a mock summary
         mock.return_value = AsyncMock(
@@ -180,8 +180,8 @@ def mock_pubtator3_http(monkeypatch):
     Use in tests that otherwise make real requests to PubTator3 and can be flaky
     under parallel pytest execution.
     """
-    from biomcp import http_client
-    from biomcp.constants import PUBTATOR3_BASE_URL
+    from czechmedmcp import http_client
+    from czechmedmcp.constants import PUBTATOR3_BASE_URL
 
     real_call_http = http_client.call_http
 

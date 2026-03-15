@@ -5,7 +5,7 @@ from unittest.mock import patch
 
 import pytest
 
-from biomcp.articles.search import _article_searcher
+from czechmedmcp.articles.search import _article_searcher
 
 
 class TestArticleSearcherMCPTool:
@@ -17,7 +17,7 @@ class TestArticleSearcherMCPTool:
         mock_results = [{"title": "Test Article", "pmid": 12345}]
 
         with patch(
-            "biomcp.articles.search_optimized.article_searcher_optimized"
+            "czechmedmcp.articles.search_optimized.article_searcher_optimized"
         ) as mock_search:
             mock_search.return_value = json.dumps(mock_results)
 
@@ -49,7 +49,7 @@ class TestArticleSearcherMCPTool:
     async def test_article_searcher_with_lists(self):
         """Test article_searcher with list inputs."""
         with patch(
-            "biomcp.articles.search_optimized.article_searcher_optimized"
+            "czechmedmcp.articles.search_optimized.article_searcher_optimized"
         ) as mock_search:
             mock_search.return_value = "## Results"
 
@@ -73,7 +73,7 @@ class TestArticleSearcherMCPTool:
     async def test_article_searcher_minimal_params(self):
         """Test article_searcher with minimal parameters."""
         with patch(
-            "biomcp.articles.search_optimized.article_searcher_optimized"
+            "czechmedmcp.articles.search_optimized.article_searcher_optimized"
         ) as mock_search:
             mock_search.return_value = "## No results"
 
@@ -92,7 +92,7 @@ class TestArticleSearcherMCPTool:
     async def test_article_searcher_empty_strings(self):
         """Test article_searcher with empty strings."""
         with patch(
-            "biomcp.articles.search_optimized.article_searcher_optimized"
+            "czechmedmcp.articles.search_optimized.article_searcher_optimized"
         ) as mock_search:
             mock_search.return_value = "## Results"
 

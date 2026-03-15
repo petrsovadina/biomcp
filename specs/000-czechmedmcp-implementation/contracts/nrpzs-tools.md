@@ -2,11 +2,11 @@
 
 ## Existing Tools (rename only)
 
-### czechmed_search_provider (was: nrpzs_provider_searcher)
+### czechmed_search_providers (was: nrpzs_provider_searcher → v2.1 plural rename)
 
 ```python
 @mcp_app.tool()
-async def czechmed_search_provider(
+async def czechmed_search_providers(
     query: Annotated[str | None, Field(description="Provider or facility name")] = None,
     city: Annotated[str | None, Field(description="City name")] = None,
     specialty: Annotated[str | None, Field(description="Medical specialty")] = None,
@@ -30,11 +30,11 @@ async def czechmed_get_provider_detail(
 
 ## New Tools
 
-### czechmed_get_codebooks
+### czechmed_get_nrpzs_codebooks (was: czechmed_get_codebooks → v2.1 rename)
 
 ```python
 @mcp_app.tool()
-async def czechmed_get_codebooks(
+async def czechmed_get_nrpzs_codebooks(
     codebook_type: Annotated[str, Field(
         description="Codebook type: specialties, care_forms, or care_types"
     )],

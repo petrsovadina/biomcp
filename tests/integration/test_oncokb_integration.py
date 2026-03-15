@@ -20,7 +20,7 @@ import os
 
 import pytest
 
-from biomcp.variants.oncokb_client import OncoKBClient
+from czechmedmcp.variants.oncokb_client import OncoKBClient
 
 
 @pytest.mark.integration
@@ -257,7 +257,7 @@ class TestOncoKBProductionServer:
             # Need to reload module to pick up env var change
             import importlib
 
-            from biomcp.variants import oncokb_client
+            from czechmedmcp.variants import oncokb_client
 
             importlib.reload(oncokb_client)
 
@@ -304,7 +304,7 @@ class TestOncoKBProductionServer:
             # Reload one more time to restore original state
             import importlib
 
-            from biomcp.variants import oncokb_client
+            from czechmedmcp.variants import oncokb_client
 
             importlib.reload(oncokb_client)
 

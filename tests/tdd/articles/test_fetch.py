@@ -1,6 +1,6 @@
 import json
 
-from biomcp.articles.fetch import fetch_articles
+from czechmedmcp.articles.fetch import fetch_articles
 
 pmids = [39293516, 34397683, 37296959]
 

@@ -7,7 +7,7 @@
 
 Rozšíření BioMCP forku o 9 nových českých zdravotnických nástrojů (batch availability, reimbursement, pharmacy search, diagnosis stats, codebooks, SZV calculation, 3 workflow orchestrace) a přejmenování 14 existujících nástrojů na prefix `czechmed_`. Výsledek: 60 MCP nástrojů (37 BioMCP + 23 Czech) s dual output (Markdown + JSON structuredContent).
 
-Technický přístup: aditivní rozšíření stávající `src/biomcp/czech/` struktury, sdílený `httpx.AsyncClient` + `diskcache` pattern, `asyncio.gather` pro workflow orchestrace s graceful degradation.
+Technický přístup: aditivní rozšíření stávající `src/czechmedmcp/czech/` struktury, sdílený `httpx.AsyncClient` + `diskcache` pattern, `asyncio.gather` pro workflow orchestrace s graceful degradation.
 
 ## Technical Context
 
@@ -28,7 +28,7 @@ Technický přístup: aditivní rozšíření stávající `src/biomcp/czech/` s
 | Principle | Status | Notes |
 |-----------|--------|-------|
 | **I. MCP Protocol First** | PASS | Všech 23 nástrojů registrováno přes `@mcp_app.tool()` |
-| **II. Modular Domain Architecture** | PASS | Czech moduly pod `src/biomcp/czech/`, registrace v `czech_tools.py`, žádné cross-module importy |
+| **II. Modular Domain Architecture** | PASS | Czech moduly pod `src/czechmedmcp/czech/`, registrace v `czech_tools.py`, žádné cross-module importy |
 | **III. Authoritative Data Sources** | PASS | SÚKL, MKN-10/ÚZIS, NRPZS, SZV/MZ ČR, VZP — všechny autoritativní české zdroje |
 | **IV. CLI & MCP Dual Access** | DEFERRED | Nové nástroje dostanou CLI v budoucím PR; stávající CLI pattern zachován |
 | **V. Testing Rigor** | PASS | Unit testy (mocked httpx) + integration testy (`@pytest.mark.integration`), `asyncio_mode = "auto"` |
@@ -71,7 +71,7 @@ specs/001-czechmedmcp-implementation/
 ### Source Code (repository root)
 
 ```text
-src/biomcp/
+src/czechmedmcp/
 ├── constants.py                  # + nové URL konstanty, rate limity
 ├── czech/
 │   ├── czech_tools.py            # 14→23 @mcp_app.tool() registrací (přejmenované)
@@ -122,7 +122,7 @@ tests/
     └── test_workflow_api.py       # NEW: E2E workflow tests
 ```
 
-**Structure Decision**: Rozšíření stávající `src/biomcp/czech/` struktury (Option 1: Single project). Nový `workflows/` subdirectory pro orchestrační nástroje. Nový `response.py` pro sdílenou dual-output logiku.
+**Structure Decision**: Rozšíření stávající `src/czechmedmcp/czech/` struktury (Option 1: Single project). Nový `workflows/` subdirectory pro orchestrační nástroje. Nový `response.py` pro sdílenou dual-output logiku.
 
 ## Implementation Phases
 

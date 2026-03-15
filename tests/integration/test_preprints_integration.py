@@ -4,13 +4,13 @@ import asyncio
 
 import pytest
 
-from biomcp.articles.preprints import (
+from czechmedmcp.articles.preprints import (
     BiorxivClient,
     EuropePMCClient,
     PreprintSearcher,
 )
-from biomcp.articles.search import PubmedRequest
-from biomcp.core import PublicationState
+from czechmedmcp.articles.search import PubmedRequest
+from czechmedmcp.core import PublicationState
 
 
 class TestBiorxivIntegration:

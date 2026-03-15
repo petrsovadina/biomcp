@@ -4,12 +4,12 @@ import asyncio
 
 import pytest
 
-from biomcp.variants.cbioportal_search import (
+from czechmedmcp.variants.cbioportal_search import (
     CBioPortalSearchClient,
     CBioPortalSearchSummary,
     format_cbioportal_search_summary,
 )
-from biomcp.variants.search import VariantQuery, search_variants
+from czechmedmcp.variants.search import VariantQuery, search_variants
 
 from .constants import API_RETRY_DELAY_SECONDS, DEFAULT_MAX_STUDIES
 
@@ -20,7 +20,7 @@ class TestCBioPortalSearch:
     @pytest.mark.asyncio
     async def test_mutation_gene_symbol_validation(self):
         """Test that process_mutation_results filters by gene symbol."""
-        from biomcp.variants.cbioportal_search_helpers import (
+        from czechmedmcp.variants.cbioportal_search_helpers import (
             process_mutation_results,
         )
 
@@ -181,7 +181,7 @@ class TestCBioPortalSearch:
         client = CBioPortalSearchClient()
 
         # Clear any caches to ensure fresh data
-        from biomcp.utils.request_cache import clear_cache
+        from czechmedmcp.utils.request_cache import clear_cache
 
         await clear_cache()
 
@@ -229,7 +229,7 @@ class TestCBioPortalSearch:
         client = CBioPortalSearchClient()
 
         # Clear any caches to ensure fresh data
-        from biomcp.utils.request_cache import clear_cache
+        from czechmedmcp.utils.request_cache import clear_cache
 
         await clear_cache()
 

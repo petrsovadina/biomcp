@@ -5,11 +5,11 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from biomcp.exceptions import (
+from czechmedmcp.exceptions import (
     InvalidDomainError,
 )
-from biomcp.rate_limiter import RateLimiter
-from biomcp.router import format_results
+from czechmedmcp.rate_limiter import RateLimiter
+from czechmedmcp.router import format_results
 
 
 @pytest.fixture(autouse=True)
@@ -19,9 +19,9 @@ def enable_metrics_for_concurrent_test(monkeypatch):
     # Force reload of the module to pick up the new env var
     import importlib
 
-    import biomcp.metrics
+    import czechmedmcp.metrics
 
-    importlib.reload(biomcp.metrics)
+    importlib.reload(czechmedmcp.metrics)
 
 
 def test_format_results_invalid_domain():
@@ -39,7 +39,7 @@ def test_format_results_handler_exception():
     bad_result = {"missing": "required_fields"}
 
     with patch(
-        "biomcp.domain_handlers.ArticleHandler.format_result"
+        "czechmedmcp.domain_handlers.ArticleHandler.format_result"
     ) as mock_format:
         mock_format.side_effect = KeyError("id")
 
@@ -65,7 +65,7 @@ async def test_rate_limiter_basic():
 async def test_concurrent_operations():
     """Test system behavior under concurrent load."""
     # Clear metrics
-    from biomcp.metrics import (
+    from czechmedmcp.metrics import (
         _metrics_collector,
         get_metric_summary,
         record_metric,
@@ -97,10 +97,10 @@ async def test_concurrent_operations():
 
 def test_cache_corruption_handling():
     """Test handling of corrupted cache data."""
-    from biomcp.http_client import get_cached_response
+    from czechmedmcp.http_client import get_cached_response
 
     # Simulate corrupted cache entry
-    with patch("biomcp.http_client.get_cache") as mock_get_cache:
+    with patch("czechmedmcp.http_client.get_cache") as mock_get_cache:
         mock_cache = MagicMock()
         mock_cache.get.return_value = "corrupted\x00data"  # Invalid data
         mock_get_cache.return_value = mock_cache

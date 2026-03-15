@@ -4,7 +4,7 @@ import json
 
 import pytest
 
-from biomcp.router import fetch, search
+from czechmedmcp.router import fetch, search
 
 
 class TestUnifiedBioThingsSearch:
@@ -28,12 +28,13 @@ class TestUnifiedBioThingsSearch:
                 return mock_gene_query
 
             async def _get_gene_by_id(self, gene_id):
-                from biomcp.integrations.biothings_client import GeneInfo
+                from czechmedmcp.integrations.biothings_client import GeneInfo
 
                 return GeneInfo(**mock_gene_details)
 
         monkeypatch.setattr(
-            "biomcp.router.BioThingsClient", MockBioThingsClient
+            "czechmedmcp.integrations.biothings_client.BioThingsClient",
+            MockBioThingsClient,
         )
 
         # Test gene search
@@ -66,12 +67,13 @@ class TestUnifiedBioThingsSearch:
                 return mock_drug_query
 
             async def _get_drug_by_id(self, drug_id):
-                from biomcp.integrations.biothings_client import DrugInfo
+                from czechmedmcp.integrations.biothings_client import DrugInfo
 
                 return DrugInfo(**mock_drug_details)
 
         monkeypatch.setattr(
-            "biomcp.router.BioThingsClient", MockBioThingsClient
+            "czechmedmcp.integrations.biothings_client.BioThingsClient",
+            MockBioThingsClient,
         )
 
         # Test drug search
@@ -104,12 +106,13 @@ class TestUnifiedBioThingsSearch:
                 return mock_disease_query
 
             async def _get_disease_by_id(self, disease_id):
-                from biomcp.integrations.biothings_client import DiseaseInfo
+                from czechmedmcp.integrations.biothings_client import DiseaseInfo
 
                 return DiseaseInfo(**mock_disease_details)
 
         monkeypatch.setattr(
-            "biomcp.router.BioThingsClient", MockBioThingsClient
+            "czechmedmcp.integrations.biothings_client.BioThingsClient",
+            MockBioThingsClient,
         )
 
         # Test disease search
@@ -145,12 +148,13 @@ class TestUnifiedBioThingsFetch:
 
         class MockBioThingsClient:
             async def get_gene_info(self, gene_id):
-                from biomcp.integrations.biothings_client import GeneInfo
+                from czechmedmcp.integrations.biothings_client import GeneInfo
 
                 return GeneInfo(**mock_gene_info)
 
         monkeypatch.setattr(
-            "biomcp.router.BioThingsClient", MockBioThingsClient
+            "czechmedmcp.integrations.biothings_client.BioThingsClient",
+            MockBioThingsClient,
         )
 
         # Test gene fetch
@@ -178,12 +182,13 @@ class TestUnifiedBioThingsFetch:
 
         class MockBioThingsClient:
             async def get_drug_info(self, drug_id):
-                from biomcp.integrations.biothings_client import DrugInfo
+                from czechmedmcp.integrations.biothings_client import DrugInfo
 
                 return DrugInfo(**mock_drug_info)
 
         monkeypatch.setattr(
-            "biomcp.router.BioThingsClient", MockBioThingsClient
+            "czechmedmcp.integrations.biothings_client.BioThingsClient",
+            MockBioThingsClient,
         )
 
         # Test drug fetch
@@ -213,12 +218,13 @@ class TestUnifiedBioThingsFetch:
 
         class MockBioThingsClient:
             async def get_disease_info(self, disease_id):
-                from biomcp.integrations.biothings_client import DiseaseInfo
+                from czechmedmcp.integrations.biothings_client import DiseaseInfo
 
                 return DiseaseInfo(**mock_disease_info)
 
         monkeypatch.setattr(
-            "biomcp.router.BioThingsClient", MockBioThingsClient
+            "czechmedmcp.integrations.biothings_client.BioThingsClient",
+            MockBioThingsClient,
         )
 
         # Test disease fetch
@@ -251,7 +257,7 @@ class TestUnifiedQueryLanguage:
             }
 
         monkeypatch.setattr(
-            "biomcp.router.execute_routing_plan", mock_execute_routing_plan
+            "czechmedmcp.router.execute_routing_plan", mock_execute_routing_plan
         )
 
         # Test cross-domain gene search
@@ -276,7 +282,7 @@ class TestUnifiedQueryLanguage:
             }
 
         monkeypatch.setattr(
-            "biomcp.router.execute_routing_plan", mock_execute_routing_plan
+            "czechmedmcp.router.execute_routing_plan", mock_execute_routing_plan
         )
 
         # Test cross-domain disease search
@@ -297,7 +303,7 @@ class TestUnifiedQueryLanguage:
             return {"genes": json.dumps([])}
 
         monkeypatch.setattr(
-            "biomcp.router.execute_routing_plan", mock_execute_routing_plan
+            "czechmedmcp.router.execute_routing_plan", mock_execute_routing_plan
         )
 
         # Test gene-specific search
@@ -319,7 +325,8 @@ class TestBioThingsErrorCases:
                 raise Exception("API connection failed")
 
         monkeypatch.setattr(
-            "biomcp.router.BioThingsClient", MockBioThingsClient
+            "czechmedmcp.integrations.biothings_client.BioThingsClient",
+            MockBioThingsClient,
         )
 
         # Test that search handles the error gracefully
@@ -337,7 +344,8 @@ class TestBioThingsErrorCases:
                 return []  # No results
 
         monkeypatch.setattr(
-            "biomcp.router.BioThingsClient", MockBioThingsClient
+            "czechmedmcp.integrations.biothings_client.BioThingsClient",
+            MockBioThingsClient,
         )
 
         results = await search(
@@ -358,7 +366,8 @@ class TestBioThingsErrorCases:
                 return None  # Not found
 
         monkeypatch.setattr(
-            "biomcp.router.BioThingsClient", MockBioThingsClient
+            "czechmedmcp.integrations.biothings_client.BioThingsClient",
+            MockBioThingsClient,
         )
 
         result = await fetch(id="INVALID:12345", domain="disease")
@@ -380,12 +389,13 @@ class TestBioThingsErrorCases:
                 return mock_gene_query
 
             async def _get_gene_by_id(self, gene_id):
-                from biomcp.integrations.biothings_client import GeneInfo
+                from czechmedmcp.integrations.biothings_client import GeneInfo
 
                 return GeneInfo(**mock_gene_details)
 
         monkeypatch.setattr(
-            "biomcp.router.BioThingsClient", MockBioThingsClient
+            "czechmedmcp.integrations.biothings_client.BioThingsClient",
+            MockBioThingsClient,
         )
 
         results = await search(query="", domain="gene", keywords=["673"])

@@ -53,7 +53,7 @@ specs/001-fix-sukl-search/
 ### Source Code (repository root)
 
 ```text
-src/biomcp/czech/sukl/
+src/czechmedmcp/czech/sukl/
 ├── client.py            # Existing — SUKL API client (no changes)
 ├── search.py            # MODIFY — replace _sukl_drug_search() to use index
 ├── drug_index.py        # NEW — DrugIndex singleton, builder, search
@@ -70,4 +70,4 @@ tests/
     └── test_sukl_api.py         # Existing — add search integration test
 ```
 
-**Structure Decision**: Single project, all changes in `src/biomcp/czech/sukl/` following existing modular domain pattern. One new file (`drug_index.py`), one modified file (`search.py`), one new test file.
+**Structure Decision**: Single project, all changes in `src/czechmedmcp/czech/sukl/` following existing modular domain pattern. One new file (`drug_index.py`), one modified file (`search.py`), one new test file.

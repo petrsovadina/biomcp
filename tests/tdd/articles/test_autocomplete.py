@@ -1,4 +1,4 @@
-from biomcp.articles.autocomplete import Entity, EntityRequest, autocomplete
+from czechmedmcp.articles.autocomplete import Entity, EntityRequest, autocomplete
 
 
 async def test_autocomplete(anyio_backend, http_cache, mock_pubtator3_http):

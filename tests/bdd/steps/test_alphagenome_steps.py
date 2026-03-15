@@ -8,7 +8,7 @@ import pandas as pd
 import pytest
 from pytest_bdd import given, parsers, scenarios, then, when
 
-from biomcp.variants.alphagenome import predict_variant_effects
+from czechmedmcp.variants.alphagenome import predict_variant_effects
 
 # Load all scenarios from the feature file
 scenarios("../features/alphagenome_integration.feature")

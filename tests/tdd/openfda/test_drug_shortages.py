@@ -8,7 +8,7 @@ from unittest.mock import patch
 
 import pytest
 
-from biomcp.openfda.drug_shortages import (
+from czechmedmcp.openfda.drug_shortages import (
     _fetch_shortage_data,
     _get_cached_shortage_data,
     get_drug_shortage,
@@ -82,7 +82,7 @@ class TestDrugShortages:
     @pytest.mark.asyncio
     async def test_csv_parsing(self, mock_csv_response):
         """Test that CSV response is correctly parsed."""
-        from biomcp.openfda.drug_shortages import _parse_csv_response
+        from czechmedmcp.openfda.drug_shortages import _parse_csv_response
 
         shortages = _parse_csv_response(mock_csv_response)
 
@@ -97,7 +97,7 @@ class TestDrugShortages:
     async def test_fetch_uses_csv_endpoint(self, mock_csv_response):
         """Test that fetch_shortage_data uses the CSV endpoint."""
         with patch(
-            "biomcp.openfda.drug_shortages.request_api"
+            "czechmedmcp.openfda.drug_shortages.request_api"
         ) as mock_request:
             mock_request.return_value = (mock_csv_response, None)
 
@@ -114,7 +114,7 @@ class TestDrugShortages:
     async def test_search_drug_shortages_success(self, mock_shortage_data):
         """Test successful drug shortage search."""
         with patch(
-            "biomcp.openfda.drug_shortages._get_cached_shortage_data"
+            "czechmedmcp.openfda.drug_shortages._get_cached_shortage_data"
         ) as mock_cache:
             mock_cache.return_value = mock_shortage_data
 
@@ -142,7 +142,7 @@ class TestDrugShortages:
     async def test_search_by_status(self, mock_shortage_data):
         """Test drug shortage search filtered by status."""
         with patch(
-            "biomcp.openfda.drug_shortages._get_cached_shortage_data"
+            "czechmedmcp.openfda.drug_shortages._get_cached_shortage_data"
         ) as mock_cache:
             mock_cache.return_value = mock_shortage_data
 
@@ -158,7 +158,7 @@ class TestDrugShortages:
     async def test_search_by_therapeutic_category(self, mock_shortage_data):
         """Test drug shortage search filtered by therapeutic category."""
         with patch(
-            "biomcp.openfda.drug_shortages._get_cached_shortage_data"
+            "czechmedmcp.openfda.drug_shortages._get_cached_shortage_data"
         ) as mock_cache:
             mock_cache.return_value = mock_shortage_data
 
@@ -174,7 +174,7 @@ class TestDrugShortages:
     async def test_search_no_results(self, mock_shortage_data):
         """Test drug shortage search with no results."""
         with patch(
-            "biomcp.openfda.drug_shortages._get_cached_shortage_data"
+            "czechmedmcp.openfda.drug_shortages._get_cached_shortage_data"
         ) as mock_cache:
             mock_cache.return_value = mock_shortage_data
 
@@ -188,7 +188,7 @@ class TestDrugShortages:
     async def test_get_drug_shortage_success(self, mock_shortage_data):
         """Test successful retrieval of specific drug shortage."""
         with patch(
-            "biomcp.openfda.drug_shortages._get_cached_shortage_data"
+            "czechmedmcp.openfda.drug_shortages._get_cached_shortage_data"
         ) as mock_cache:
             mock_cache.return_value = mock_shortage_data
 
@@ -212,7 +212,7 @@ class TestDrugShortages:
     async def test_get_drug_shortage_not_found(self, mock_shortage_data):
         """Test retrieval of non-existent drug shortage."""
         with patch(
-            "biomcp.openfda.drug_shortages._get_cached_shortage_data"
+            "czechmedmcp.openfda.drug_shortages._get_cached_shortage_data"
         ) as mock_cache:
             mock_cache.return_value = mock_shortage_data
 
@@ -225,7 +225,7 @@ class TestDrugShortages:
     async def test_cache_mechanism(self, mock_shortage_data):
         """Test that caching mechanism works correctly."""
         # Setup cache directory
-        cache_dir = Path(tempfile.gettempdir()) / "biomcp_cache"
+        cache_dir = Path(tempfile.gettempdir()) / "czechmedmcp_cache"
         cache_dir.mkdir(exist_ok=True)
         cache_file = cache_dir / "drug_shortages.json"
 
@@ -233,14 +233,14 @@ class TestDrugShortages:
         cache_data = mock_shortage_data.copy()
         cache_data["_cache_time"] = datetime.now().isoformat()
 
-        with patch("biomcp.openfda.drug_shortages.CACHE_FILE", cache_file):
+        with patch("czechmedmcp.openfda.drug_shortages.CACHE_FILE", cache_file):
             # Write cache
             with open(cache_file, "w") as f:
                 json.dump(cache_data, f)
 
             # Test cache is used when fresh
             with patch(
-                "biomcp.openfda.drug_shortages._fetch_shortage_data"
+                "czechmedmcp.openfda.drug_shortages._fetch_shortage_data"
             ) as mock_fetch:
                 result = await _get_cached_shortage_data()
 
@@ -256,7 +256,7 @@ class TestDrugShortages:
     async def test_data_unavailable(self):
         """Test handling when shortage data is unavailable."""
         with patch(
-            "biomcp.openfda.drug_shortages._get_cached_shortage_data"
+            "czechmedmcp.openfda.drug_shortages._get_cached_shortage_data"
         ) as mock_cache:
             mock_cache.return_value = None
 
@@ -270,7 +270,7 @@ class TestDrugShortages:
     async def test_fetch_shortage_data_error_handling(self):
         """Test error handling in fetch_shortage_data."""
         with patch(
-            "biomcp.openfda.drug_shortages.request_api"
+            "czechmedmcp.openfda.drug_shortages.request_api"
         ) as mock_request:
             # Simulate API error
             mock_request.return_value = (None, "Connection timeout")
@@ -284,7 +284,7 @@ class TestDrugShortages:
     async def test_shortage_with_alternatives(self, mock_shortage_data):
         """Test that alternatives are displayed for shortages."""
         with patch(
-            "biomcp.openfda.drug_shortages._get_cached_shortage_data"
+            "czechmedmcp.openfda.drug_shortages._get_cached_shortage_data"
         ) as mock_cache:
             mock_cache.return_value = mock_shortage_data
 
@@ -298,7 +298,7 @@ class TestDrugShortages:
     async def test_critical_shortage_highlighting(self, mock_shortage_data):
         """Test that critical shortages are properly highlighted."""
         with patch(
-            "biomcp.openfda.drug_shortages._get_cached_shortage_data"
+            "czechmedmcp.openfda.drug_shortages._get_cached_shortage_data"
         ) as mock_cache:
             mock_cache.return_value = mock_shortage_data
 
@@ -314,7 +314,7 @@ class TestDrugShortages:
     async def test_resolved_shortage_display(self, mock_shortage_data):
         """Test display of resolved shortages."""
         with patch(
-            "biomcp.openfda.drug_shortages._get_cached_shortage_data"
+            "czechmedmcp.openfda.drug_shortages._get_cached_shortage_data"
         ) as mock_cache:
             mock_cache.return_value = mock_shortage_data
 
@@ -334,7 +334,7 @@ class TestDrugShortages:
         )  # 30 items
 
         with patch(
-            "biomcp.openfda.drug_shortages._get_cached_shortage_data"
+            "czechmedmcp.openfda.drug_shortages._get_cached_shortage_data"
         ) as mock_cache:
             mock_cache.return_value = large_data
 
@@ -350,7 +350,7 @@ class TestDrugShortages:
         """Verify that mock data is never returned in production code."""
         import inspect
 
-        import biomcp.openfda.drug_shortages as module
+        import czechmedmcp.openfda.drug_shortages as module
 
         # Get source code
         source = inspect.getsource(module)

@@ -4,7 +4,7 @@ from unittest.mock import patch
 
 import pytest
 
-from biomcp.openfda.drug_approvals import (
+from czechmedmcp.openfda.drug_approvals import (
     get_drug_approval,
     search_drug_approvals,
 )
@@ -73,7 +73,7 @@ class TestDrugApprovals:
         }
 
         with patch(
-            "biomcp.openfda.drug_approvals.make_openfda_request"
+            "czechmedmcp.openfda.drug_approvals.make_openfda_request"
         ) as mock_request:
             mock_request.return_value = (mock_response, None)
 
@@ -114,7 +114,7 @@ class TestDrugApprovals:
         }
 
         with patch(
-            "biomcp.openfda.drug_approvals.make_openfda_request"
+            "czechmedmcp.openfda.drug_approvals.make_openfda_request"
         ) as mock_request:
             mock_request.return_value = (mock_response, None)
 
@@ -148,7 +148,7 @@ class TestDrugApprovals:
         }
 
         with patch(
-            "biomcp.openfda.drug_approvals.make_openfda_request"
+            "czechmedmcp.openfda.drug_approvals.make_openfda_request"
         ) as mock_request:
             mock_request.return_value = (mock_response, None)
 
@@ -162,7 +162,7 @@ class TestDrugApprovals:
     async def test_search_drug_approvals_api_error(self):
         """Test drug approval search with API error."""
         with patch(
-            "biomcp.openfda.drug_approvals.make_openfda_request"
+            "czechmedmcp.openfda.drug_approvals.make_openfda_request"
         ) as mock_request:
             mock_request.return_value = (None, "API rate limit exceeded")
 
@@ -221,7 +221,7 @@ class TestDrugApprovals:
         }
 
         with patch(
-            "biomcp.openfda.drug_approvals.make_openfda_request"
+            "czechmedmcp.openfda.drug_approvals.make_openfda_request"
         ) as mock_request:
             mock_request.return_value = (mock_response, None)
 
@@ -251,7 +251,7 @@ class TestDrugApprovals:
         mock_response = {"results": []}
 
         with patch(
-            "biomcp.openfda.drug_approvals.make_openfda_request"
+            "czechmedmcp.openfda.drug_approvals.make_openfda_request"
         ) as mock_request:
             mock_request.return_value = (mock_response, None)
 
@@ -286,7 +286,7 @@ class TestDrugApprovals:
         }
 
         with patch(
-            "biomcp.openfda.drug_approvals.make_openfda_request"
+            "czechmedmcp.openfda.drug_approvals.make_openfda_request"
         ) as mock_request:
             mock_request.return_value = (mock_response, None)
 
@@ -319,7 +319,7 @@ class TestDrugApprovals:
         }
 
         with patch(
-            "biomcp.openfda.drug_approvals.make_openfda_request"
+            "czechmedmcp.openfda.drug_approvals.make_openfda_request"
         ) as mock_request:
             mock_request.return_value = (mock_response, None)
 
@@ -334,7 +334,7 @@ class TestDrugApprovals:
 
     def test_validate_approval_response(self):
         """Test validation of drug approval response structure."""
-        from biomcp.openfda.validation import validate_fda_response
+        from czechmedmcp.openfda.validation import validate_fda_response
 
         # Valid response
         valid_response = {
@@ -346,7 +346,7 @@ class TestDrugApprovals:
         assert validate_fda_response(valid_response) is True
 
         # Invalid response (not a dict)
-        from biomcp.openfda.exceptions import OpenFDAValidationError
+        from czechmedmcp.openfda.exceptions import OpenFDAValidationError
 
         with pytest.raises(OpenFDAValidationError):
             validate_fda_response("not a dict")
@@ -361,7 +361,7 @@ class TestDrugApprovals:
     async def test_rate_limit_handling(self):
         """Test handling of FDA API rate limits."""
         with patch(
-            "biomcp.openfda.drug_approvals.make_openfda_request"
+            "czechmedmcp.openfda.drug_approvals.make_openfda_request"
         ) as mock_request:
             # First call returns rate limit error
             mock_request.side_effect = [

@@ -4,7 +4,7 @@ from unittest.mock import patch
 
 import pytest
 
-from biomcp.openfda.drug_recalls import (
+from czechmedmcp.openfda.drug_recalls import (
     get_drug_recall,
     search_drug_recalls,
 )
@@ -57,7 +57,7 @@ class TestDrugRecalls:
         }
 
         with patch(
-            "biomcp.openfda.drug_recalls.make_openfda_request"
+            "czechmedmcp.openfda.drug_recalls.make_openfda_request"
         ) as mock_request:
             mock_request.return_value = (mock_response, None)
 
@@ -101,7 +101,7 @@ class TestDrugRecalls:
         }
 
         with patch(
-            "biomcp.openfda.drug_recalls.make_openfda_request"
+            "czechmedmcp.openfda.drug_recalls.make_openfda_request"
         ) as mock_request:
             mock_request.return_value = (mock_response, None)
 
@@ -123,7 +123,7 @@ class TestDrugRecalls:
         }
 
         with patch(
-            "biomcp.openfda.drug_recalls.make_openfda_request"
+            "czechmedmcp.openfda.drug_recalls.make_openfda_request"
         ) as mock_request:
             mock_request.return_value = (mock_response, None)
 
@@ -173,7 +173,7 @@ class TestDrugRecalls:
         }
 
         with patch(
-            "biomcp.openfda.drug_recalls.make_openfda_request"
+            "czechmedmcp.openfda.drug_recalls.make_openfda_request"
         ) as mock_request:
             mock_request.return_value = (mock_response, None)
 
@@ -208,7 +208,7 @@ class TestDrugRecalls:
         mock_response = {"results": []}
 
         with patch(
-            "biomcp.openfda.drug_recalls.make_openfda_request"
+            "czechmedmcp.openfda.drug_recalls.make_openfda_request"
         ) as mock_request:
             mock_request.return_value = (mock_response, None)
 
@@ -221,7 +221,7 @@ class TestDrugRecalls:
     async def test_search_drug_recalls_api_error(self):
         """Test drug recall search with API error."""
         with patch(
-            "biomcp.openfda.drug_recalls.make_openfda_request"
+            "czechmedmcp.openfda.drug_recalls.make_openfda_request"
         ) as mock_request:
             mock_request.return_value = (None, "Connection timeout")
 
@@ -248,7 +248,7 @@ class TestDrugRecalls:
         }
 
         with patch(
-            "biomcp.openfda.drug_recalls.make_openfda_request"
+            "czechmedmcp.openfda.drug_recalls.make_openfda_request"
         ) as mock_request:
             mock_request.return_value = (mock_response, None)
 
@@ -277,7 +277,7 @@ class TestDrugRecalls:
         }
 
         with patch(
-            "biomcp.openfda.drug_recalls.make_openfda_request"
+            "czechmedmcp.openfda.drug_recalls.make_openfda_request"
         ) as mock_request:
             mock_request.return_value = (mock_response, None)
 
@@ -289,7 +289,7 @@ class TestDrugRecalls:
 
     def test_recall_classification_validation(self):
         """Test validation of recall classification values."""
-        from biomcp.openfda.validation import validate_recall
+        from czechmedmcp.openfda.validation import validate_recall
 
         # Valid recall with proper classification
         valid_recall = {
@@ -330,7 +330,7 @@ class TestDrugRecalls:
         }
 
         with patch(
-            "biomcp.openfda.drug_recalls.make_openfda_request"
+            "czechmedmcp.openfda.drug_recalls.make_openfda_request"
         ) as mock_request:
             mock_request.return_value = (mock_response, None)
 

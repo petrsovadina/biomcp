@@ -1,7 +1,7 @@
 Feature: CLI Help and Version Information
 
   Scenario: Display help information
-    Given I run "biomcp --help"
+    Given I run "czechmedmcp --help"
     Then the output should contain "Usage:"
     And the output should contain "Options"
     And the output should contain "Commands"
@@ -12,5 +12,5 @@ Feature: CLI Help and Version Information
     And the output should contain "drug"
 
   Scenario: Display version information
-    Given I run "biomcp --version"
-    Then the output should contain "biomcp version"
+    Given I run "czechmedmcp --version"
+    Then the output should contain "czechmedmcp version"

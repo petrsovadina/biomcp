@@ -6,7 +6,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import httpx
 import pytest
 
-from biomcp.retry import (
+from czechmedmcp.retry import (
     RetryableHTTPError,
     RetryConfig,
     calculate_delay,
@@ -236,14 +236,14 @@ async def test_retry_with_delay_progression():
 @pytest.mark.asyncio
 async def test_integration_with_http_client(monkeypatch):
     """Test retry integration with HTTP client."""
-    from biomcp.http_client import call_http
+    from czechmedmcp.http_client import call_http
 
     # Disable connection pooling for this test
     monkeypatch.setenv("BIOMCP_USE_CONNECTION_POOL", "false")
 
     # Test 1: Connection error retry
     with patch(
-        "biomcp.http_client_simple.httpx.AsyncClient"
+        "czechmedmcp.http_client_simple.httpx.AsyncClient"
     ) as mock_client_class:
         mock_client = AsyncMock()
         mock_client_class.return_value = mock_client
@@ -280,7 +280,7 @@ async def test_integration_with_http_client(monkeypatch):
 
     # Test 2: Timeout error retry
     with patch(
-        "biomcp.http_client_simple.httpx.AsyncClient"
+        "czechmedmcp.http_client_simple.httpx.AsyncClient"
     ) as mock_client_class:
         mock_client = AsyncMock()
         mock_client_class.return_value = mock_client

@@ -57,6 +57,26 @@ help:
 
 .DEFAULT_GOAL := help
 
+.PHONY: deploy
+deploy: ## Deploy production stack (Docker + Caddy HTTPS)
+	docker compose -f docker-compose.prod.yml up -d --build
+
+.PHONY: deploy-stop
+deploy-stop: ## Stop production stack
+	docker compose -f docker-compose.prod.yml down
+
+.PHONY: deploy-logs
+deploy-logs: ## Show production logs
+	docker compose -f docker-compose.prod.yml logs -f
+
+.PHONY: docker-build
+docker-build: ## Build Docker image
+	docker build -t czechmedmcp-server .
+
+.PHONY: docker-run
+docker-run: docker-build ## Run MCP server locally in Docker
+	docker run --rm -p 8000:8000 -e MCP_MODE=streamable_http czechmedmcp-server
+
 .PHONY: inspector
 inspector:
 	@echo "🚀 Starting MCP Inspector"

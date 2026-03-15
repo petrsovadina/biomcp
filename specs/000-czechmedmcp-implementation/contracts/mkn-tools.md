@@ -23,11 +23,11 @@ async def czechmed_get_diagnosis_detail(
     """Get complete diagnosis details including hierarchy, inclusions, and exclusions."""
 ```
 
-### czechmed_browse_classification (was: mkn_category_browser)
+### czechmed_browse_diagnosis (was: mkn_category_browser → czechmed_browse_classification → v2.1 rename)
 
 ```python
 @mcp_app.tool()
-async def czechmed_browse_classification(
+async def czechmed_browse_diagnosis(
     code: Annotated[str | None, Field(description="Parent code or None for root chapters")] = None,
 ) -> str:
     """Browse MKN-10 classification hierarchy. Returns children of given code or root chapters."""

@@ -38,4 +38,4 @@ EXPOSE 8000
 ENV MCP_MODE=streamable_http
 ENV PYTHONUNBUFFERED=1
 
-CMD ["sh", "-c", "biomcp run --mode ${MCP_MODE} --host 0.0.0.0 --port 8000"]
+CMD ["sh", "-c", "czechmedmcp run --mode ${MCP_MODE} --host 0.0.0.0 --port 8000"]

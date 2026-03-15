@@ -2,8 +2,8 @@
 
 import pytest
 
-from biomcp.constants import DEFAULT_TITLE
-from biomcp.domain_handlers import (
+from czechmedmcp.constants import DEFAULT_TITLE
+from czechmedmcp.domain_handlers import (
     ArticleHandler,
     TrialHandler,
     VariantHandler,

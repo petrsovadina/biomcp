@@ -6,7 +6,7 @@ from typing import Any
 
 import pytest
 
-from biomcp.variants.links import inject_links
+from czechmedmcp.variants.links import inject_links
 
 
 @pytest.fixture

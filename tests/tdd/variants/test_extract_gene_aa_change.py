@@ -2,7 +2,7 @@
 
 import pytest
 
-from biomcp.variants.external import ExternalVariantAggregator
+from czechmedmcp.variants.external import ExternalVariantAggregator
 
 
 class TestExtractGeneAAChange:

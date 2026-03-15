@@ -4,14 +4,14 @@ from unittest.mock import patch
 
 import pytest
 
-from biomcp.biomarkers import search_biomarkers
-from biomcp.diseases.search import search_diseases
-from biomcp.integrations.cts_api import CTSAPIError, make_cts_request
-from biomcp.interventions import search_interventions
-from biomcp.organizations import get_organization, search_organizations
-from biomcp.trials.nci_getter import get_trial_nci
-from biomcp.trials.nci_search import convert_query_to_nci, search_trials_nci
-from biomcp.trials.search import TrialQuery
+from czechmedmcp.biomarkers import search_biomarkers
+from czechmedmcp.diseases.search import search_diseases
+from czechmedmcp.integrations.cts_api import CTSAPIError, make_cts_request
+from czechmedmcp.interventions import search_interventions
+from czechmedmcp.organizations import get_organization, search_organizations
+from czechmedmcp.trials.nci_getter import get_trial_nci
+from czechmedmcp.trials.nci_search import convert_query_to_nci, search_trials_nci
+from czechmedmcp.trials.search import TrialQuery
 
 
 class TestCTSAPIIntegration:
@@ -29,7 +29,7 @@ class TestCTSAPIIntegration:
     @pytest.mark.asyncio
     async def test_make_cts_request_with_api_key(self):
         """Test successful request with API key."""
-        with patch("biomcp.integrations.cts_api.request_api") as mock_request:
+        with patch("czechmedmcp.integrations.cts_api.request_api") as mock_request:
             mock_request.return_value = ({"data": "test"}, None)
 
             result = await make_cts_request(
@@ -52,7 +52,7 @@ class TestOrganizationsModule:
     async def test_search_organizations(self):
         """Test organization search."""
         with patch(
-            "biomcp.organizations.search.make_cts_request"
+            "czechmedmcp.organizations.search.make_cts_request"
         ) as mock_request:
             mock_request.return_value = {
                 "data": [{"id": "ORG001", "name": "Test Cancer Center"}],
@@ -71,7 +71,7 @@ class TestOrganizationsModule:
     async def test_get_organization(self):
         """Test getting specific organization."""
         with patch(
-            "biomcp.organizations.getter.make_cts_request"
+            "czechmedmcp.organizations.getter.make_cts_request"
         ) as mock_request:
             mock_request.return_value = {
                 "data": {
@@ -95,7 +95,7 @@ class TestInterventionsModule:
     async def test_search_interventions(self):
         """Test intervention search."""
         with patch(
-            "biomcp.interventions.search.make_cts_request"
+            "czechmedmcp.interventions.search.make_cts_request"
         ) as mock_request:
             mock_request.return_value = {
                 "data": [
@@ -120,7 +120,7 @@ class TestBiomarkersModule:
     async def test_search_biomarkers(self):
         """Test biomarker search."""
         with patch(
-            "biomcp.biomarkers.search.make_cts_request"
+            "czechmedmcp.biomarkers.search.make_cts_request"
         ) as mock_request:
             mock_request.return_value = {
                 "data": [{"id": "BIO001", "name": "PD-L1", "gene": "CD274"}],
@@ -140,7 +140,7 @@ class TestDiseasesModule:
     @pytest.mark.asyncio
     async def test_search_diseases_nci(self):
         """Test disease search via NCI API."""
-        with patch("biomcp.diseases.search.make_cts_request") as mock_request:
+        with patch("czechmedmcp.diseases.search.make_cts_request") as mock_request:
             mock_request.return_value = {
                 "data": [
                     {
@@ -174,9 +174,9 @@ class TestNCITrialIntegration:
 
         # Mock the disease/intervention lookups
         with (
-            patch("biomcp.trials.nci_search.search_diseases") as mock_diseases,
+            patch("czechmedmcp.trials.nci_search.search_diseases") as mock_diseases,
             patch(
-                "biomcp.trials.nci_search.search_interventions"
+                "czechmedmcp.trials.nci_search.search_interventions"
             ) as mock_interventions,
         ):
             mock_diseases.return_value = {"diseases": []}
@@ -199,9 +199,9 @@ class TestNCITrialIntegration:
 
         with (
             patch(
-                "biomcp.trials.nci_search.convert_query_to_nci"
+                "czechmedmcp.trials.nci_search.convert_query_to_nci"
             ) as mock_convert,
-            patch("biomcp.trials.nci_search.make_cts_request") as mock_request,
+            patch("czechmedmcp.trials.nci_search.make_cts_request") as mock_request,
         ):
             mock_convert.return_value = {"diseases": ["melanoma"]}
             mock_request.return_value = {
@@ -226,7 +226,7 @@ class TestNCITrialIntegration:
     async def test_get_trial_nci(self):
         """Test getting specific trial from NCI."""
         with patch(
-            "biomcp.trials.nci_getter.make_cts_request"
+            "czechmedmcp.trials.nci_getter.make_cts_request"
         ) as mock_request:
             mock_request.return_value = {
                 "data": {

@@ -4,7 +4,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from biomcp.czech.sukl.drug_index import (
+from czechmedmcp.czech.sukl.drug_index import (
     DrugIndex,
     _detail_to_entry,
     get_drug_index,
@@ -155,12 +155,12 @@ class TestSearchIndex:
 
 class TestDrugIndex:
     @patch(
-        "biomcp.czech.sukl.drug_index._fetch_drug_list",
+        "czechmedmcp.czech.sukl.drug_index._fetch_drug_list",
         new_callable=AsyncMock,
         return_value=SAMPLE_CODES,
     )
     @patch(
-        "biomcp.czech.sukl.drug_index.fetch_drug_detail",
+        "czechmedmcp.czech.sukl.drug_index.fetch_drug_detail",
         side_effect=mock_fetch_detail,
     )
     async def test_build_index(self, mock_detail, mock_list):
@@ -170,12 +170,12 @@ class TestDrugIndex:
         assert not idx.is_expired
 
     @patch(
-        "biomcp.czech.sukl.drug_index._fetch_drug_list",
+        "czechmedmcp.czech.sukl.drug_index._fetch_drug_list",
         new_callable=AsyncMock,
         return_value=SAMPLE_CODES,
     )
     @patch(
-        "biomcp.czech.sukl.drug_index.fetch_drug_detail",
+        "czechmedmcp.czech.sukl.drug_index.fetch_drug_detail",
         side_effect=mock_fetch_detail,
     )
     async def test_ensure_built_only_once(
@@ -188,7 +188,7 @@ class TestDrugIndex:
         mock_list.assert_called_once()
 
     @patch(
-        "biomcp.czech.sukl.drug_index._fetch_drug_list",
+        "czechmedmcp.czech.sukl.drug_index._fetch_drug_list",
         new_callable=AsyncMock,
         return_value=[],
     )
@@ -202,12 +202,12 @@ class TestDrugIndex:
         assert idx.is_expired
 
     @patch(
-        "biomcp.czech.sukl.drug_index._fetch_drug_list",
+        "czechmedmcp.czech.sukl.drug_index._fetch_drug_list",
         new_callable=AsyncMock,
         return_value=SAMPLE_CODES,
     )
     @patch(
-        "biomcp.czech.sukl.drug_index.fetch_drug_detail",
+        "czechmedmcp.czech.sukl.drug_index.fetch_drug_detail",
         side_effect=mock_fetch_detail,
     )
     async def test_handles_failed_details(
@@ -228,12 +228,12 @@ class TestDrugIndex:
 
 class TestGetDrugIndex:
     @patch(
-        "biomcp.czech.sukl.drug_index._fetch_drug_list",
+        "czechmedmcp.czech.sukl.drug_index._fetch_drug_list",
         new_callable=AsyncMock,
         return_value=SAMPLE_CODES,
     )
     @patch(
-        "biomcp.czech.sukl.drug_index.fetch_drug_detail",
+        "czechmedmcp.czech.sukl.drug_index.fetch_drug_detail",
         side_effect=mock_fetch_detail,
     )
     async def test_singleton(self, mock_detail, mock_list):
@@ -244,12 +244,12 @@ class TestGetDrugIndex:
         reset_drug_index()
 
     @patch(
-        "biomcp.czech.sukl.drug_index._fetch_drug_list",
+        "czechmedmcp.czech.sukl.drug_index._fetch_drug_list",
         new_callable=AsyncMock,
         return_value=SAMPLE_CODES,
     )
     @patch(
-        "biomcp.czech.sukl.drug_index.fetch_drug_detail",
+        "czechmedmcp.czech.sukl.drug_index.fetch_drug_detail",
         side_effect=mock_fetch_detail,
     )
     async def test_reset_clears_singleton(

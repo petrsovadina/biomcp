@@ -62,18 +62,18 @@ class TestSuklDrugGetter:
         self, mock_drug_api_response, mock_composition
     ):
         """Get drug details returns full Drug entity."""
-        from biomcp.czech.sukl.getter import _sukl_drug_details
+        from czechmedmcp.czech.sukl.getter import _sukl_drug_details
 
         with patch(
-            "biomcp.czech.sukl.getter._fetch_drug_detail",
+            "czechmedmcp.czech.sukl.getter._fetch_drug_detail",
             new_callable=AsyncMock,
             return_value=mock_drug_api_response,
         ), patch(
-            "biomcp.czech.sukl.getter._fetch_composition",
+            "czechmedmcp.czech.sukl.getter._fetch_composition",
             new_callable=AsyncMock,
             return_value=mock_composition,
         ), patch(
-            "biomcp.czech.sukl.getter._fetch_doc_metadata",
+            "czechmedmcp.czech.sukl.getter._fetch_doc_metadata",
             new_callable=AsyncMock,
             return_value=[],
         ):
@@ -89,10 +89,10 @@ class TestSuklDrugGetter:
     @pytest.mark.asyncio
     async def test_get_drug_invalid_code(self):
         """Get drug with invalid code returns error."""
-        from biomcp.czech.sukl.getter import _sukl_drug_details
+        from czechmedmcp.czech.sukl.getter import _sukl_drug_details
 
         with patch(
-            "biomcp.czech.sukl.getter._fetch_drug_detail",
+            "czechmedmcp.czech.sukl.getter._fetch_drug_detail",
             new_callable=AsyncMock,
             return_value=None,
         ):
@@ -108,18 +108,18 @@ class TestSuklDrugGetter:
         mock_doc_metadata_spc,
     ):
         """Get SmPC returns dual output with doc info."""
-        from biomcp.czech.sukl.getter import _sukl_spc_getter
+        from czechmedmcp.czech.sukl.getter import _sukl_spc_getter
 
         with patch(
-            "biomcp.czech.sukl.getter._fetch_drug_detail",
+            "czechmedmcp.czech.sukl.getter._fetch_drug_detail",
             new_callable=AsyncMock,
             return_value=mock_drug_api_response,
         ), patch(
-            "biomcp.czech.sukl.getter._fetch_doc_metadata",
+            "czechmedmcp.czech.sukl.getter._fetch_doc_metadata",
             new_callable=AsyncMock,
             return_value=mock_doc_metadata_spc,
         ), patch(
-            "biomcp.czech.sukl.getter._fetch_doc_html",
+            "czechmedmcp.czech.sukl.getter._fetch_doc_html",
             new_callable=AsyncMock,
             return_value=None,
         ):
@@ -138,18 +138,18 @@ class TestSuklDrugGetter:
         mock_doc_metadata_pil,
     ):
         """Get PIL returns dual output with doc info."""
-        from biomcp.czech.sukl.getter import _sukl_pil_getter
+        from czechmedmcp.czech.sukl.getter import _sukl_pil_getter
 
         with patch(
-            "biomcp.czech.sukl.getter._fetch_drug_detail",
+            "czechmedmcp.czech.sukl.getter._fetch_drug_detail",
             new_callable=AsyncMock,
             return_value=mock_drug_api_response,
         ), patch(
-            "biomcp.czech.sukl.getter._fetch_doc_metadata",
+            "czechmedmcp.czech.sukl.getter._fetch_doc_metadata",
             new_callable=AsyncMock,
             return_value=mock_doc_metadata_pil,
         ), patch(
-            "biomcp.czech.sukl.getter._fetch_doc_html",
+            "czechmedmcp.czech.sukl.getter._fetch_doc_html",
             new_callable=AsyncMock,
             return_value=None,
         ):
@@ -166,14 +166,14 @@ class TestSuklDrugGetter:
         self, mock_drug_api_response
     ):
         """SmPC not available returns error."""
-        from biomcp.czech.sukl.getter import _sukl_spc_getter
+        from czechmedmcp.czech.sukl.getter import _sukl_spc_getter
 
         with patch(
-            "biomcp.czech.sukl.getter._fetch_drug_detail",
+            "czechmedmcp.czech.sukl.getter._fetch_drug_detail",
             new_callable=AsyncMock,
             return_value=mock_drug_api_response,
         ), patch(
-            "biomcp.czech.sukl.getter._fetch_doc_metadata",
+            "czechmedmcp.czech.sukl.getter._fetch_doc_metadata",
             new_callable=AsyncMock,
             return_value=[],
         ):

@@ -7,8 +7,8 @@ from unittest.mock import patch
 
 import pytest
 
-from biomcp.http_client import RequestError
-from biomcp.variants.oncokb_client import (
+from czechmedmcp.http_client import RequestError
+from czechmedmcp.variants.oncokb_client import (
     ONCOKB_DEMO_URL,
     ONCOKB_PROD_URL,
     OncoKBClient,
@@ -46,7 +46,7 @@ class TestOncoKBClient:
         """Test client switches to production URL when token is set."""
         with (
             patch.dict(os.environ, {"ONCOKB_TOKEN": "test-token"}, clear=True),
-            patch("biomcp.variants.oncokb_client.ONCOKB_TOKEN", "test-token"),
+            patch("czechmedmcp.variants.oncokb_client.ONCOKB_TOKEN", "test-token"),
         ):
             client = OncoKBClient()
             assert client.base_url == ONCOKB_PROD_URL
@@ -63,7 +63,7 @@ class TestOncoKBClient:
                 clear=True,
             ),
             patch(
-                "biomcp.variants.oncokb_client.ONCOKB_TOKEN",
+                "czechmedmcp.variants.oncokb_client.ONCOKB_TOKEN",
                 "Bearer existing-token",
             ),
         ):
@@ -85,7 +85,7 @@ class TestOncoKBClient:
         token = "my-oncokb-token"  # noqa: S105 - test token
         with (
             patch.dict(os.environ, {"ONCOKB_TOKEN": token}, clear=True),
-            patch("biomcp.variants.oncokb_client.ONCOKB_TOKEN", token),
+            patch("czechmedmcp.variants.oncokb_client.ONCOKB_TOKEN", token),
         ):
             client = OncoKBClient()
             assert client.base_url == ONCOKB_PROD_URL
@@ -100,7 +100,7 @@ class TestOncoKBClient:
             mock_genes = mock_responses["allCuratedGenes"]
 
             with patch(
-                "biomcp.variants.oncokb_client.request_api"
+                "czechmedmcp.variants.oncokb_client.request_api"
             ) as mock_request:
                 mock_request.return_value = (mock_genes, None)
 
@@ -147,7 +147,7 @@ class TestOncoKBClient:
             )
 
             with patch(
-                "biomcp.variants.oncokb_client.request_api"
+                "czechmedmcp.variants.oncokb_client.request_api"
             ) as mock_request:
                 mock_request.return_value = (None, error_response)
 
@@ -166,7 +166,7 @@ class TestOncoKBClient:
 
             # Return dict instead of list
             with patch(
-                "biomcp.variants.oncokb_client.request_api"
+                "czechmedmcp.variants.oncokb_client.request_api"
             ) as mock_request:
                 mock_request.return_value = ({"error": "not a list"}, None)
 
@@ -183,7 +183,7 @@ class TestOncoKBClient:
             client = OncoKBClient()
 
             with patch(
-                "biomcp.variants.oncokb_client.request_api"
+                "czechmedmcp.variants.oncokb_client.request_api"
             ) as mock_request:
                 mock_request.side_effect = ValueError("Unexpected error")
 
@@ -202,7 +202,7 @@ class TestOncoKBClient:
             mock_annotation = mock_responses["genesByHugoSymbol"][0]
 
             with patch(
-                "biomcp.variants.oncokb_client.request_api"
+                "czechmedmcp.variants.oncokb_client.request_api"
             ) as mock_request:
                 mock_request.return_value = (mock_annotation, None)
 
@@ -233,7 +233,7 @@ class TestOncoKBClient:
             # Test BRAF
             braf_annotation = mock_responses["genesByHugoSymbol"][0]
             with patch(
-                "biomcp.variants.oncokb_client.request_api"
+                "czechmedmcp.variants.oncokb_client.request_api"
             ) as mock_request:
                 mock_request.return_value = (braf_annotation, None)
                 result, error = await client.get_gene_annotation("BRAF")
@@ -243,7 +243,7 @@ class TestOncoKBClient:
             # Test ROS1
             ros1_annotation = mock_responses["genesByHugoSymbol"][1]
             with patch(
-                "biomcp.variants.oncokb_client.request_api"
+                "czechmedmcp.variants.oncokb_client.request_api"
             ) as mock_request:
                 mock_request.return_value = (ros1_annotation, None)
                 result, error = await client.get_gene_annotation("ROS1")
@@ -254,7 +254,7 @@ class TestOncoKBClient:
             # Test TP53
             tp53_annotation = mock_responses["genesByHugoSymbol"][2]
             with patch(
-                "biomcp.variants.oncokb_client.request_api"
+                "czechmedmcp.variants.oncokb_client.request_api"
             ) as mock_request:
                 mock_request.return_value = (tp53_annotation, None)
                 result, error = await client.get_gene_annotation("TP53")
@@ -271,7 +271,7 @@ class TestOncoKBClient:
             error_response = RequestError(code=404, message="Gene not found")
 
             with patch(
-                "biomcp.variants.oncokb_client.request_api"
+                "czechmedmcp.variants.oncokb_client.request_api"
             ) as mock_request:
                 mock_request.return_value = (None, error_response)
 
@@ -289,7 +289,7 @@ class TestOncoKBClient:
 
             # Return list instead of dict
             with patch(
-                "biomcp.variants.oncokb_client.request_api"
+                "czechmedmcp.variants.oncokb_client.request_api"
             ) as mock_request:
                 mock_request.return_value = (["not", "a", "dict"], None)
 
@@ -310,7 +310,7 @@ class TestOncoKBClient:
             ]
 
             with patch(
-                "biomcp.variants.oncokb_client.request_api"
+                "czechmedmcp.variants.oncokb_client.request_api"
             ) as mock_request:
                 mock_request.return_value = (mock_annotation, None)
 
@@ -365,7 +365,7 @@ class TestOncoKBClient:
             client = OncoKBClient()
 
             with patch(
-                "biomcp.variants.oncokb_client.request_api"
+                "czechmedmcp.variants.oncokb_client.request_api"
             ) as mock_request:
                 mock_request.return_value = (
                     {"query": {}, "oncogenic": "Oncogenic"},
@@ -392,7 +392,7 @@ class TestOncoKBClient:
             )
 
             with patch(
-                "biomcp.variants.oncokb_client.request_api"
+                "czechmedmcp.variants.oncokb_client.request_api"
             ) as mock_request:
                 mock_request.return_value = (None, error_response)
 
@@ -411,7 +411,7 @@ class TestOncoKBClient:
             client = OncoKBClient()
 
             with patch(
-                "biomcp.variants.oncokb_client.request_api"
+                "czechmedmcp.variants.oncokb_client.request_api"
             ) as mock_request:
                 mock_request.side_effect = RuntimeError("Network error")
 
@@ -427,7 +427,7 @@ class TestOncoKBClient:
         """Test that headers are properly formatted as JSON."""
         with (
             patch.dict(os.environ, {"ONCOKB_TOKEN": "test-token"}, clear=True),
-            patch("biomcp.variants.oncokb_client.ONCOKB_TOKEN", "test-token"),
+            patch("czechmedmcp.variants.oncokb_client.ONCOKB_TOKEN", "test-token"),
         ):
             client = OncoKBClient()
             headers_json = client._headers_json()
@@ -446,7 +446,7 @@ class TestOncoKBClient:
 
             # Simulate complete API failure
             with patch(
-                "biomcp.variants.oncokb_client.request_api"
+                "czechmedmcp.variants.oncokb_client.request_api"
             ) as mock_request:
                 mock_request.return_value = (
                     None,
@@ -478,7 +478,7 @@ class TestOncoKBClient:
             client = OncoKBClient()
 
             with patch(
-                "biomcp.variants.oncokb_client.request_api"
+                "czechmedmcp.variants.oncokb_client.request_api"
             ) as mock_request:
                 mock_request.return_value = ([], None)
 
@@ -502,7 +502,7 @@ class TestOncoKBClient:
             client = OncoKBClient()
 
             with patch(
-                "biomcp.variants.oncokb_client.request_api"
+                "czechmedmcp.variants.oncokb_client.request_api"
             ) as mock_request:
                 mock_request.return_value = ([], None)
 

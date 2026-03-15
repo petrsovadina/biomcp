@@ -4,7 +4,7 @@ from unittest.mock import patch
 
 import pytest
 
-from biomcp.variants.alphagenome import predict_variant_effects
+from czechmedmcp.variants.alphagenome import predict_variant_effects
 
 
 @pytest.mark.asyncio

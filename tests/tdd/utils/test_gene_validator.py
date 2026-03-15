@@ -1,6 +1,6 @@
 """Tests for gene validation utilities."""
 
-from biomcp.utils.gene_validator import (
+from czechmedmcp.utils.gene_validator import (
     is_valid_gene_symbol,
     sanitize_gene_symbol,
 )

@@ -5,7 +5,7 @@ from unittest.mock import patch
 
 import pytest
 
-from biomcp.http_client import RequestError, request_api
+from czechmedmcp.http_client import RequestError, request_api
 
 
 @pytest.mark.asyncio
@@ -34,7 +34,7 @@ async def test_offline_mode_allows_cached_responses():
     # First, cache a response (with offline mode disabled)
     with (
         patch.dict(os.environ, {"BIOMCP_OFFLINE": "false"}),
-        patch("biomcp.http_client.call_http") as mock_call,
+        patch("czechmedmcp.http_client.call_http") as mock_call,
     ):
         mock_call.return_value = (200, '{"data": "cached"}')
 
@@ -87,7 +87,7 @@ async def test_offline_mode_disabled_by_default():
     # Clear the environment variable
     with (
         patch.dict(os.environ, {}, clear=True),
-        patch("biomcp.http_client.call_http") as mock_call,
+        patch("czechmedmcp.http_client.call_http") as mock_call,
     ):
         mock_call.return_value = (200, '{"data": "response"}')
 

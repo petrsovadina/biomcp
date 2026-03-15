@@ -5,7 +5,7 @@ from unittest.mock import patch
 
 import pytest
 
-from biomcp.czech.mkn.parser import _parse_csv
+from czechmedmcp.czech.mkn.parser import _parse_csv
 
 # Minimal CSV matching MZ ČR open data schema
 _SAMPLE_CSV = """\
@@ -23,7 +23,7 @@ _CODE_INDEX, _TEXT_INDEX = _parse_csv(_SAMPLE_CSV)
 @pytest.fixture(autouse=True)
 def mock_index():
     """Mock _get_index to return our test data."""
-    import biomcp.czech.mkn.search as search_mod
+    import czechmedmcp.czech.mkn.search as search_mod
 
     search_mod._INDEX_CACHE = None
 
@@ -49,7 +49,7 @@ class TestMknSearch:
     @pytest.mark.asyncio
     async def test_search_by_code_exact(self):
         """Searching 'J06.9' returns exact code match."""
-        from biomcp.czech.mkn.search import _mkn_search
+        from czechmedmcp.czech.mkn.search import _mkn_search
 
         result = json.loads(await _mkn_search("J06.9"))
         assert result["total"] >= 1
@@ -59,7 +59,7 @@ class TestMknSearch:
     @pytest.mark.asyncio
     async def test_search_by_code_prefix(self):
         """Searching 'J06' returns both J06 and J06.9."""
-        from biomcp.czech.mkn.search import _mkn_search
+        from czechmedmcp.czech.mkn.search import _mkn_search
 
         result = json.loads(await _mkn_search("J06"))
         codes = [r["code"] for r in result["results"]]
@@ -69,7 +69,7 @@ class TestMknSearch:
     @pytest.mark.asyncio
     async def test_search_by_text_czech(self):
         """Searching 'infekce' returns matching entries."""
-        from biomcp.czech.mkn.search import _mkn_search
+        from czechmedmcp.czech.mkn.search import _mkn_search
 
         result = json.loads(await _mkn_search("infekce"))
         assert result["total"] >= 1
@@ -79,7 +79,7 @@ class TestMknSearch:
     @pytest.mark.asyncio
     async def test_search_no_results(self):
         """Searching unknown term returns empty result set."""
-        from biomcp.czech.mkn.search import _mkn_search
+        from czechmedmcp.czech.mkn.search import _mkn_search
 
         result = json.loads(await _mkn_search("infarkt"))
         assert result["total"] == 0
@@ -88,7 +88,7 @@ class TestMknSearch:
     @pytest.mark.asyncio
     async def test_search_diacritics_with(self):
         """Searching 'dýchací' finds entries."""
-        from biomcp.czech.mkn.search import _mkn_search
+        from czechmedmcp.czech.mkn.search import _mkn_search
 
         result = json.loads(await _mkn_search("dýchací"))
         assert result["total"] >= 1
@@ -96,7 +96,7 @@ class TestMknSearch:
     @pytest.mark.asyncio
     async def test_search_diacritics_without(self):
         """Searching 'dychaci' finds same entries."""
-        from biomcp.czech.mkn.search import _mkn_search
+        from czechmedmcp.czech.mkn.search import _mkn_search
 
         result = json.loads(await _mkn_search("dychaci"))
         assert result["total"] >= 1
@@ -104,7 +104,7 @@ class TestMknSearch:
     @pytest.mark.asyncio
     async def test_search_diacritics_same_results(self):
         """'dýchací' and 'dychaci' return the same codes."""
-        from biomcp.czech.mkn.search import _mkn_search
+        from czechmedmcp.czech.mkn.search import _mkn_search
 
         r1 = json.loads(await _mkn_search("dýchací"))
         r2 = json.loads(await _mkn_search("dychaci"))
@@ -115,7 +115,7 @@ class TestMknSearch:
     @pytest.mark.asyncio
     async def test_search_max_results_respected(self):
         """max_results parameter limits result count."""
-        from biomcp.czech.mkn.search import _mkn_search
+        from czechmedmcp.czech.mkn.search import _mkn_search
 
         result = json.loads(
             await _mkn_search("J", max_results=1)
@@ -125,7 +125,7 @@ class TestMknSearch:
     @pytest.mark.asyncio
     async def test_search_query_preserved_in_response(self):
         """Response includes the original query string."""
-        from biomcp.czech.mkn.search import _mkn_search
+        from czechmedmcp.czech.mkn.search import _mkn_search
 
         result = json.loads(await _mkn_search("J06.9"))
         assert result["query"] == "J06.9"
@@ -142,7 +142,7 @@ class TestMknGet:
     @pytest.mark.asyncio
     async def test_get_leaf_code(self):
         """Getting J06.9 returns full Diagnosis dict."""
-        from biomcp.czech.mkn.search import _mkn_get
+        from czechmedmcp.czech.mkn.search import _mkn_get
 
         result = json.loads(await _mkn_get("J06.9"))
         assert result["code"] == "J06.9"
@@ -152,7 +152,7 @@ class TestMknGet:
     @pytest.mark.asyncio
     async def test_get_hierarchy_present(self):
         """Getting J06.9 includes hierarchy with chapter."""
-        from biomcp.czech.mkn.search import _mkn_get
+        from czechmedmcp.czech.mkn.search import _mkn_get
 
         result = json.loads(await _mkn_get("J06.9"))
         hierarchy = result.get("hierarchy")
@@ -162,7 +162,7 @@ class TestMknGet:
     @pytest.mark.asyncio
     async def test_get_invalid_code_returns_error(self):
         """Getting nonexistent code returns {'error': ...}."""
-        from biomcp.czech.mkn.search import _mkn_get
+        from czechmedmcp.czech.mkn.search import _mkn_get
 
         result = json.loads(await _mkn_get("Z99.9"))
         assert "error" in result
@@ -170,7 +170,7 @@ class TestMknGet:
     @pytest.mark.asyncio
     async def test_get_chapter_code(self):
         """Getting chapter code returns valid result."""
-        from biomcp.czech.mkn.search import _mkn_get
+        from czechmedmcp.czech.mkn.search import _mkn_get
 
         result = json.loads(await _mkn_get("J00-J99"))
         assert result["code"] == "J00-J99"
@@ -178,7 +178,7 @@ class TestMknGet:
     @pytest.mark.asyncio
     async def test_get_block_code(self):
         """Getting block code J06 returns valid result."""
-        from biomcp.czech.mkn.search import _mkn_get
+        from czechmedmcp.czech.mkn.search import _mkn_get
 
         result = json.loads(await _mkn_get("J06"))
         assert result["code"] == "J06"
@@ -187,7 +187,7 @@ class TestMknGet:
     @pytest.mark.asyncio
     async def test_get_category_code(self):
         """Getting category J06 includes/excludes lists."""
-        from biomcp.czech.mkn.search import _mkn_get
+        from czechmedmcp.czech.mkn.search import _mkn_get
 
         result = json.loads(await _mkn_get("J06"))
         assert result["code"] == "J06"
@@ -206,7 +206,7 @@ class TestMknBrowse:
     @pytest.mark.asyncio
     async def test_browse_root_returns_chapters(self):
         """Browsing without code returns chapter list."""
-        from biomcp.czech.mkn.search import _mkn_browse
+        from czechmedmcp.czech.mkn.search import _mkn_browse
 
         result = json.loads(await _mkn_browse())
         assert result["type"] == "chapters"
@@ -217,7 +217,7 @@ class TestMknBrowse:
     @pytest.mark.asyncio
     async def test_browse_chapter_returns_children(self):
         """Browsing chapter returns blocks as children."""
-        from biomcp.czech.mkn.search import _mkn_browse
+        from czechmedmcp.czech.mkn.search import _mkn_browse
 
         result = json.loads(await _mkn_browse("J00-J99"))
         assert result["code"] == "J00-J99"
@@ -229,7 +229,7 @@ class TestMknBrowse:
     @pytest.mark.asyncio
     async def test_browse_block_returns_children(self):
         """Browsing block J06 returns subcategories."""
-        from biomcp.czech.mkn.search import _mkn_browse
+        from czechmedmcp.czech.mkn.search import _mkn_browse
 
         result = json.loads(await _mkn_browse("J06"))
         assert result["code"] == "J06"
@@ -241,7 +241,7 @@ class TestMknBrowse:
     @pytest.mark.asyncio
     async def test_browse_leaf_has_empty_children(self):
         """Browsing leaf J06.9 returns empty children."""
-        from biomcp.czech.mkn.search import _mkn_browse
+        from czechmedmcp.czech.mkn.search import _mkn_browse
 
         result = json.loads(await _mkn_browse("J06.9"))
         assert result["code"] == "J06.9"
@@ -250,7 +250,7 @@ class TestMknBrowse:
     @pytest.mark.asyncio
     async def test_browse_invalid_code_returns_error(self):
         """Browsing unknown code returns error."""
-        from biomcp.czech.mkn.search import _mkn_browse
+        from czechmedmcp.czech.mkn.search import _mkn_browse
 
         result = json.loads(await _mkn_browse("Z99"))
         assert "error" in result
@@ -258,7 +258,7 @@ class TestMknBrowse:
     @pytest.mark.asyncio
     async def test_browse_node_includes_kind(self):
         """Browse result includes the 'kind' field."""
-        from biomcp.czech.mkn.search import _mkn_browse
+        from czechmedmcp.czech.mkn.search import _mkn_browse
 
         result = json.loads(
             await _mkn_browse("J00-J99")
@@ -268,7 +268,7 @@ class TestMknBrowse:
     @pytest.mark.asyncio
     async def test_browse_parent_code_present(self):
         """Browse of J06 includes its parent_code."""
-        from biomcp.czech.mkn.search import _mkn_browse
+        from czechmedmcp.czech.mkn.search import _mkn_browse
 
         result = json.loads(await _mkn_browse("J06"))
         assert result.get("parent_code") == "J00-J99"

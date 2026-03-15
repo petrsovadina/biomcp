@@ -5,7 +5,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from biomcp.czech.sukl.drug_index import (
+from czechmedmcp.czech.sukl.drug_index import (
     DrugIndex,
     DrugIndexEntry,
     _detail_to_entry,
@@ -59,12 +59,12 @@ class TestSuklDrugSearch:
 
     async def test_search_by_name(self, mock_index):
         """Search by drug name returns matching results."""
-        from biomcp.czech.sukl.search import (
+        from czechmedmcp.czech.sukl.search import (
             _sukl_drug_search,
         )
 
         with patch(
-            "biomcp.czech.sukl.search.get_drug_index",
+            "czechmedmcp.czech.sukl.search.get_drug_index",
             new_callable=AsyncMock,
             return_value=mock_index,
         ):
@@ -79,12 +79,12 @@ class TestSuklDrugSearch:
 
     async def test_search_by_atc_code(self, mock_index):
         """Search by ATC code returns matching drugs."""
-        from biomcp.czech.sukl.search import (
+        from czechmedmcp.czech.sukl.search import (
             _sukl_drug_search,
         )
 
         with patch(
-            "biomcp.czech.sukl.search.get_drug_index",
+            "czechmedmcp.czech.sukl.search.get_drug_index",
             new_callable=AsyncMock,
             return_value=mock_index,
         ):
@@ -99,7 +99,7 @@ class TestSuklDrugSearch:
 
     async def test_search_pagination(self):
         """Search supports pagination parameters."""
-        from biomcp.czech.sukl.search import (
+        from czechmedmcp.czech.sukl.search import (
             _sukl_drug_search,
         )
 
@@ -112,7 +112,7 @@ class TestSuklDrugSearch:
         index = _make_index(entries)
 
         with patch(
-            "biomcp.czech.sukl.search.get_drug_index",
+            "czechmedmcp.czech.sukl.search.get_drug_index",
             new_callable=AsyncMock,
             return_value=index,
         ):
@@ -127,14 +127,14 @@ class TestSuklDrugSearch:
 
     async def test_search_empty_results(self):
         """Search with no matches returns empty result set."""
-        from biomcp.czech.sukl.search import (
+        from czechmedmcp.czech.sukl.search import (
             _sukl_drug_search,
         )
 
         index = _make_index([NUROFEN])
 
         with patch(
-            "biomcp.czech.sukl.search.get_drug_index",
+            "czechmedmcp.czech.sukl.search.get_drug_index",
             new_callable=AsyncMock,
             return_value=index,
         ):
@@ -148,7 +148,7 @@ class TestSuklDrugSearch:
 
     async def test_search_diacritics_handling(self):
         """Search handles Czech diacritics transparently."""
-        from biomcp.czech.sukl.search import (
+        from czechmedmcp.czech.sukl.search import (
             _sukl_drug_search,
         )
 
@@ -160,7 +160,7 @@ class TestSuklDrugSearch:
         index = _make_index([entry])
 
         with patch(
-            "biomcp.czech.sukl.search.get_drug_index",
+            "czechmedmcp.czech.sukl.search.get_drug_index",
             new_callable=AsyncMock,
             return_value=index,
         ):
@@ -171,12 +171,12 @@ class TestSuklDrugSearch:
 
     async def test_search_api_error_returns_error(self):
         """Search handles API errors gracefully."""
-        from biomcp.czech.sukl.search import (
+        from czechmedmcp.czech.sukl.search import (
             _sukl_drug_search,
         )
 
         with patch(
-            "biomcp.czech.sukl.search.get_drug_index",
+            "czechmedmcp.czech.sukl.search.get_drug_index",
             new_callable=AsyncMock,
             side_effect=Exception("API unavailable"),
         ):
@@ -188,12 +188,12 @@ class TestSuklDrugSearch:
 
     async def test_search_result_fields(self, mock_index):
         """Search results contain expected fields."""
-        from biomcp.czech.sukl.search import (
+        from czechmedmcp.czech.sukl.search import (
             _sukl_drug_search,
         )
 
         with patch(
-            "biomcp.czech.sukl.search.get_drug_index",
+            "czechmedmcp.czech.sukl.search.get_drug_index",
             new_callable=AsyncMock,
             return_value=mock_index,
         ):

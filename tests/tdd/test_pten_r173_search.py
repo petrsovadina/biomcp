@@ -5,7 +5,7 @@ import json
 
 import pytest
 
-from biomcp.articles.search import PubmedRequest, search_articles
+from czechmedmcp.articles.search import PubmedRequest, search_articles
 
 
 @pytest.mark.asyncio

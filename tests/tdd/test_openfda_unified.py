@@ -8,7 +8,7 @@ class TestOpenFDAUnifiedIntegration:
 
     def test_openfda_domains_registered(self):
         """Test that OpenFDA domains are properly registered in constants."""
-        from biomcp.constants import (
+        from czechmedmcp.constants import (
             DOMAIN_TO_PLURAL,
             PLURAL_TO_DOMAIN,
             VALID_DOMAINS,
@@ -69,7 +69,7 @@ class TestOpenFDAUnifiedIntegration:
         """Test that OpenFDA domains are in search tool type hints."""
         import inspect
 
-        from biomcp.router import search
+        from czechmedmcp.router import search
 
         # Get the function signature
         sig = inspect.signature(search)
@@ -94,7 +94,7 @@ class TestOpenFDAUnifiedIntegration:
         """Test that OpenFDA domains are in fetch tool type hints."""
         import inspect
 
-        from biomcp.router import fetch
+        from czechmedmcp.router import fetch
 
         # Get the function signature
         sig = inspect.signature(fetch)
@@ -120,14 +120,14 @@ class TestOpenFDAUnifiedIntegration:
 
         # Mock the OpenFDA search function that will be imported
         with patch(
-            "biomcp.openfda.adverse_events.search_adverse_events",
+            "czechmedmcp.openfda.adverse_events.search_adverse_events",
             new_callable=AsyncMock,
         ) as mock_search:
             mock_search.return_value = (
                 "## FDA Adverse Event Reports\n\nTest results"
             )
 
-            from biomcp.router import search
+            from czechmedmcp.router import search
 
             # This should not raise an error
             result = await search(
@@ -148,12 +148,12 @@ class TestOpenFDAUnifiedIntegration:
 
         # Mock the OpenFDA get function that will be imported
         with patch(
-            "biomcp.openfda.drug_approvals.get_drug_approval",
+            "czechmedmcp.openfda.drug_approvals.get_drug_approval",
             new_callable=AsyncMock,
         ) as mock_get:
             mock_get.return_value = "## Drug Approval Details\n\nTest details"
 
-            from biomcp.router import fetch
+            from czechmedmcp.router import fetch
 
             # This should not raise an error
             result = await fetch(

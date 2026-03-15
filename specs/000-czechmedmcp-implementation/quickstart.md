@@ -23,8 +23,8 @@ uv run python -m pytest tests/tdd/test_mcp_integration.py -v
 
 ```bash
 # Soubory k editaci:
-# src/biomcp/czech/czech_tools.py     — rename all 14 tools
-# src/biomcp/czech/response.py        — NEW: format_czech_response()
+# src/czechmedmcp/czech/czech_tools.py     — rename all 14 tools
+# src/czechmedmcp/czech/response.py        — NEW: format_czech_response()
 # tests/czech/test_tool_registration.py — update expected names
 # tests/tdd/test_mcp_integration.py    — update tool names in assertions
 
@@ -36,13 +36,13 @@ uv run python -m pytest tests/czech/ tests/tdd/test_mcp_integration.py -v
 
 ```bash
 # Nové soubory:
-# src/biomcp/czech/sukl/reimbursement.py  — _get_reimbursement()
+# src/czechmedmcp/czech/sukl/reimbursement.py  — _get_reimbursement()
 # Rozšířené soubory:
-# src/biomcp/czech/sukl/search.py         — + _batch_availability()
-# src/biomcp/czech/sukl/search.py         — + _find_pharmacies()
-# src/biomcp/czech/sukl/getter.py         — enhance PIL/SPC
-# src/biomcp/czech/sukl/models.py         — + new models
-# src/biomcp/czech/czech_tools.py         — + 3 tool registrations
+# src/czechmedmcp/czech/sukl/search.py         — + _batch_availability()
+# src/czechmedmcp/czech/sukl/search.py         — + _find_pharmacies()
+# src/czechmedmcp/czech/sukl/getter.py         — enhance PIL/SPC
+# src/czechmedmcp/czech/sukl/models.py         — + new models
+# src/czechmedmcp/czech/czech_tools.py         — + 3 tool registrations
 
 # Testy:
 uv run python -m pytest tests/czech/test_sukl_batch.py tests/czech/test_sukl_reimbursement.py tests/czech/test_sukl_pharmacies.py -v
@@ -52,11 +52,11 @@ uv run python -m pytest tests/czech/test_sukl_batch.py tests/czech/test_sukl_rei
 
 ```bash
 # Nové soubory:
-# src/biomcp/czech/mkn/stats.py           — _get_diagnosis_stats()
-# src/biomcp/czech/szv/reimbursement.py   — _calculate_reimbursement()
+# src/czechmedmcp/czech/mkn/stats.py           — _get_diagnosis_stats()
+# src/czechmedmcp/czech/szv/reimbursement.py   — _calculate_reimbursement()
 # Rozšířené soubory:
-# src/biomcp/czech/nrpzs/search.py        — + _get_codebooks()
-# src/biomcp/czech/czech_tools.py         — + 3 tool registrations
+# src/czechmedmcp/czech/nrpzs/search.py        — + _get_codebooks()
+# src/czechmedmcp/czech/czech_tools.py         — + 3 tool registrations
 
 # Testy:
 uv run python -m pytest tests/czech/test_mkn_stats.py tests/czech/test_nrpzs_codebooks.py tests/czech/test_szv_reimbursement.py -v
@@ -66,9 +66,9 @@ uv run python -m pytest tests/czech/test_mkn_stats.py tests/czech/test_nrpzs_cod
 
 ```bash
 # Rozšířené soubory:
-# src/biomcp/czech/vzp/search.py          — repurpose for drug reimbursement
-# src/biomcp/czech/vzp/models.py          — + DrugReimbursement, DrugAlternative
-# src/biomcp/czech/czech_tools.py         — update 2 tool registrations
+# src/czechmedmcp/czech/vzp/search.py          — repurpose for drug reimbursement
+# src/czechmedmcp/czech/vzp/models.py          — + DrugReimbursement, DrugAlternative
+# src/czechmedmcp/czech/czech_tools.py         — update 2 tool registrations
 
 # Testy:
 uv run python -m pytest tests/czech/test_vzp_drug_reimb.py -v
@@ -78,11 +78,11 @@ uv run python -m pytest tests/czech/test_vzp_drug_reimb.py -v
 
 ```bash
 # Nové soubory:
-# src/biomcp/czech/workflows/__init__.py
-# src/biomcp/czech/workflows/drug_profile.py
-# src/biomcp/czech/workflows/diagnosis_assistant.py
-# src/biomcp/czech/workflows/referral_assistant.py
-# src/biomcp/czech/czech_tools.py         — + 3 workflow registrations
+# src/czechmedmcp/czech/workflows/__init__.py
+# src/czechmedmcp/czech/workflows/drug_profile.py
+# src/czechmedmcp/czech/workflows/diagnosis_assistant.py
+# src/czechmedmcp/czech/workflows/referral_assistant.py
+# src/czechmedmcp/czech/czech_tools.py         — + 3 workflow registrations
 
 # Testy:
 uv run python -m pytest tests/czech/test_workflow_drug.py tests/czech/test_workflow_diagnosis.py tests/czech/test_workflow_referral.py -v
@@ -114,8 +114,8 @@ make inspector
 
 ```python
 # In czech_tools.py
-from biomcp.core import mcp_app
-from biomcp.metrics import track_performance
+from czechmedmcp.core import mcp_app
+from czechmedmcp.metrics import track_performance
 
 @mcp_app.tool()
 @track_performance("czechmedmcp.tool_name")
@@ -130,7 +130,7 @@ async def czechmed_tool_name(
 
 ```python
 # In response.py
-from biomcp.czech.response import format_czech_response
+from czechmedmcp.czech.response import format_czech_response
 
 result = format_czech_response(
     data=model.model_dump(),
@@ -143,10 +143,10 @@ return result  # JSON string with content + structuredContent
 ### Cache Pattern
 
 ```python
-from biomcp.http_client import (
+from czechmedmcp.http_client import (
     generate_cache_key, cache_response, get_cached_response
 )
-from biomcp.constants import CACHE_TTL_DAY, CZECH_HTTP_TIMEOUT
+from czechmedmcp.constants import CACHE_TTL_DAY, CZECH_HTTP_TIMEOUT
 
 cache_key = generate_cache_key("GET", url, params)
 cached = get_cached_response(cache_key)

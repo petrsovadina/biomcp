@@ -4,7 +4,7 @@ import shlex
 from pytest_bdd import given, parsers, scenarios, then
 from typer.testing import CliRunner
 
-from biomcp.cli.main import app
+from czechmedmcp.cli.main import app
 
 # Link to the feature file
 scenarios("get.feature")
@@ -18,7 +18,7 @@ def cli_result(command):
     Run the given CLI command and return the parsed JSON output.
     The command is expected to include the '--json' flag.
     """
-    args = shlex.split(command)[1:]  # remove the leading "biomcp" token
+    args = shlex.split(command)[1:]  # remove the leading "czechmedmcp" token
     result = runner.invoke(app, args)
     assert result.exit_code == 0, f"CLI command failed: {result.stderr}"
     return json.loads(result.stdout)

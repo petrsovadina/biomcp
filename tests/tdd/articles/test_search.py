@@ -3,7 +3,7 @@ from unittest.mock import patch
 
 import pytest
 
-from biomcp.articles.search import (
+from czechmedmcp.articles.search import (
     PubmedRequest,
     ResultItem,
     SearchResponse,
@@ -140,20 +140,20 @@ async def test_search_mocked(anyio_backend):
         total_pages=1,
     )
 
-    with patch("biomcp.http_client.request_api") as mock_request:
+    with patch("czechmedmcp.http_client.request_api") as mock_request:
         mock_request.return_value = (mock_response, None)
 
         # Mock the autocomplete calls
-        with patch("biomcp.articles.search.autocomplete") as mock_autocomplete:
+        with patch("czechmedmcp.articles.search.autocomplete") as mock_autocomplete:
             mock_autocomplete.return_value = (
                 None  # Simplified - no entity mapping
             )
 
             # Mock the call_pubtator_api function
             with patch(
-                "biomcp.articles.search.call_pubtator_api"
+                "czechmedmcp.articles.search.call_pubtator_api"
             ) as mock_pubtator:
-                from biomcp.articles.fetch import (
+                from czechmedmcp.articles.fetch import (
                     Article,
                     FetchArticlesResponse,
                     Passage,
@@ -203,8 +203,8 @@ async def test_search_network_error(anyio_backend):
     """Test search handles network errors gracefully."""
     query = PubmedRequest(genes=["BRAF"])
 
-    with patch("biomcp.http_client.request_api") as mock_request:
-        from biomcp.http_client import RequestError
+    with patch("czechmedmcp.http_client.request_api") as mock_request:
+        from czechmedmcp.http_client import RequestError
 
         mock_request.return_value = (
             None,

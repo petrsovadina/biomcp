@@ -4,7 +4,7 @@ import json
 from contextlib import contextmanager
 from unittest.mock import patch
 
-from biomcp.czech.sukl.getter import (
+from czechmedmcp.czech.sukl.getter import (
     _sukl_pil_getter,
     _sukl_spc_getter,
 )
@@ -113,26 +113,26 @@ def _mock_env(
 
     with (
         patch(
-            "biomcp.czech.sukl.getter."
+            "czechmedmcp.czech.sukl.getter."
             "httpx.AsyncClient",
             return_value=client,
         ),
         patch(
-            "biomcp.czech.sukl.getter."
+            "czechmedmcp.czech.sukl.getter."
             "get_cached_response",
             return_value=None,
         ),
         patch(
-            "biomcp.czech.sukl.getter."
+            "czechmedmcp.czech.sukl.getter."
             "cache_response",
         ),
         patch(
-            "biomcp.czech.sukl.client."
+            "czechmedmcp.czech.sukl.client."
             "get_cached_response",
             return_value=None,
         ),
         patch(
-            "biomcp.czech.sukl.client."
+            "czechmedmcp.czech.sukl.client."
             "cache_response",
         ),
     ):

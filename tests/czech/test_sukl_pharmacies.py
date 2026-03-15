@@ -71,15 +71,15 @@ def _mock_env(api_data=None):
 
     with (
         patch(
-            "biomcp.czech.sukl.search.httpx.AsyncClient",
+            "czechmedmcp.czech.sukl.search.httpx.AsyncClient",
             return_value=mock_client,
         ),
         patch(
-            "biomcp.czech.sukl.search.get_cached_response",
+            "czechmedmcp.czech.sukl.search.get_cached_response",
             return_value=None,
         ),
         patch(
-            "biomcp.czech.sukl.search.cache_response",
+            "czechmedmcp.czech.sukl.search.cache_response",
         ),
     ):
         yield mock_client
@@ -94,7 +94,7 @@ class TestFindPharmacies:
 
     async def test_dual_output(self):
         """Returns content + structuredContent."""
-        from biomcp.czech.sukl.search import (
+        from czechmedmcp.czech.sukl.search import (
             _find_pharmacies,
         )
 
@@ -109,7 +109,7 @@ class TestFindPharmacies:
 
     async def test_city_filter(self):
         """Only Praha pharmacies returned when city=Praha."""
-        from biomcp.czech.sukl.search import (
+        from czechmedmcp.czech.sukl.search import (
             _find_pharmacies,
         )
 
@@ -123,7 +123,7 @@ class TestFindPharmacies:
 
     async def test_nonstop_filter(self):
         """nonstop_only=True filters non-24/7."""
-        from biomcp.czech.sukl.search import (
+        from czechmedmcp.czech.sukl.search import (
             _find_pharmacies,
         )
 
@@ -139,7 +139,7 @@ class TestFindPharmacies:
 
     async def test_pagination(self):
         """Page/page_size slices results."""
-        from biomcp.czech.sukl.search import (
+        from czechmedmcp.czech.sukl.search import (
             _find_pharmacies,
         )
 
@@ -155,7 +155,7 @@ class TestFindPharmacies:
 
     async def test_no_params_error(self):
         """Error when neither city nor postal_code."""
-        from biomcp.czech.sukl.search import (
+        from czechmedmcp.czech.sukl.search import (
             _find_pharmacies,
         )
 
@@ -165,7 +165,7 @@ class TestFindPharmacies:
 
     async def test_api_failure(self):
         """Empty results on HTTP error."""
-        from biomcp.czech.sukl.search import (
+        from czechmedmcp.czech.sukl.search import (
             _find_pharmacies,
         )
 
@@ -182,17 +182,17 @@ class TestFindPharmacies:
 
         with (
             patch(
-                "biomcp.czech.sukl.search"
+                "czechmedmcp.czech.sukl.search"
                 ".httpx.AsyncClient",
                 return_value=mock_client,
             ),
             patch(
-                "biomcp.czech.sukl.search"
+                "czechmedmcp.czech.sukl.search"
                 ".get_cached_response",
                 return_value=None,
             ),
             patch(
-                "biomcp.czech.sukl.search"
+                "czechmedmcp.czech.sukl.search"
                 ".cache_response",
             ),
         ):
@@ -204,7 +204,7 @@ class TestFindPharmacies:
 
     async def test_markdown_output(self):
         """Markdown contains pharmacy names."""
-        from biomcp.czech.sukl.search import (
+        from czechmedmcp.czech.sukl.search import (
             _find_pharmacies,
         )
 
@@ -218,7 +218,7 @@ class TestFindPharmacies:
 
     async def test_postal_code_search(self):
         """Search by postal_code works."""
-        from biomcp.czech.sukl.search import (
+        from czechmedmcp.czech.sukl.search import (
             _find_pharmacies,
         )
 
@@ -232,7 +232,7 @@ class TestFindPharmacies:
 
     async def test_504_returns_empty_results(self):
         """504 Gateway Timeout returns empty list."""
-        from biomcp.czech.sukl.search import (
+        from czechmedmcp.czech.sukl.search import (
             _find_pharmacies,
         )
 
@@ -249,17 +249,17 @@ class TestFindPharmacies:
 
         with (
             patch(
-                "biomcp.czech.sukl.search"
+                "czechmedmcp.czech.sukl.search"
                 ".httpx.AsyncClient",
                 return_value=mock_client,
             ),
             patch(
-                "biomcp.czech.sukl.search"
+                "czechmedmcp.czech.sukl.search"
                 ".get_cached_response",
                 return_value=None,
             ),
             patch(
-                "biomcp.czech.sukl.search"
+                "czechmedmcp.czech.sukl.search"
                 ".cache_response",
             ),
         ):

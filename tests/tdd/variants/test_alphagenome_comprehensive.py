@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 import pandas as pd
 import pytest
 
-from biomcp.variants.alphagenome import (
+from czechmedmcp.variants.alphagenome import (
     _validate_inputs,
     predict_variant_effects,
 )

@@ -28,11 +28,11 @@
 
 **⚠️ CRITICAL**: CI workflow (US2) spouští `uv run mypy` — dokud nejsou chyby opraveny, CI bude vždy fail.
 
-- [x] T002 [P] [US4] Opravit 2 mypy chyby v `src/biomcp/variants/cbioportal_search.py` (řádky 155, 157) — proměnná typovaná jako `dict[str, Any]` dostává `str` hodnotu. Přidat runtime type guard `if isinstance(study, str): study = {"studyId": study}` nebo opravit typovou anotaci dle skutečného API response formátu.
+- [x] T002 [P] [US4] Opravit 2 mypy chyby v `src/czechmedmcp/variants/cbioportal_search.py` (řádky 155, 157) — proměnná typovaná jako `dict[str, Any]` dostává `str` hodnotu. Přidat runtime type guard `if isinstance(study, str): study = {"studyId": study}` nebo opravit typovou anotaci dle skutečného API response formátu.
 
-- [x] T003 [P] [US4] Opravit 3 mypy chyby v `src/biomcp/variants/cbioportal_mutations.py` (řádky 257, 261, 262) — `_resolve_cancer_type()` dostává `str` místo `dict`. Přidat type guard nebo opravit caller aby předával správný typ.
+- [x] T003 [P] [US4] Opravit 3 mypy chyby v `src/czechmedmcp/variants/cbioportal_mutations.py` (řádky 257, 261, 262) — `_resolve_cancer_type()` dostává `str` místo `dict`. Přidat type guard nebo opravit caller aby předával správný typ.
 
-- [x] T004 [US4] Opravit 5 mypy chyb v `src/biomcp/router.py` (řádky 866, 875, 884, 893, 902) — FDA domain bloky přiřazují `str` do `dict[str, Any]` proměnné. Tyto chyby jsou pravděpodobně ve `fetch()` function v FDA case blocích. Opravit typové anotace nebo přidat správnou konverzi.
+- [x] T004 [US4] Opravit 5 mypy chyb v `src/czechmedmcp/router.py` (řádky 866, 875, 884, 893, 902) — FDA domain bloky přiřazují `str` do `dict[str, Any]` proměnné. Tyto chyby jsou pravděpodobně ve `fetch()` function v FDA case blocích. Opravit typové anotace nebo přidat správnou konverzi.
 
 - [x] T005 Ověřit nulový počet mypy chyb: `uv run mypy` — musí hlásit `Found 0 errors`
 
@@ -72,8 +72,8 @@
 
 - [x] T011 [P] [US1] Aktualizovat CLAUDE.md — Monorepo sekce:
   - Odstranit Turborepo tabulku s `apps/web/` a `apps/docs/`
-  - Popsat skutečnou strukturu: root Next.js landing page (`app/`, `components/`), Python MCP server (`src/biomcp/`)
-  - Aktualizovat příkazy: `npm run dev` (landing page), `uv run biomcp run` (server)
+  - Popsat skutečnou strukturu: root Next.js landing page (`app/`, `components/`), Python MCP server (`src/czechmedmcp/`)
+  - Aktualizovat příkazy: `npm run dev` (landing page), `uv run czechmedmcp run` (server)
   - Odstranit `npx turbo dev`, `npm run dev:web`, `npm run dev:docs`
 
 - [x] T012 [P] [US1] Aktualizovat CLAUDE.md — CI sekce:
@@ -131,7 +131,7 @@
 
 **Independent Test**: Všechny testy v `tests/tdd/test_router.py` prochází beze změn.
 
-- [x] T018 [P] [US4] Vytvořit `src/biomcp/fetch_handlers.py` — extrahovat FDA domain handlery (6 bloků, řádky 865–930):
+- [x] T018 [P] [US4] Vytvořit `src/czechmedmcp/fetch_handlers.py` — extrahovat FDA domain handlery (6 bloků, řádky 865–930):
   - `handle_fda_adverse_fetch(id)`
   - `handle_fda_label_fetch(id)`
   - `handle_fda_device_fetch(id)`
@@ -140,21 +140,21 @@
   - `handle_fda_shortage_fetch(id)`
   - Každý handler vrací stejný typ jako aktuální inline kód
 
-- [x] T019 [P] [US4] Extrahovat NCI fetch handlery do `src/biomcp/fetch_handlers.py`:
+- [x] T019 [P] [US4] Extrahovat NCI fetch handlery do `src/czechmedmcp/fetch_handlers.py`:
   - `handle_nci_organization_fetch(id)`
   - `handle_nci_intervention_fetch(id)`
   - `handle_nci_disease_fetch(id)`
 
-- [x] T020 [P] [US4] Extrahovat české fetch handlery do `src/biomcp/fetch_handlers.py`:
+- [x] T020 [P] [US4] Extrahovat české fetch handlery do `src/czechmedmcp/fetch_handlers.py`:
   - `handle_sukl_drug_fetch(id)`
   - `handle_mkn_diagnosis_fetch(id)`
   - `handle_nrpzs_provider_fetch(id)`
   - `handle_szv_procedure_fetch(id)`
   - `handle_vzp_reimbursement_fetch(id)`
 
-- [x] T021 [US4] Extrahovat core domain fetch handlery (article, trial, variant, gene, drug, disease) do `src/biomcp/fetch_handlers.py` — tyto jsou nejdelší a mají nejvíce logiky
+- [x] T021 [US4] Extrahovat core domain fetch handlery (article, trial, variant, gene, drug, disease) do `src/czechmedmcp/fetch_handlers.py` — tyto jsou nejdelší a mají nejvíce logiky
 
-- [x] T022 [US4] Refaktorovat `fetch()` v `src/biomcp/router.py` — nahradit inline domain bloky dispatch table voláním handlerů z `fetch_handlers.py`:
+- [x] T022 [US4] Refaktorovat `fetch()` v `src/czechmedmcp/router.py` — nahradit inline domain bloky dispatch table voláním handlerů z `fetch_handlers.py`:
   ```python
   FETCH_HANDLERS = {
       "article": handle_article_fetch,
@@ -166,11 +166,11 @@
       return await handler(id, ...)
   ```
 
-- [x] T023 [US4] Ověřit, že `router.py` je pod 1 000 řádků: `wc -l src/biomcp/router.py`
+- [x] T023 [US4] Ověřit, že `router.py` je pod 1 000 řádků: `wc -l src/czechmedmcp/router.py`
 
 - [x] T024 [US4] Ověřit plnou zpětnou kompatibilitu — spustit celou test suite: `uv run python -m pytest -x --ff -n auto --dist loadscope -m "not integration"` — 713+ testů
 
-**Checkpoint**: `wc -l src/biomcp/router.py` < 1000, všechny testy zelené.
+**Checkpoint**: `wc -l src/czechmedmcp/router.py` < 1000, všechny testy zelené.
 
 ---
 
@@ -178,13 +178,13 @@
 
 **Purpose**: Vyčistit zbývající lint warningy, finální verifikace.
 
-- [x] T025 Opravit ruff C901 warning v `src/biomcp/czech/mkn/parser.py:74` (`_parse_csv` complexity 14 > 10) — extrahovat pomocné funkce nebo přidat `# noqa: C901` s komentářem proč je komplexita akceptovatelná (CSV parser s mnoha sloupci)
+- [x] T025 Opravit ruff C901 warning v `src/czechmedmcp/czech/mkn/parser.py:74` (`_parse_csv` complexity 14 > 10) — extrahovat pomocné funkce nebo přidat `# noqa: C901` s komentářem proč je komplexita akceptovatelná (CSV parser s mnoha sloupci)
 
 - [x] T026 Finální verifikace — spustit kompletní quality check:
   - `uv run ruff check src tests` → 0 errors
   - `uv run mypy` → 0 errors
   - `uv run python -m pytest -x --ff -n auto --dist loadscope -m "not integration"` → 713+ passed
-  - `wc -l src/biomcp/router.py` → < 1000
+  - `wc -l src/czechmedmcp/router.py` → < 1000
 
 - [x] T027 Aktualizovat CLAUDE.md s finálním stavem — aktualizovat počet řádků router.py, přidat zmínku o `fetch_handlers.py`
 

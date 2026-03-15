@@ -4,13 +4,13 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from biomcp.integrations import BioThingsClient, DiseaseInfo, GeneInfo
+from czechmedmcp.integrations import BioThingsClient, DiseaseInfo, GeneInfo
 
 
 @pytest.fixture
 def mock_http_client():
     """Mock the http_client.request_api function."""
-    with patch("biomcp.integrations.biothings_client.http_client") as mock:
+    with patch("czechmedmcp.integrations.biothings_client.http_client") as mock:
         yield mock
 
 
@@ -252,9 +252,9 @@ class TestTrialSynonymExpansion:
     @pytest.mark.asyncio
     async def test_trial_search_with_synonym_expansion(self):
         """Test that trial search expands disease synonyms."""
-        from biomcp.trials.search import TrialQuery, convert_query
+        from czechmedmcp.trials.search import TrialQuery, convert_query
 
-        with patch("biomcp.trials.search.BioThingsClient") as mock_client:
+        with patch("czechmedmcp.trials.search.BioThingsClient") as mock_client:
             # Mock synonym expansion
             mock_instance = mock_client.return_value
             mock_instance.get_disease_synonyms = AsyncMock(
@@ -281,7 +281,7 @@ class TestTrialSynonymExpansion:
     @pytest.mark.asyncio
     async def test_trial_search_without_synonym_expansion(self):
         """Test that trial search works without synonym expansion."""
-        from biomcp.trials.search import TrialQuery, convert_query
+        from czechmedmcp.trials.search import TrialQuery, convert_query
 
         query = TrialQuery(
             conditions=["GIST"],
@@ -303,7 +303,7 @@ class TestErrorHandling:
         self, biothings_client, mock_http_client
     ):
         """Test handling of API errors."""
-        from biomcp.http_client import RequestError
+        from czechmedmcp.http_client import RequestError
 
         mock_http_client.request_api = AsyncMock(
             return_value=(

@@ -4,8 +4,8 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-from biomcp.constants import DEFAULT_ASSEMBLY
-from biomcp.variants import getter
+from czechmedmcp.constants import DEFAULT_ASSEMBLY
+from czechmedmcp.variants import getter
 
 
 class TestGetVariant:
@@ -19,7 +19,7 @@ class TestGetVariant:
             "dbsnp": {"rsid": "rs113488022"},
         }
 
-        with patch("biomcp.http_client.request_api") as mock_request:
+        with patch("czechmedmcp.http_client.request_api") as mock_request:
             mock_request.return_value = (mock_response, None)
 
             await getter.get_variant("rs113488022")
@@ -36,7 +36,7 @@ class TestGetVariant:
             "dbsnp": {"rsid": "rs113488022"},
         }
 
-        with patch("biomcp.http_client.request_api") as mock_request:
+        with patch("czechmedmcp.http_client.request_api") as mock_request:
             mock_request.return_value = (mock_response, None)
 
             await getter.get_variant("rs113488022", assembly="hg38")
@@ -53,7 +53,7 @@ class TestGetVariant:
             "dbsnp": {"rsid": "rs113488022"},
         }
 
-        with patch("biomcp.http_client.request_api") as mock_request:
+        with patch("czechmedmcp.http_client.request_api") as mock_request:
             mock_request.return_value = (mock_response, None)
 
             await getter.get_variant("rs113488022", assembly="hg19")
@@ -67,7 +67,7 @@ class TestGetVariant:
         """Test that request includes all required fields."""
         mock_response = {"_id": "rs113488022"}
 
-        with patch("biomcp.http_client.request_api") as mock_request:
+        with patch("czechmedmcp.http_client.request_api") as mock_request:
             mock_request.return_value = (mock_response, None)
 
             await getter.get_variant("rs113488022", assembly="hg38")
@@ -83,7 +83,7 @@ class TestGetVariant:
     @pytest.mark.asyncio
     async def test_get_variant_with_external_annotations(self):
         """Test that assembly parameter works with external annotations."""
-        from biomcp.variants.external import EnhancedVariantAnnotation
+        from czechmedmcp.variants.external import EnhancedVariantAnnotation
 
         mock_response = {
             "_id": "rs113488022",
@@ -92,9 +92,9 @@ class TestGetVariant:
         }
 
         with (
-            patch("biomcp.http_client.request_api") as mock_request,
+            patch("czechmedmcp.http_client.request_api") as mock_request,
             patch(
-                "biomcp.variants.getter.ExternalVariantAggregator"
+                "czechmedmcp.variants.getter.ExternalVariantAggregator"
             ) as mock_aggregator,
         ):
             mock_request.return_value = (mock_response, None)
@@ -135,7 +135,7 @@ class TestVariantDetailsMCPTool:
     @pytest.mark.asyncio
     async def test_variant_details_default_assembly(self):
         """Test that _variant_details defaults to hg19 assembly."""
-        with patch("biomcp.variants.getter.get_variant") as mock_get:
+        with patch("czechmedmcp.variants.getter.get_variant") as mock_get:
             mock_get.return_value = "Variant details"
 
             await getter._variant_details(
@@ -155,7 +155,7 @@ class TestVariantDetailsMCPTool:
     @pytest.mark.asyncio
     async def test_variant_details_custom_assembly(self):
         """Test that _variant_details accepts custom assembly parameter."""
-        with patch("biomcp.variants.getter.get_variant") as mock_get:
+        with patch("czechmedmcp.variants.getter.get_variant") as mock_get:
             mock_get.return_value = "Variant details"
 
             await getter._variant_details(
@@ -176,7 +176,7 @@ class TestVariantDetailsMCPTool:
     @pytest.mark.asyncio
     async def test_variant_details_with_all_params(self):
         """Test that all parameters are passed through correctly."""
-        with patch("biomcp.variants.getter.get_variant") as mock_get:
+        with patch("czechmedmcp.variants.getter.get_variant") as mock_get:
             mock_get.return_value = "Variant details"
 
             await getter._variant_details(
@@ -198,7 +198,7 @@ class TestVariantDetailsMCPTool:
     @pytest.mark.asyncio
     async def test_variant_details_extensive_parameter(self):
         """Test that extensive parameter is passed through correctly."""
-        with patch("biomcp.variants.getter.get_variant") as mock_get:
+        with patch("czechmedmcp.variants.getter.get_variant") as mock_get:
             mock_get.return_value = "Variant details"
 
             await getter._variant_details(
@@ -229,11 +229,11 @@ class TestCompactFormatting:
         }
 
         with (
-            patch("biomcp.http_client.request_api") as mock_request,
+            patch("czechmedmcp.http_client.request_api") as mock_request,
             patch(
-                "biomcp.variants.getter.consolidate_multi_allelic_variants"
+                "czechmedmcp.variants.getter.consolidate_multi_allelic_variants"
             ) as mock_consolidate,
-            patch("biomcp.render.to_markdown") as mock_render,
+            patch("czechmedmcp.render.to_markdown") as mock_render,
         ):
             mock_request.return_value = (mock_response, None)
             mock_consolidate.return_value = {"summary": {}}
@@ -254,11 +254,11 @@ class TestCompactFormatting:
         }
 
         with (
-            patch("biomcp.http_client.request_api") as mock_request,
+            patch("czechmedmcp.http_client.request_api") as mock_request,
             patch(
-                "biomcp.variants.getter.consolidate_multi_allelic_variants"
+                "czechmedmcp.variants.getter.consolidate_multi_allelic_variants"
             ) as mock_consolidate,
-            patch("biomcp.render.to_markdown") as mock_render,
+            patch("czechmedmcp.render.to_markdown") as mock_render,
         ):
             mock_request.return_value = (mock_response, None)
             mock_render.return_value = "# Extensive output"
@@ -281,9 +281,9 @@ class TestCompactFormatting:
         }
 
         with (
-            patch("biomcp.http_client.request_api") as mock_request,
+            patch("czechmedmcp.http_client.request_api") as mock_request,
             patch(
-                "biomcp.variants.getter.consolidate_multi_allelic_variants"
+                "czechmedmcp.variants.getter.consolidate_multi_allelic_variants"
             ) as mock_consolidate,
         ):
             mock_request.return_value = (mock_response, None)

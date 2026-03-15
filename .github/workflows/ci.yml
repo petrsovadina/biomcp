@@ -127,7 +127,7 @@ jobs:
 
       - name: Test MCP server startup
         run: |
-          timeout 10s uv run biomcp run || code=$?; if [[ $code -ne 124 && $code -ne 0 ]]; then exit $code; fi
+          timeout 10s uv run czechmedmcp run || code=$?; if [[ $code -ne 124 && $code -ne 0 ]]; then exit $code; fi
 
       - name: Run MCP integration tests
         run: |

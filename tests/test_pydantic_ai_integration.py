@@ -3,8 +3,8 @@ Tests for Pydantic AI integration with BioMCP.
 
 These tests verify the examples provided in the documentation work correctly.
 
-NOTE: All tests in this module spawn subprocesses via ``python -m biomcp``
-which cannot resolve the ``biomcp`` package when pytest runs from the
+NOTE: All tests in this module spawn subprocesses via ``python -m czechmedmcp``
+which cannot resolve the ``czechmedmcp`` package when pytest runs from the
 src-layout. The entire module is therefore marked xfail until the module
 resolution issue is fixed.
 """
@@ -19,7 +19,7 @@ from pydantic_ai import Agent
 from pydantic_ai.mcp import MCPServerStdio
 
 pytestmark = pytest.mark.xfail(
-    reason="Known module resolution: subprocess cannot find biomcp package"
+    reason="Known module resolution: subprocess cannot find czechmedmcp package"
 )
 
 try:
@@ -45,7 +45,7 @@ def worker_dependencies_available():
 # Skip marker for tests requiring worker dependencies
 requires_worker = pytest.mark.skipif(
     not worker_dependencies_available(),
-    reason="Worker dependencies (FastAPI/Starlette) not installed. Install with: pip install biomcp-python[worker]",
+    reason="Worker dependencies (FastAPI/Starlette) not installed. Install with: pip install czechmedmcp[worker]",
 )
 
 # Skip marker for tests requiring MCPServerStreamableHTTP
@@ -103,7 +103,7 @@ async def wait_for_server(
 async def test_stdio_mode_connection():
     """Test STDIO mode connection and tool listing."""
     server = MCPServerStdio(
-        "python", args=["-m", "biomcp", "run", "--mode", "stdio"], timeout=20
+        "python", args=["-m", "czechmedmcp", "run", "--mode", "stdio"], timeout=20
     )
 
     # Use TestModel to avoid needing API keys
@@ -123,7 +123,7 @@ async def test_stdio_mode_connection():
 async def test_stdio_mode_simple_query():
     """Test STDIO mode with a simple search query."""
     server = MCPServerStdio(
-        "python", args=["-m", "biomcp", "run", "--mode", "stdio"], timeout=20
+        "python", args=["-m", "czechmedmcp", "run", "--mode", "stdio"], timeout=20
     )
 
     # Use TestModel configured to call search
@@ -147,7 +147,7 @@ async def test_stdio_mode_with_openai():
         pytest.skip("OPENAI_API_KEY not set")
 
     server = MCPServerStdio(
-        "python", args=["-m", "biomcp", "run", "--mode", "stdio"], timeout=30
+        "python", args=["-m", "czechmedmcp", "run", "--mode", "stdio"], timeout=30
     )
 
     agent = Agent("openai:gpt-4o-mini", toolsets=[server])
@@ -178,7 +178,7 @@ async def test_streamable_http_mode_connection():
         [
             sys.executable,
             "-m",
-            "biomcp",
+            "czechmedmcp",
             "run",
             "--mode",
             "streamable_http",
@@ -229,7 +229,7 @@ async def test_streamable_http_simple_query():
         [
             sys.executable,
             "-m",
-            "biomcp",
+            "czechmedmcp",
             "run",
             "--mode",
             "streamable_http",
@@ -280,7 +280,7 @@ async def test_worker_mode_streamable_http():
         [
             sys.executable,
             "-m",
-            "biomcp",
+            "czechmedmcp",
             "run",
             "--mode",
             "worker",
@@ -338,7 +338,7 @@ async def test_worker_mode_streamable_http():
 async def test_connection_verification_script():
     """Test the connection verification script from documentation."""
     server = MCPServerStdio(
-        "python", args=["-m", "biomcp", "run", "--mode", "stdio"], timeout=20
+        "python", args=["-m", "czechmedmcp", "run", "--mode", "stdio"], timeout=20
     )
 
     # Use TestModel to avoid needing LLM credentials
@@ -357,7 +357,7 @@ async def test_connection_verification_script():
 async def test_biomedical_research_workflow():
     """Test a complete biomedical research workflow."""
     server = MCPServerStdio(
-        "python", args=["-m", "biomcp", "run", "--mode", "stdio"], timeout=30
+        "python", args=["-m", "czechmedmcp", "run", "--mode", "stdio"], timeout=30
     )
 
     # Use TestModel configured to use multiple tools
@@ -389,7 +389,7 @@ async def test_health_endpoint():
         [
             sys.executable,
             "-m",
-            "biomcp",
+            "czechmedmcp",
             "run",
             "--mode",
             "worker",
@@ -439,7 +439,7 @@ async def test_auth_token_required():
         [
             sys.executable,
             "-m",
-            "biomcp",
+            "czechmedmcp",
             "run",
             "--mode",
             "streamable_http",
@@ -488,7 +488,7 @@ async def test_auth_token_valid():
         [
             sys.executable,
             "-m",
-            "biomcp",
+            "czechmedmcp",
             "run",
             "--mode",
             "streamable_http",
@@ -537,7 +537,7 @@ async def test_auth_token_invalid():
         [
             sys.executable,
             "-m",
-            "biomcp",
+            "czechmedmcp",
             "run",
             "--mode",
             "streamable_http",
@@ -587,7 +587,7 @@ async def test_auth_health_no_auth_required():
         [
             sys.executable,
             "-m",
-            "biomcp",
+            "czechmedmcp",
             "run",
             "--mode",
             "streamable_http",
@@ -633,7 +633,7 @@ async def test_auth_no_token_set():
         [
             sys.executable,
             "-m",
-            "biomcp",
+            "czechmedmcp",
             "run",
             "--mode",
             "streamable_http",
@@ -681,7 +681,7 @@ async def test_worker_mode_rejects_auth_token():
         [
             sys.executable,
             "-m",
-            "biomcp",
+            "czechmedmcp",
             "run",
             "--mode",
             "worker",

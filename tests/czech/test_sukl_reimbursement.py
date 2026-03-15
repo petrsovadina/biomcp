@@ -3,7 +3,7 @@
 import json
 from unittest.mock import MagicMock, patch
 
-from biomcp.czech.sukl.reimbursement import _get_reimbursement
+from czechmedmcp.czech.sukl.reimbursement import _get_reimbursement
 
 MOCK_DETAIL = {"kodSUKL": "0012345", "nazev": "Ibuprofen 400mg"}
 
@@ -49,7 +49,7 @@ def _patch_http(status_code=200, data=None):
             return resp
 
     return patch(
-        "biomcp.czech.sukl.reimbursement.httpx.AsyncClient",
+        "czechmedmcp.czech.sukl.reimbursement.httpx.AsyncClient",
         return_value=MockClient(),
     )
 
@@ -61,17 +61,17 @@ class TestGetReimbursement:
         """Result must have content + structuredContent."""
         with (
             patch(
-                "biomcp.czech.sukl.reimbursement."
+                "czechmedmcp.czech.sukl.reimbursement."
                 "_fetch_drug_detail",
                 return_value=MOCK_DETAIL,
             ),
             patch(
-                "biomcp.czech.sukl.reimbursement."
+                "czechmedmcp.czech.sukl.reimbursement."
                 "get_cached_response",
                 return_value=None,
             ),
             patch(
-                "biomcp.czech.sukl.reimbursement."
+                "czechmedmcp.czech.sukl.reimbursement."
                 "cache_response",
             ),
             _patch_http(200, MOCK_REIMBURSEMENT_DATA),
@@ -86,17 +86,17 @@ class TestGetReimbursement:
         """structuredContent must have Reimbursement fields."""
         with (
             patch(
-                "biomcp.czech.sukl.reimbursement."
+                "czechmedmcp.czech.sukl.reimbursement."
                 "_fetch_drug_detail",
                 return_value=MOCK_DETAIL,
             ),
             patch(
-                "biomcp.czech.sukl.reimbursement."
+                "czechmedmcp.czech.sukl.reimbursement."
                 "get_cached_response",
                 return_value=None,
             ),
             patch(
-                "biomcp.czech.sukl.reimbursement."
+                "czechmedmcp.czech.sukl.reimbursement."
                 "cache_response",
             ),
             _patch_http(200, MOCK_REIMBURSEMENT_DATA),
@@ -114,17 +114,17 @@ class TestGetReimbursement:
         """Content should contain Czech Markdown."""
         with (
             patch(
-                "biomcp.czech.sukl.reimbursement."
+                "czechmedmcp.czech.sukl.reimbursement."
                 "_fetch_drug_detail",
                 return_value=MOCK_DETAIL,
             ),
             patch(
-                "biomcp.czech.sukl.reimbursement."
+                "czechmedmcp.czech.sukl.reimbursement."
                 "get_cached_response",
                 return_value=None,
             ),
             patch(
-                "biomcp.czech.sukl.reimbursement."
+                "czechmedmcp.czech.sukl.reimbursement."
                 "cache_response",
             ),
             _patch_http(200, MOCK_REIMBURSEMENT_DATA),
@@ -140,12 +140,12 @@ class TestGetReimbursement:
         """404 should return error in dual output."""
         with (
             patch(
-                "biomcp.czech.sukl.reimbursement."
+                "czechmedmcp.czech.sukl.reimbursement."
                 "_fetch_drug_detail",
                 return_value=MOCK_DETAIL,
             ),
             patch(
-                "biomcp.czech.sukl.reimbursement."
+                "czechmedmcp.czech.sukl.reimbursement."
                 "get_cached_response",
                 return_value=None,
             ),
@@ -162,12 +162,12 @@ class TestGetReimbursement:
 
         with (
             patch(
-                "biomcp.czech.sukl.reimbursement."
+                "czechmedmcp.czech.sukl.reimbursement."
                 "_fetch_drug_detail",
                 return_value=MOCK_DETAIL,
             ),
             patch(
-                "biomcp.czech.sukl.reimbursement."
+                "czechmedmcp.czech.sukl.reimbursement."
                 "get_cached_response",
                 return_value=cached,
             ),

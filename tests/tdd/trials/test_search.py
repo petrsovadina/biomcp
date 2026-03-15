@@ -1,6 +1,6 @@
 import pytest
 
-from biomcp.trials.search import (
+from czechmedmcp.trials.search import (
     CLOSED_STATUSES,
     AgeGroup,
     DateField,

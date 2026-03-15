@@ -4,8 +4,8 @@ from datetime import datetime
 
 import pytest
 
-from biomcp.thinking import sequential
-from biomcp.thinking.session import ThoughtEntry, _session_manager
+from czechmedmcp.thinking import sequential
+from czechmedmcp.thinking.session import ThoughtEntry, _session_manager
 
 
 @pytest.fixture(autouse=True)

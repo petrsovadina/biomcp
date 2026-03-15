@@ -7,15 +7,15 @@ from unittest.mock import patch
 
 import pytest
 
-from biomcp.openfda.cache import _generate_cache_key
-from biomcp.openfda.input_validation import (
+from czechmedmcp.openfda.cache import _generate_cache_key
+from czechmedmcp.openfda.input_validation import (
     build_safe_query,
     sanitize_input,
     validate_api_key,
     validate_date,
     validate_drug_name,
 )
-from biomcp.openfda.rate_limiter import (
+from czechmedmcp.openfda.rate_limiter import (
     CircuitBreaker,
     CircuitState,
     RateLimiter,
@@ -120,7 +120,7 @@ class TestCacheSecurity:
 
     def test_cache_response_size_limit(self):
         """Test that overly large responses are not cached."""
-        from biomcp.openfda.cache import (
+        from czechmedmcp.openfda.cache import (
             clear_cache,
             get_cached_response,
             set_cached_response,
@@ -228,9 +228,9 @@ class TestSecurityIntegration:
     @pytest.mark.asyncio
     async def test_sql_injection_prevention(self):
         """Test that SQL injection attempts are sanitized."""
-        from biomcp.openfda.utils import make_openfda_request
+        from czechmedmcp.openfda.utils import make_openfda_request
 
-        with patch("biomcp.openfda.utils.request_api") as mock_request:
+        with patch("czechmedmcp.openfda.utils.request_api") as mock_request:
             mock_request.return_value = ({"results": []}, None)
 
             # Attempt SQL injection through the utils layer
@@ -254,10 +254,10 @@ class TestSecurityIntegration:
     @pytest.mark.asyncio
     async def test_xss_prevention(self):
         """Test that XSS attempts are sanitized."""
-        from biomcp.openfda.drug_labels import search_drug_labels
+        from czechmedmcp.openfda.drug_labels import search_drug_labels
 
         with patch(
-            "biomcp.openfda.drug_labels.make_openfda_request"
+            "czechmedmcp.openfda.drug_labels.make_openfda_request"
         ) as mock_request:
             mock_request.return_value = ({"results": []}, None)
 
@@ -276,10 +276,10 @@ class TestSecurityIntegration:
     @pytest.mark.asyncio
     async def test_command_injection_prevention(self):
         """Test that command injection attempts are blocked."""
-        from biomcp.openfda.device_events import search_device_events
+        from czechmedmcp.openfda.device_events import search_device_events
 
         with patch(
-            "biomcp.openfda.device_events.make_openfda_request"
+            "czechmedmcp.openfda.device_events.make_openfda_request"
         ) as mock_request:
             mock_request.return_value = ({"results": []}, None)
 
@@ -301,11 +301,11 @@ class TestSecurityIntegration:
         """Test that API keys are not logged."""
         import logging
 
-        from biomcp.openfda.utils import get_api_key
+        from czechmedmcp.openfda.utils import get_api_key
 
         # Set up log capture
         with patch.object(
-            logging.getLogger("biomcp.openfda.utils"), "debug"
+            logging.getLogger("czechmedmcp.openfda.utils"), "debug"
         ) as mock_debug:
             # Call function that might log
             key = get_api_key()
@@ -321,9 +321,9 @@ class TestSecurityIntegration:
     @pytest.mark.asyncio
     async def test_rate_limit_applied_to_requests(self):
         """Test that rate limiting is applied to actual requests."""
-        from biomcp.openfda.utils import make_openfda_request
+        from czechmedmcp.openfda.utils import make_openfda_request
 
-        with patch("biomcp.openfda.utils.request_api") as mock_api:
+        with patch("czechmedmcp.openfda.utils.request_api") as mock_api:
             mock_api.return_value = ({"results": []}, None)
 
             # Make rapid requests
@@ -351,7 +351,7 @@ class TestFileOperationSecurity:
         """Test that cache files are created with secure permissions."""
         import stat
 
-        from biomcp.openfda.drug_shortages import CACHE_DIR
+        from czechmedmcp.openfda.drug_shortages import CACHE_DIR
 
         # Ensure directory exists
         CACHE_DIR.mkdir(parents=True, exist_ok=True)
@@ -374,11 +374,11 @@ class TestFileOperationSecurity:
     async def test_atomic_file_operations(self):
         """Test that file operations are atomic."""
 
-        from biomcp.openfda.drug_shortages import _get_cached_shortage_data
+        from czechmedmcp.openfda.drug_shortages import _get_cached_shortage_data
 
         # This should use atomic operations internally
         with patch(
-            "biomcp.openfda.drug_shortages._fetch_shortage_data"
+            "czechmedmcp.openfda.drug_shortages._fetch_shortage_data"
         ) as mock_fetch:
             mock_fetch.return_value = {
                 "test": "data",

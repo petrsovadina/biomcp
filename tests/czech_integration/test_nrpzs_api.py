@@ -19,7 +19,7 @@ class TestNrpzsApiIntegration:
     @pytest.mark.asyncio
     async def test_search_returns_results(self):
         """Live search for Praha returns at least one provider."""
-        from biomcp.czech.nrpzs.search import _nrpzs_search
+        from czechmedmcp.czech.nrpzs.search import _nrpzs_search
 
         result = json.loads(
             await _nrpzs_search(city="Praha", page_size=5)
@@ -32,7 +32,7 @@ class TestNrpzsApiIntegration:
     @pytest.mark.asyncio
     async def test_search_result_structure(self):
         """Search result items contain required ProviderSummary fields."""
-        from biomcp.czech.nrpzs.search import _nrpzs_search
+        from czechmedmcp.czech.nrpzs.search import _nrpzs_search
 
         result = json.loads(
             await _nrpzs_search(city="Brno", page_size=3)
@@ -47,7 +47,7 @@ class TestNrpzsApiIntegration:
     @pytest.mark.asyncio
     async def test_search_pagination(self):
         """Pagination parameters are honoured by the live API."""
-        from biomcp.czech.nrpzs.search import _nrpzs_search
+        from czechmedmcp.czech.nrpzs.search import _nrpzs_search
 
         result = json.loads(
             await _nrpzs_search(city="Praha", page=1, page_size=2)
@@ -58,7 +58,7 @@ class TestNrpzsApiIntegration:
     @pytest.mark.asyncio
     async def test_search_specialty_filter(self):
         """Specialty filter narrows results from the live API."""
-        from biomcp.czech.nrpzs.search import _nrpzs_search
+        from czechmedmcp.czech.nrpzs.search import _nrpzs_search
 
         result = json.loads(
             await _nrpzs_search(
@@ -72,7 +72,7 @@ class TestNrpzsApiIntegration:
     @pytest.mark.asyncio
     async def test_get_provider_from_search(self):
         """Get full provider detail for the first search result."""
-        from biomcp.czech.nrpzs.search import (
+        from czechmedmcp.czech.nrpzs.search import (
             _nrpzs_get,
             _nrpzs_search,
         )
@@ -95,7 +95,7 @@ class TestNrpzsApiIntegration:
     @pytest.mark.asyncio
     async def test_get_provider_detail_structure(self):
         """Full provider detail contains all HealthcareProvider fields."""
-        from biomcp.czech.nrpzs.search import (
+        from czechmedmcp.czech.nrpzs.search import (
             _nrpzs_get,
             _nrpzs_search,
         )
@@ -123,7 +123,7 @@ class TestNrpzsApiIntegration:
     @pytest.mark.asyncio
     async def test_get_invalid_provider_returns_error(self):
         """Non-existent provider ID returns an error JSON response."""
-        from biomcp.czech.nrpzs.search import _nrpzs_get
+        from czechmedmcp.czech.nrpzs.search import _nrpzs_get
 
         result = json.loads(
             await _nrpzs_get("0000000000nonexistent")

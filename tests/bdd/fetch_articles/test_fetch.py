@@ -5,7 +5,7 @@ import pytest
 from pytest_bdd import given, parsers, scenarios, then
 from typer.testing import CliRunner
 
-from biomcp.cli.main import app
+from czechmedmcp.cli.main import app
 
 scenarios("fetch.feature")
 

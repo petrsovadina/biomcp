@@ -3,7 +3,7 @@ import asyncio
 import pytest
 from pytest_bdd import given, parsers, scenarios, then, when
 
-from biomcp.articles.autocomplete import (
+from czechmedmcp.articles.autocomplete import (
     Concept,
     Entity,
     EntityRequest,

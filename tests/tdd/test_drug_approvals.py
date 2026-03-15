@@ -6,7 +6,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from biomcp.openfda.drug_approvals import (
+from czechmedmcp.openfda.drug_approvals import (
     get_drug_approval,
     search_drug_approvals,
 )
@@ -28,7 +28,7 @@ class TestDrugApprovals:
     async def test_search_drug_approvals_success(self):
         """Test successful drug approval search."""
         with patch(
-            "biomcp.openfda.drug_approvals.make_openfda_request",
+            "czechmedmcp.openfda.drug_approvals.make_openfda_request",
             new_callable=AsyncMock,
         ) as mock_request:
             mock_request.return_value = (MOCK_APPROVALS_SEARCH, None)
@@ -48,7 +48,7 @@ class TestDrugApprovals:
     async def test_search_drug_approvals_with_filters(self):
         """Test drug approval search with multiple filters."""
         with patch(
-            "biomcp.openfda.drug_approvals.make_openfda_request",
+            "czechmedmcp.openfda.drug_approvals.make_openfda_request",
             new_callable=AsyncMock,
         ) as mock_request:
             mock_request.return_value = (MOCK_APPROVALS_SEARCH, None)
@@ -72,7 +72,7 @@ class TestDrugApprovals:
     async def test_search_drug_approvals_no_results(self):
         """Test drug approval search with no results."""
         with patch(
-            "biomcp.openfda.drug_approvals.make_openfda_request",
+            "czechmedmcp.openfda.drug_approvals.make_openfda_request",
             new_callable=AsyncMock,
         ) as mock_request:
             mock_request.return_value = ({"results": []}, None)
@@ -85,7 +85,7 @@ class TestDrugApprovals:
     async def test_search_drug_approvals_api_error(self):
         """Test drug approval search with API error."""
         with patch(
-            "biomcp.openfda.drug_approvals.make_openfda_request",
+            "czechmedmcp.openfda.drug_approvals.make_openfda_request",
             new_callable=AsyncMock,
         ) as mock_request:
             mock_request.return_value = (None, "API rate limit exceeded")
@@ -99,7 +99,7 @@ class TestDrugApprovals:
     async def test_get_drug_approval_success(self):
         """Test getting specific drug approval details."""
         with patch(
-            "biomcp.openfda.drug_approvals.make_openfda_request",
+            "czechmedmcp.openfda.drug_approvals.make_openfda_request",
             new_callable=AsyncMock,
         ) as mock_request:
             mock_request.return_value = (MOCK_APPROVAL_DETAIL, None)
@@ -116,7 +116,7 @@ class TestDrugApprovals:
     async def test_get_drug_approval_not_found(self):
         """Test getting drug approval that doesn't exist."""
         with patch(
-            "biomcp.openfda.drug_approvals.make_openfda_request",
+            "czechmedmcp.openfda.drug_approvals.make_openfda_request",
             new_callable=AsyncMock,
         ) as mock_request:
             mock_request.return_value = ({"results": []}, None)
@@ -130,7 +130,7 @@ class TestDrugApprovals:
     async def test_get_drug_approval_with_api_key(self):
         """Test getting drug approval with API key."""
         with patch(
-            "biomcp.openfda.drug_approvals.make_openfda_request",
+            "czechmedmcp.openfda.drug_approvals.make_openfda_request",
             new_callable=AsyncMock,
         ) as mock_request:
             mock_request.return_value = (MOCK_APPROVAL_DETAIL, None)
@@ -152,7 +152,7 @@ class TestDrugApprovals:
     async def test_search_drug_approvals_pagination(self):
         """Test drug approval search pagination."""
         with patch(
-            "biomcp.openfda.drug_approvals.make_openfda_request",
+            "czechmedmcp.openfda.drug_approvals.make_openfda_request",
             new_callable=AsyncMock,
         ) as mock_request:
             mock_response = {
@@ -179,7 +179,7 @@ class TestDrugApprovals:
     async def test_approval_year_validation(self):
         """Test that approval year is properly formatted."""
         with patch(
-            "biomcp.openfda.drug_approvals.make_openfda_request",
+            "czechmedmcp.openfda.drug_approvals.make_openfda_request",
             new_callable=AsyncMock,
         ) as mock_request:
             mock_request.return_value = (MOCK_APPROVALS_SEARCH, None)

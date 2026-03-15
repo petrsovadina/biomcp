@@ -6,33 +6,33 @@ class TestNoRegression:
     """Verify czech import doesn't break existing functionality."""
 
     def test_import_czech_no_error(self):
-        """Importing biomcp.czech doesn't raise."""
-        import biomcp.czech  # noqa: F401
+        """Importing czechmedmcp.czech doesn't raise."""
+        import czechmedmcp.czech  # noqa: F401
 
     def test_import_czech_tools_no_error(self):
         """Importing czech_tools doesn't raise."""
-        import biomcp.czech.czech_tools  # noqa: F401
+        import czechmedmcp.czech.czech_tools  # noqa: F401
 
     def test_existing_modules_importable(self):
         """Core BioMCP modules still importable after czech."""
-        import biomcp.constants
-        import biomcp.core
-        import biomcp.czech
-        import biomcp.http_client
-        import biomcp.metrics  # noqa: F401
+        import czechmedmcp.constants
+        import czechmedmcp.core
+        import czechmedmcp.czech
+        import czechmedmcp.http_client
+        import czechmedmcp.metrics  # noqa: F401
 
     def test_mcp_app_accessible(self):
         """mcp_app still accessible after czech import."""
-        import biomcp.czech.czech_tools  # noqa: F401
-        from biomcp.core import mcp_app
+        import czechmedmcp.czech.czech_tools  # noqa: F401
+        from czechmedmcp.core import mcp_app
 
         assert mcp_app is not None
         assert mcp_app.name is not None
 
     def test_existing_tool_not_overwritten(self):
         """Czech tools don't overwrite existing tools."""
-        import biomcp.czech.czech_tools  # noqa: F401
-        from biomcp.core import mcp_app
+        import czechmedmcp.czech.czech_tools  # noqa: F401
+        from czechmedmcp.core import mcp_app
 
         tool_names = [
             t.name for t in mcp_app._tool_manager._tools.values()

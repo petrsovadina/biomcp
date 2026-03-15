@@ -3,7 +3,7 @@
 import json
 from unittest.mock import patch
 
-from biomcp.czech.workflows.diagnosis_assistant import (
+from czechmedmcp.czech.workflows.diagnosis_assistant import (
     _diagnosis_assistant,
 )
 
@@ -21,7 +21,7 @@ MOCK_PUBMED_RESULT = json.dumps([
 
 def _patch_mkn():
     return patch(
-        "biomcp.czech.workflows."
+        "czechmedmcp.czech.workflows."
         "diagnosis_assistant._mkn_search",
         return_value=MOCK_MKN_RESULT,
     )
@@ -32,7 +32,7 @@ def _patch_pubmed(side_effect=None):
     if side_effect is not None:
         kw = {"side_effect": side_effect}
     return patch(
-        "biomcp.articles.search._article_searcher",
+        "czechmedmcp.articles.search._article_searcher",
         **kw,
     )
 

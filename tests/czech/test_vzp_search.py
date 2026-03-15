@@ -47,7 +47,7 @@ _MOCK_ENTRIES = [
 @pytest.fixture(autouse=True)
 def inject_entries():
     """Inject mock data into module-level cache."""
-    import biomcp.czech.vzp.search as mod
+    import czechmedmcp.czech.vzp.search as mod
 
     old = mod._ENTRIES
     mod._ENTRIES = list(_MOCK_ENTRIES)
@@ -60,7 +60,7 @@ class TestVzpSearch:
 
     @pytest.mark.asyncio
     async def test_search_by_code(self):
-        from biomcp.czech.vzp.search import _vzp_search
+        from czechmedmcp.czech.vzp.search import _vzp_search
 
         result = json.loads(
             await _vzp_search("09513", "seznam_vykonu")
@@ -70,7 +70,7 @@ class TestVzpSearch:
 
     @pytest.mark.asyncio
     async def test_search_by_name(self):
-        from biomcp.czech.vzp.search import _vzp_search
+        from czechmedmcp.czech.vzp.search import _vzp_search
 
         result = json.loads(
             await _vzp_search("EKG", "seznam_vykonu")
@@ -80,7 +80,7 @@ class TestVzpSearch:
 
     @pytest.mark.asyncio
     async def test_search_empty_results(self):
-        from biomcp.czech.vzp.search import _vzp_search
+        from czechmedmcp.czech.vzp.search import _vzp_search
 
         result = json.loads(
             await _vzp_search(
@@ -92,7 +92,7 @@ class TestVzpSearch:
 
     @pytest.mark.asyncio
     async def test_search_result_has_keys(self):
-        from biomcp.czech.vzp.search import _vzp_search
+        from czechmedmcp.czech.vzp.search import _vzp_search
 
         result = json.loads(
             await _vzp_search("09513", "seznam_vykonu")
@@ -103,14 +103,14 @@ class TestVzpSearch:
 
     @pytest.mark.asyncio
     async def test_search_without_type(self):
-        from biomcp.czech.vzp.search import _vzp_search
+        from czechmedmcp.czech.vzp.search import _vzp_search
 
         result = json.loads(await _vzp_search("EKG"))
         assert result["total"] >= 1
 
     @pytest.mark.asyncio
     async def test_search_respects_max_results(self):
-        from biomcp.czech.vzp.search import _vzp_search
+        from czechmedmcp.czech.vzp.search import _vzp_search
 
         result = json.loads(
             await _vzp_search(
@@ -121,7 +121,7 @@ class TestVzpSearch:
 
     @pytest.mark.asyncio
     async def test_search_diacritics(self):
-        from biomcp.czech.vzp.search import _vzp_search
+        from czechmedmcp.czech.vzp.search import _vzp_search
 
         result = json.loads(
             await _vzp_search(

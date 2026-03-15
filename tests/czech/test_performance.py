@@ -11,7 +11,7 @@ from unittest.mock import patch
 
 import pytest
 
-from biomcp.czech.mkn.parser import _parse_csv
+from czechmedmcp.czech.mkn.parser import _parse_csv
 
 
 class TestSearchLatency:
@@ -22,11 +22,11 @@ class TestSearchLatency:
         """Cached SUKL search should return in < 100ms."""
         from unittest.mock import AsyncMock
 
-        from biomcp.czech.sukl.drug_index import (
+        from czechmedmcp.czech.sukl.drug_index import (
             DrugIndex,
             _detail_to_entry,
         )
-        from biomcp.czech.sukl.search import _sukl_drug_search
+        from czechmedmcp.czech.sukl.search import _sukl_drug_search
 
         idx = DrugIndex()
         idx._entries = [
@@ -38,7 +38,7 @@ class TestSearchLatency:
         idx._built_at = 9999999999.0
 
         with patch(
-            "biomcp.czech.sukl.search.get_drug_index",
+            "czechmedmcp.czech.sukl.search.get_drug_index",
             new_callable=AsyncMock,
             return_value=idx,
         ):
@@ -53,8 +53,8 @@ class TestSearchLatency:
     @pytest.mark.asyncio
     async def test_nrpzs_search_with_module_cache(self):
         """NRPZS in-memory search with pre-loaded data."""
-        import biomcp.czech.nrpzs.search as nrpzs_mod
-        from biomcp.czech.nrpzs.search import _nrpzs_search
+        import czechmedmcp.czech.nrpzs.search as nrpzs_mod
+        from czechmedmcp.czech.nrpzs.search import _nrpzs_search
 
         # Pre-populate module cache
         old = nrpzs_mod._PROVIDERS
@@ -80,8 +80,8 @@ class TestSearchLatency:
     @pytest.mark.asyncio
     async def test_szv_search_with_module_cache(self):
         """SZV in-memory search with pre-loaded data."""
-        import biomcp.czech.szv.search as szv_mod
-        from biomcp.czech.szv.search import _szv_search
+        import czechmedmcp.czech.szv.search as szv_mod
+        from czechmedmcp.czech.szv.search import _szv_search
 
         old = szv_mod._PROCEDURES
         szv_mod._PROCEDURES = [
@@ -104,8 +104,8 @@ class TestSearchLatency:
     @pytest.mark.asyncio
     async def test_vzp_search_with_module_cache(self):
         """VZP in-memory search with pre-loaded data."""
-        import biomcp.czech.vzp.search as vzp_mod
-        from biomcp.czech.vzp.search import _vzp_search
+        import czechmedmcp.czech.vzp.search as vzp_mod
+        from czechmedmcp.czech.vzp.search import _vzp_search
 
         old = vzp_mod._ENTRIES
         vzp_mod._ENTRIES = [
@@ -205,19 +205,19 @@ class TestSourceAttribution:
     """FR-015: All models include source field."""
 
     def test_sukl_models_have_source(self):
-        from biomcp.czech.sukl.models import Drug
+        from czechmedmcp.czech.sukl.models import Drug
 
         d = Drug(sukl_code="001", name="Test")
         assert d.source == "SUKL"
 
     def test_mkn_models_have_source(self):
-        from biomcp.czech.mkn.models import Diagnosis
+        from czechmedmcp.czech.mkn.models import Diagnosis
 
         d = Diagnosis(code="J06.9", name_cs="Test")
         assert d.source == "UZIS/MKN-10"
 
     def test_nrpzs_source_in_output(self):
-        from biomcp.czech.nrpzs.search import _csv_to_provider
+        from czechmedmcp.czech.nrpzs.search import _csv_to_provider
 
         row = {
             "ZZ_misto_poskytovani_ID": "1",
@@ -241,14 +241,14 @@ class TestSourceAttribution:
         assert result["source"] == "NRPZS"
 
     def test_szv_source_in_output(self):
-        from biomcp.czech.szv.search import _raw_to_full
+        from czechmedmcp.czech.szv.search import _raw_to_full
 
         raw = {"Kód": "001", "Název": "Test"}
         result = _raw_to_full(raw)
         assert result["source"] == "MZCR/SZV"
 
     def test_vzp_source_in_output(self):
-        from biomcp.czech.vzp.search import _normalise_entry
+        from czechmedmcp.czech.vzp.search import _normalise_entry
 
         raw = {"KOD": "001", "NAZ": "Test"}
         result = _normalise_entry(raw, "seznam_vykonu")

@@ -2,8 +2,8 @@
 
 import pytest
 
-from biomcp.variants.cbio_external_client import CBioPortalExternalClient
-from biomcp.variants.external import (
+from czechmedmcp.variants.cbio_external_client import CBioPortalExternalClient
+from czechmedmcp.variants.external import (
     ExternalVariantAggregator,
     TCGAClient,
     ThousandGenomesClient,

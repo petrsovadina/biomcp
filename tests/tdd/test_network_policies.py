@@ -4,8 +4,8 @@ from unittest.mock import patch
 
 import pytest
 
-from biomcp.http_client import request_api
-from biomcp.utils.endpoint_registry import (
+from czechmedmcp.http_client import request_api
+from czechmedmcp.utils.endpoint_registry import (
     DataType,
     EndpointCategory,
     EndpointInfo,
@@ -124,7 +124,7 @@ class TestEndpointTracking:
     @pytest.mark.asyncio
     async def test_valid_endpoint_key(self):
         """Test that valid endpoint keys are accepted."""
-        with patch("biomcp.http_client.call_http") as mock_call:
+        with patch("czechmedmcp.http_client.call_http") as mock_call:
             mock_call.return_value = (200, '{"data": "test"}')
 
             # Should not raise an error
@@ -152,7 +152,7 @@ class TestEndpointTracking:
     @pytest.mark.asyncio
     async def test_no_endpoint_key_allowed(self):
         """Test that requests without endpoint keys are allowed."""
-        with patch("biomcp.http_client.call_http") as mock_call:
+        with patch("czechmedmcp.http_client.call_http") as mock_call:
             mock_call.return_value = (200, '{"data": "test"}')
 
             # Should not raise an error

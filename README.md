@@ -2,7 +2,7 @@
 
 Open source MCP server se **60 nástroji** pro české i globální zdravotnické zdroje. Propojuje Claude, Cursor a další AI asistenty s SUKL, MKN-10, PubMed a dalšími databázemi.
 
-**[Landing page](https://web-sovadina.vercel.app)** · **[GitHub](https://github.com/petrsovadina/biomcp)**
+**[Landing page](https://web-sovadina.vercel.app)** · **[GitHub](https://github.com/petrsovadina/czechmedmcp)**
 
 ## Rychlý start.
 

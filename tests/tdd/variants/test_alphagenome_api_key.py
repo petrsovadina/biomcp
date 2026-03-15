@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, patch
 import pandas as pd
 import pytest
 
-from biomcp.variants.alphagenome import predict_variant_effects
+from czechmedmcp.variants.alphagenome import predict_variant_effects
 
 
 @pytest.mark.asyncio

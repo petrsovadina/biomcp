@@ -4,7 +4,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from biomcp.articles.preprints import (
+from czechmedmcp.articles.preprints import (
     BiorxivClient,
     BiorxivResponse,
     BiorxivResult,
@@ -12,8 +12,8 @@ from biomcp.articles.preprints import (
     EuropePMCResponse,
     PreprintSearcher,
 )
-from biomcp.articles.search import PubmedRequest, ResultItem
-from biomcp.core import PublicationState
+from czechmedmcp.articles.search import PubmedRequest, ResultItem
+from czechmedmcp.core import PublicationState
 
 
 class TestBiorxivClient:
@@ -39,7 +39,7 @@ class TestBiorxivClient:
             total=1,
         )
 
-        with patch("biomcp.http_client.request_api") as mock_request:
+        with patch("czechmedmcp.http_client.request_api") as mock_request:
             mock_request.return_value = (mock_response, None)
 
             results = await client.search("BRAF")
@@ -55,7 +55,7 @@ class TestBiorxivClient:
         """Test bioRxiv search with no results."""
         client = BiorxivClient()
 
-        with patch("biomcp.http_client.request_api") as mock_request:
+        with patch("czechmedmcp.http_client.request_api") as mock_request:
             mock_request.return_value = (
                 None,
                 {"code": 404, "message": "Not found"},
@@ -92,7 +92,7 @@ class TestEuropePMCClient:
             },
         )
 
-        with patch("biomcp.http_client.request_api") as mock_request:
+        with patch("czechmedmcp.http_client.request_api") as mock_request:
             mock_request.return_value = (mock_response, None)
 
             results = await client.search("TP53")

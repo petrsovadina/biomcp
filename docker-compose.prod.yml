@@ -33,7 +33,7 @@ services:
       - ONCOKB_TOKEN=${ONCOKB_TOKEN:-}
       - CBIO_TOKEN=${CBIO_TOKEN:-}
     volumes:
-      - biomcp-cache:/root/.cache/biomcp
+      - czechmedmcp-cache:/root/.cache/czechmedmcp
     healthcheck:
       test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8000/health').raise_for_status()"]
       interval: 30s
@@ -63,7 +63,7 @@ services:
         condition: service_healthy
 
 volumes:
-  biomcp-cache:
+  czechmedmcp-cache:
   web-static:
   caddy-data:
   caddy-config:

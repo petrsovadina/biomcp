@@ -6,7 +6,7 @@ from typing import Any
 
 import pytest
 
-from biomcp.variants.filters import filter_variants
+from czechmedmcp.variants.filters import filter_variants
 
 
 @pytest.fixture

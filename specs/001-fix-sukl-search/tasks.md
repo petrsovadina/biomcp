@@ -29,8 +29,8 @@
 
 **⚠️ CRITICAL**: No user story work can begin until DrugIndex is complete and tested.
 
-- [x] T002 Create DrugIndex module with DrugIndexEntry dataclass and DrugIndex singleton in `src/biomcp/czech/sukl/drug_index.py` — include: `DrugIndexEntry` (sukl_code, name, name_normalized, strength, atc_code, atc_normalized, form, supplement, supplement_normalized, holder_code), `DrugIndex` class with `_entries`, `_built_at`, `_lock`, async `get_drug_index()` factory that fetches all codes via `_fetch_drug_list()`, fetches details from cache/API with bounded concurrency (semaphore=10), builds entries list. Use `CACHE_TTL_DAY` for expiry. Follow MKN-10/SZV lazy-init pattern.
-- [x] T003 Implement `search_index(index, query, page, page_size)` function in `src/biomcp/czech/sukl/drug_index.py` — normalize query via `normalize_query()`, substring match on name_normalized, atc_normalized (exact match), supplement_normalized, holder_code. Return `(page_results, total_count)`. Apply `compute_skip()` for pagination.
+- [x] T002 Create DrugIndex module with DrugIndexEntry dataclass and DrugIndex singleton in `src/czechmedmcp/czech/sukl/drug_index.py` — include: `DrugIndexEntry` (sukl_code, name, name_normalized, strength, atc_code, atc_normalized, form, supplement, supplement_normalized, holder_code), `DrugIndex` class with `_entries`, `_built_at`, `_lock`, async `get_drug_index()` factory that fetches all codes via `_fetch_drug_list()`, fetches details from cache/API with bounded concurrency (semaphore=10), builds entries list. Use `CACHE_TTL_DAY` for expiry. Follow MKN-10/SZV lazy-init pattern.
+- [x] T003 Implement `search_index(index, query, page, page_size)` function in `src/czechmedmcp/czech/sukl/drug_index.py` — normalize query via `normalize_query()`, substring match on name_normalized, atc_normalized (exact match), supplement_normalized, holder_code. Return `(page_results, total_count)`. Apply `compute_skip()` for pagination.
 - [x] T004 Create unit tests for DrugIndex in `tests/czech/test_drug_index.py` — test: index build from mocked drug list + details, search by name, search by ATC code, search with diacritics, empty results, pagination, cache expiry triggers rebuild, concurrent access (lock), cold start behavior.
 
 **Checkpoint**: DrugIndex builds, searches, and is tested in isolation.
@@ -45,10 +45,10 @@
 
 ### Implementation for User Story 1
 
-- [x] T005 [US1] Replace `_sukl_drug_search()` in `src/biomcp/czech/sukl/search.py` — remove the 68K full-scan logic (lines 107-153), replace with: call `get_drug_index()`, call `search_index()`, convert `DrugIndexEntry` results to existing `_detail_to_summary()` format, return same JSON structure. Keep error handling for API unavailability.
+- [x] T005 [US1] Replace `_sukl_drug_search()` in `src/czechmedmcp/czech/sukl/search.py` — remove the 68K full-scan logic (lines 107-153), replace with: call `get_drug_index()`, call `search_index()`, convert `DrugIndexEntry` results to existing `_detail_to_summary()` format, return same JSON structure. Keep error handling for API unavailability.
 - [x] T006 [US1] Update unit tests in `tests/czech/test_sukl_search.py` — update mocks to patch `drug_index.get_drug_index()` and `drug_index.search_index()` instead of old `_fetch_drug_list()` + `_fetch_drug_detail()` calls. Verify same JSON output contract.
 - [x] T007 [US1] Add integration test in `tests/czech_integration/test_sukl_api.py` — add `@pytest.mark.integration` test that calls `_sukl_drug_search("ibuprofen")` against live API and asserts results returned within 30 seconds, results contain expected fields (sukl_code, name, atc_code).
-- [x] T008 [US1] Live validation: run `uv run python -c "import asyncio; from biomcp.core import mcp_app; print(asyncio.run(mcp_app.call_tool('czechmed_search_medicine', {'query': 'ibuprofen'}))[:500])"` and verify results within 10 seconds.
+- [x] T008 [US1] Live validation: run `uv run python -c "import asyncio; from czechmedmcp.core import mcp_app; print(asyncio.run(mcp_app.call_tool('czechmed_search_medicine', {'query': 'ibuprofen'}))[:500])"` and verify results within 10 seconds.
 
 **Checkpoint**: `czechmed_search_medicine` works. Verify with T008.
 
@@ -62,7 +62,7 @@
 
 ### Implementation for User Story 2
 
-- [x] T009 [US2] Verify `compare_alternatives` in `src/biomcp/czech/vzp/drug_reimbursement.py` — check if it calls `_sukl_drug_search()` internally. If yes, it automatically benefits from US1 fix. If it has its own search logic, update to use `get_drug_index()` + `search_index()`.
+- [x] T009 [US2] Verify `compare_alternatives` in `src/czechmedmcp/czech/vzp/drug_reimbursement.py` — check if it calls `_sukl_drug_search()` internally. If yes, it automatically benefits from US1 fix. If it has its own search logic, update to use `get_drug_index()` + `search_index()`.
 - [x] T010 [US2] Live validation: run `czechmed_compare_alternatives` with a known SUKL code and verify response within 15 seconds.
 
 **Checkpoint**: `czechmed_compare_alternatives` responds within 15 seconds.
@@ -77,7 +77,7 @@
 
 ### Implementation for User Story 3
 
-- [x] T011 [US3] Verify `_resolve_sukl_code()` in `src/biomcp/czech/workflows/drug_profile.py` — confirm it calls `_sukl_drug_search()` and thus benefits from US1 fix. If it has additional search logic, update to use DrugIndex.
+- [x] T011 [US3] Verify `_resolve_sukl_code()` in `src/czechmedmcp/czech/workflows/drug_profile.py` — confirm it calls `_sukl_drug_search()` and thus benefits from US1 fix. If it has additional search logic, update to use DrugIndex.
 - [x] T012 [US3] Live validation: run `czechmed_drug_profile` with query "ibuprofen" and verify response within 20 seconds.
 
 **Checkpoint**: `czechmed_drug_profile` responds within 20 seconds.
@@ -93,7 +93,7 @@
 ### Implementation for User Story 4
 
 - [x] T013 [US4] Investigate SUKL pharmacy API: test `GET /dlp/v1/lecebna-zarizeni` with various params (mesto, psc). If 504 persists, document as known limitation.
-- [x] T014 [US4] Update `_find_pharmacies()` in `src/biomcp/czech/sukl/search.py` — if API is non-functional: return clear Czech-language message "SUKL API pro lékárny je momentálně nedostupné" via `format_czech_response()`. If API works: fix query parameters.
+- [x] T014 [US4] Update `_find_pharmacies()` in `src/czechmedmcp/czech/sukl/search.py` — if API is non-functional: return clear Czech-language message "SUKL API pro lékárny je momentálně nedostupné" via `format_czech_response()`. If API works: fix query parameters.
 - [x] T015 [US4] Update `tests/czech/test_sukl_pharmacies.py` — add test for graceful 504 handling with expected error message.
 
 **Checkpoint**: `czechmed_find_pharmacies` either returns results or clear error message.
@@ -184,4 +184,4 @@ Task T013: "Investigate SUKL pharmacy API status"
 - Total: **19 tasks** across 7 phases
 - US2 and US3 may require zero code changes if they exclusively use `_sukl_drug_search()` — T009/T011 are verification-only
 - Commit after each phase checkpoint
-- DrugIndex follows exact same pattern as MKN-10 (in `src/biomcp/czech/mkn/`) and SZV (in `src/biomcp/czech/szv/`)
+- DrugIndex follows exact same pattern as MKN-10 (in `src/czechmedmcp/czech/mkn/`) and SZV (in `src/czechmedmcp/czech/szv/`)

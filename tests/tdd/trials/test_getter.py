@@ -1,4 +1,4 @@
-from biomcp.trials.getter import Module, get_trial, modules
+from czechmedmcp.trials.getter import Module, get_trial, modules
 
 
 async def test_get_protocol(anyio_backend):

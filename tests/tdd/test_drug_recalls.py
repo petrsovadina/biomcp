@@ -6,7 +6,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from biomcp.openfda.drug_recalls import (
+from czechmedmcp.openfda.drug_recalls import (
     get_drug_recall,
     search_drug_recalls,
 )
@@ -28,7 +28,7 @@ class TestDrugRecalls:
     async def test_search_drug_recalls_success(self):
         """Test successful drug recall search."""
         with patch(
-            "biomcp.openfda.drug_recalls.make_openfda_request",
+            "czechmedmcp.openfda.drug_recalls.make_openfda_request",
             new_callable=AsyncMock,
         ) as mock_request:
             mock_request.return_value = (MOCK_RECALLS_SEARCH, None)
@@ -48,7 +48,7 @@ class TestDrugRecalls:
     async def test_search_drug_recalls_with_filters(self):
         """Test drug recall search with multiple filters."""
         with patch(
-            "biomcp.openfda.drug_recalls.make_openfda_request",
+            "czechmedmcp.openfda.drug_recalls.make_openfda_request",
             new_callable=AsyncMock,
         ) as mock_request:
             mock_request.return_value = (MOCK_RECALLS_SEARCH, None)
@@ -74,7 +74,7 @@ class TestDrugRecalls:
     async def test_search_drug_recalls_no_results(self):
         """Test drug recall search with no results."""
         with patch(
-            "biomcp.openfda.drug_recalls.make_openfda_request",
+            "czechmedmcp.openfda.drug_recalls.make_openfda_request",
             new_callable=AsyncMock,
         ) as mock_request:
             mock_request.return_value = ({"results": []}, None)
@@ -87,7 +87,7 @@ class TestDrugRecalls:
     async def test_search_drug_recalls_api_error(self):
         """Test drug recall search with API error."""
         with patch(
-            "biomcp.openfda.drug_recalls.make_openfda_request",
+            "czechmedmcp.openfda.drug_recalls.make_openfda_request",
             new_callable=AsyncMock,
         ) as mock_request:
             mock_request.return_value = (None, "API rate limit exceeded")
@@ -101,7 +101,7 @@ class TestDrugRecalls:
     async def test_get_drug_recall_success(self):
         """Test getting specific drug recall details."""
         with patch(
-            "biomcp.openfda.drug_recalls.make_openfda_request",
+            "czechmedmcp.openfda.drug_recalls.make_openfda_request",
             new_callable=AsyncMock,
         ) as mock_request:
             mock_request.return_value = (MOCK_RECALL_DETAIL, None)
@@ -117,7 +117,7 @@ class TestDrugRecalls:
     async def test_get_drug_recall_not_found(self):
         """Test getting drug recall that doesn't exist."""
         with patch(
-            "biomcp.openfda.drug_recalls.make_openfda_request",
+            "czechmedmcp.openfda.drug_recalls.make_openfda_request",
             new_callable=AsyncMock,
         ) as mock_request:
             mock_request.return_value = ({"results": []}, None)
@@ -131,7 +131,7 @@ class TestDrugRecalls:
     async def test_get_drug_recall_with_api_key(self):
         """Test getting drug recall with API key."""
         with patch(
-            "biomcp.openfda.drug_recalls.make_openfda_request",
+            "czechmedmcp.openfda.drug_recalls.make_openfda_request",
             new_callable=AsyncMock,
         ) as mock_request:
             mock_request.return_value = (MOCK_RECALL_DETAIL, None)
@@ -152,7 +152,7 @@ class TestDrugRecalls:
     async def test_recall_class_validation(self):
         """Test that recall class is validated."""
         with patch(
-            "biomcp.openfda.drug_recalls.make_openfda_request",
+            "czechmedmcp.openfda.drug_recalls.make_openfda_request",
             new_callable=AsyncMock,
         ) as mock_request:
             mock_request.return_value = (MOCK_RECALLS_SEARCH, None)
@@ -172,7 +172,7 @@ class TestDrugRecalls:
     async def test_recall_status_mapping(self):
         """Test that recall status is properly mapped."""
         with patch(
-            "biomcp.openfda.drug_recalls.make_openfda_request",
+            "czechmedmcp.openfda.drug_recalls.make_openfda_request",
             new_callable=AsyncMock,
         ) as mock_request:
             mock_request.return_value = (MOCK_RECALLS_SEARCH, None)
@@ -193,7 +193,7 @@ class TestDrugRecalls:
     async def test_search_drug_recalls_pagination(self):
         """Test drug recall search pagination."""
         with patch(
-            "biomcp.openfda.drug_recalls.make_openfda_request",
+            "czechmedmcp.openfda.drug_recalls.make_openfda_request",
             new_callable=AsyncMock,
         ) as mock_request:
             mock_response = {
@@ -220,7 +220,7 @@ class TestDrugRecalls:
     async def test_date_filtering(self):
         """Test that date filtering works correctly."""
         with patch(
-            "biomcp.openfda.drug_recalls.make_openfda_request",
+            "czechmedmcp.openfda.drug_recalls.make_openfda_request",
             new_callable=AsyncMock,
         ) as mock_request:
             mock_request.return_value = (MOCK_RECALLS_SEARCH, None)

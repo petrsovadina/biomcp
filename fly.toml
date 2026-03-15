@@ -42,5 +42,5 @@ primary_region = "fra"  # Frankfurt — nejblíže ČR
   cpus = 1
 
 [mounts]
-  source = "biomcp_cache"
-  destination = "/root/.cache/biomcp"
+  source = "czechmedmcp_cache"
+  destination = "/root/.cache/czechmedmcp"

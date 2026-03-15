@@ -91,7 +91,7 @@
 ## Internal: DrugIndex API (new)
 
 ```python
-# src/biomcp/czech/sukl/drug_index.py
+# src/czechmedmcp/czech/sukl/drug_index.py
 
 async def get_drug_index() -> DrugIndex:
     """Get or build the drug index singleton."""

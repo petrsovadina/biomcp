@@ -5,7 +5,7 @@ from unittest.mock import patch
 
 import pytest
 
-from biomcp.core import mcp_app
+from czechmedmcp.core import mcp_app
 
 
 @pytest.mark.asyncio
@@ -145,12 +145,12 @@ class TestMCPIntegration:
         ])
 
         with patch(
-            "biomcp.articles.unified.search_articles_unified"
+            "czechmedmcp.articles.unified.search_articles_unified"
         ) as mock_search:
             mock_search.return_value = mock_result
 
             # Import search function directly since we can't test through MCP without Context
-            from biomcp.router import search
+            from czechmedmcp.router import search
 
             # Call the search function
             result = await search(
@@ -179,10 +179,10 @@ class TestMCPIntegration:
             }
         ])
 
-        with patch("biomcp.variants.getter.get_variant") as mock_get:
+        with patch("czechmedmcp.variants.getter.get_variant") as mock_get:
             mock_get.return_value = mock_result
 
-            from biomcp.router import fetch
+            from czechmedmcp.router import fetch
 
             # Call the fetch function
             result = await fetch(
@@ -199,7 +199,7 @@ class TestMCPIntegration:
 
     async def test_mcp_unified_query_integration(self):
         """Test unified query through MCP."""
-        with patch("biomcp.query_router.execute_routing_plan") as mock_execute:
+        with patch("czechmedmcp.query_router.execute_routing_plan") as mock_execute:
             mock_execute.return_value = {
                 "articles": json.dumps([
                     {"pmid": "111", "title": "Article 1"}
@@ -209,7 +209,7 @@ class TestMCPIntegration:
                 ]),
             }
 
-            from biomcp.router import search
+            from czechmedmcp.router import search
 
             # Call search with unified query
             result = await search(
@@ -228,14 +228,14 @@ class TestMCPIntegration:
     async def test_mcp_thinking_integration(self):
         """Test sequential thinking through MCP."""
         with patch(
-            "biomcp.thinking.sequential._sequential_thinking"
+            "czechmedmcp.thinking.sequential._sequential_thinking"
         ) as mock_think:
             mock_think.return_value = {
                 "thought": "Processed thought",
                 "analysis": "Test analysis",
             }
 
-            from biomcp.thinking_tool import think
+            from czechmedmcp.thinking_tool import think
 
             # Call the think tool directly
             result = await think(
@@ -252,8 +252,8 @@ class TestMCPIntegration:
 
     async def test_mcp_error_handling(self):
         """Test MCP error handling."""
-        from biomcp.exceptions import InvalidDomainError
-        from biomcp.router import search
+        from czechmedmcp.exceptions import InvalidDomainError
+        from czechmedmcp.router import search
 
         # Test with invalid domain
         with pytest.raises(InvalidDomainError) as exc_info:
@@ -270,17 +270,17 @@ class TestMCPIntegration:
         mock_locations = {"locations": [{"city": "Boston"}]}
 
         with (
-            patch("biomcp.trials.getter._trial_protocol") as mock_p,
-            patch("biomcp.trials.getter._trial_locations") as mock_l,
-            patch("biomcp.trials.getter._trial_outcomes") as mock_o,
-            patch("biomcp.trials.getter._trial_references") as mock_r,
+            patch("czechmedmcp.trials.getter._trial_protocol") as mock_p,
+            patch("czechmedmcp.trials.getter._trial_locations") as mock_l,
+            patch("czechmedmcp.trials.getter._trial_outcomes") as mock_o,
+            patch("czechmedmcp.trials.getter._trial_references") as mock_r,
         ):
             mock_p.return_value = json.dumps(mock_protocol)
             mock_l.return_value = json.dumps(mock_locations)
             mock_o.return_value = json.dumps({"outcomes": {}})
             mock_r.return_value = json.dumps({"references": []})
 
-            from biomcp.router import fetch
+            from czechmedmcp.router import fetch
 
             result = await fetch(
                 domain="trial",
@@ -299,11 +299,11 @@ class TestMCPIntegration:
         mock_result = json.dumps([])
 
         with patch(
-            "biomcp.articles.unified.search_articles_unified"
+            "czechmedmcp.articles.unified.search_articles_unified"
         ) as mock_search:
             mock_search.return_value = mock_result
 
-            from biomcp.router import search
+            from czechmedmcp.router import search
 
             # Test with various parameter formats
             await search(

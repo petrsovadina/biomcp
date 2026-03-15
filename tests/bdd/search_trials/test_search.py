@@ -4,7 +4,7 @@ from typing import Any
 
 from pytest_bdd import given, parsers, scenarios, then, when
 
-from biomcp.trials.search import (
+from czechmedmcp.trials.search import (
     AgeGroup,
     DateField,
     InterventionType,
@@ -358,7 +358,7 @@ def add_biomarker_expression(
 @given(parsers.parse('I set line of therapy to "{line}"'))
 def set_line_of_therapy(trial_query: TrialQuery, line: str):
     """Set line of therapy filter."""
-    from biomcp.trials.search import LineOfTherapy
+    from czechmedmcp.trials.search import LineOfTherapy
 
     # Map string values to enum
     mapping = {

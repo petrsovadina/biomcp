@@ -4,7 +4,7 @@ import asyncio
 
 import pytest
 
-from biomcp.circuit_breaker import (
+from czechmedmcp.circuit_breaker import (
     CircuitBreaker,
     CircuitBreakerConfig,
     CircuitBreakerError,

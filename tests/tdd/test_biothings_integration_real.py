@@ -2,7 +2,7 @@
 
 import pytest
 
-from biomcp.integrations import BioThingsClient
+from czechmedmcp.integrations import BioThingsClient
 
 
 @pytest.mark.integration
@@ -220,7 +220,7 @@ class TestGeneToolIntegration:
     @pytest.mark.asyncio
     async def test_gene_getter_tool(self):
         """Test the gene_getter tool function."""
-        from biomcp.genes.getter import get_gene
+        from czechmedmcp.genes.getter import get_gene
 
         result = await get_gene("TP53", output_json=False)
 
@@ -235,7 +235,7 @@ class TestGeneToolIntegration:
         """Test gene_getter with JSON output."""
         import json
 
-        from biomcp.genes.getter import get_gene
+        from czechmedmcp.genes.getter import get_gene
 
         result = await get_gene("BRAF", output_json=True)
         data = json.loads(result)
@@ -252,7 +252,7 @@ class TestDiseaseToolIntegration:
     @pytest.mark.asyncio
     async def test_disease_getter_tool(self):
         """Test the disease_getter tool function."""
-        from biomcp.diseases.getter import get_disease
+        from czechmedmcp.diseases.getter import get_disease
 
         result = await get_disease("melanoma", output_json=False)
 
@@ -266,7 +266,7 @@ class TestDiseaseToolIntegration:
         """Test disease_getter with JSON output."""
         import json
 
-        from biomcp.diseases.getter import get_disease
+        from czechmedmcp.diseases.getter import get_disease
 
         result = await get_disease("GIST", output_json=True)
         data = json.loads(result)
@@ -287,7 +287,7 @@ class TestDrugToolIntegration:
     @pytest.mark.asyncio
     async def test_drug_getter_tool(self):
         """Test the drug_getter tool function."""
-        from biomcp.drugs.getter import get_drug
+        from czechmedmcp.drugs.getter import get_drug
 
         result = await get_drug("DB00945", output_json=False)  # Aspirin
 
@@ -301,7 +301,7 @@ class TestDrugToolIntegration:
         """Test drug_getter with JSON output."""
         import json
 
-        from biomcp.drugs.getter import get_drug
+        from czechmedmcp.drugs.getter import get_drug
 
         result = await get_drug("DB00619", output_json=True)  # Imatinib
         data = json.loads(result)

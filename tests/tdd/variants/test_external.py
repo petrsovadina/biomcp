@@ -4,11 +4,11 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from biomcp.variants.cbio_external_client import (
+from czechmedmcp.variants.cbio_external_client import (
     CBioPortalExternalClient,
     CBioPortalVariantData,
 )
-from biomcp.variants.external import (
+from czechmedmcp.variants.external import (
     EnhancedVariantAnnotation,
     ExternalVariantAggregator,
     TCGAClient,
@@ -57,7 +57,7 @@ class TestTCGAClient:
             }
         }
 
-        with patch("biomcp.http_client.request_api") as mock_request:
+        with patch("czechmedmcp.http_client.request_api") as mock_request:
             # First call is for SSM search, second is for occurrences
             mock_request.side_effect = [
                 (mock_response, None),
@@ -80,7 +80,7 @@ class TestTCGAClient:
 
         mock_response = {"data": {"hits": []}}
 
-        with patch("biomcp.http_client.request_api") as mock_request:
+        with patch("czechmedmcp.http_client.request_api") as mock_request:
             mock_request.return_value = (mock_response, None)
 
             result = await client.get_variant_data("chr7:g.140453136A>T")
@@ -112,7 +112,7 @@ class TestThousandGenomesClient:
             "ancestral_allele": "A",
         }
 
-        with patch("biomcp.http_client.request_api") as mock_request:
+        with patch("czechmedmcp.http_client.request_api") as mock_request:
             mock_request.return_value = (mock_response, None)
 
             result = await client.get_variant_data("rs113488022")

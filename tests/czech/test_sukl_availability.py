@@ -31,16 +31,16 @@ class TestSuklAvailability:
     @pytest.mark.asyncio
     async def test_available_drug(self, mock_drug_in_list):
         """Drug in active list shows as available."""
-        from biomcp.czech.sukl.availability import (
+        from czechmedmcp.czech.sukl.availability import (
             _sukl_availability_check,
         )
 
         with patch(
-            "biomcp.czech.sukl.availability._fetch_drug_detail",
+            "czechmedmcp.czech.sukl.availability._fetch_drug_detail",
             new_callable=AsyncMock,
             return_value=mock_drug_in_list,
         ), patch(
-            "biomcp.czech.sukl.availability._check_distribution",
+            "czechmedmcp.czech.sukl.availability._check_distribution",
             new_callable=AsyncMock,
             return_value="available",
         ):
@@ -54,16 +54,16 @@ class TestSuklAvailability:
     @pytest.mark.asyncio
     async def test_limited_drug(self, mock_drug_in_list):
         """Drug with limited availability."""
-        from biomcp.czech.sukl.availability import (
+        from czechmedmcp.czech.sukl.availability import (
             _sukl_availability_check,
         )
 
         with patch(
-            "biomcp.czech.sukl.availability._fetch_drug_detail",
+            "czechmedmcp.czech.sukl.availability._fetch_drug_detail",
             new_callable=AsyncMock,
             return_value=mock_drug_in_list,
         ), patch(
-            "biomcp.czech.sukl.availability._check_distribution",
+            "czechmedmcp.czech.sukl.availability._check_distribution",
             new_callable=AsyncMock,
             return_value="limited",
         ):
@@ -75,16 +75,16 @@ class TestSuklAvailability:
     @pytest.mark.asyncio
     async def test_unavailable_drug(self, mock_drug_in_list):
         """Drug not in distribution is unavailable."""
-        from biomcp.czech.sukl.availability import (
+        from czechmedmcp.czech.sukl.availability import (
             _sukl_availability_check,
         )
 
         with patch(
-            "biomcp.czech.sukl.availability._fetch_drug_detail",
+            "czechmedmcp.czech.sukl.availability._fetch_drug_detail",
             new_callable=AsyncMock,
             return_value=mock_drug_in_list,
         ), patch(
-            "biomcp.czech.sukl.availability._check_distribution",
+            "czechmedmcp.czech.sukl.availability._check_distribution",
             new_callable=AsyncMock,
             return_value="unavailable",
         ):
@@ -96,12 +96,12 @@ class TestSuklAvailability:
     @pytest.mark.asyncio
     async def test_invalid_code(self):
         """Invalid SUKL code returns error."""
-        from biomcp.czech.sukl.availability import (
+        from czechmedmcp.czech.sukl.availability import (
             _sukl_availability_check,
         )
 
         with patch(
-            "biomcp.czech.sukl.availability._fetch_drug_detail",
+            "czechmedmcp.czech.sukl.availability._fetch_drug_detail",
             new_callable=AsyncMock,
             return_value=None,
         ):
@@ -115,16 +115,16 @@ class TestSuklAvailability:
         self, mock_drug_in_list
     ):
         """Result includes last_checked timestamp."""
-        from biomcp.czech.sukl.availability import (
+        from czechmedmcp.czech.sukl.availability import (
             _sukl_availability_check,
         )
 
         with patch(
-            "biomcp.czech.sukl.availability._fetch_drug_detail",
+            "czechmedmcp.czech.sukl.availability._fetch_drug_detail",
             new_callable=AsyncMock,
             return_value=mock_drug_in_list,
         ), patch(
-            "biomcp.czech.sukl.availability._check_distribution",
+            "czechmedmcp.czech.sukl.availability._check_distribution",
             new_callable=AsyncMock,
             return_value="available",
         ):

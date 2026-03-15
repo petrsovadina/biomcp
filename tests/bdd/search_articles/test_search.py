@@ -8,7 +8,7 @@ import json
 import pytest
 from pytest_bdd import given, parsers, scenarios, then, when
 
-from biomcp.articles.search import (
+from czechmedmcp.articles.search import (
     PubmedRequest,
     search_articles,
 )

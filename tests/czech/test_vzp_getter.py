@@ -29,7 +29,7 @@ _MOCK_ENTRIES = [
 @pytest.fixture(autouse=True)
 def inject_entries():
     """Inject mock data into module-level cache."""
-    import biomcp.czech.vzp.search as mod
+    import czechmedmcp.czech.vzp.search as mod
 
     old = mod._ENTRIES
     mod._ENTRIES = list(_MOCK_ENTRIES)
@@ -42,7 +42,7 @@ class TestVzpGetter:
 
     @pytest.mark.asyncio
     async def test_get_entry(self):
-        from biomcp.czech.vzp.search import _vzp_get
+        from czechmedmcp.czech.vzp.search import _vzp_get
 
         result = json.loads(
             await _vzp_get("seznam_vykonu", "09513")
@@ -53,7 +53,7 @@ class TestVzpGetter:
 
     @pytest.mark.asyncio
     async def test_get_entry_description(self):
-        from biomcp.czech.vzp.search import _vzp_get
+        from czechmedmcp.czech.vzp.search import _vzp_get
 
         result = json.loads(
             await _vzp_get("seznam_vykonu", "09513")
@@ -62,7 +62,7 @@ class TestVzpGetter:
 
     @pytest.mark.asyncio
     async def test_get_codebook_type_preserved(self):
-        from biomcp.czech.vzp.search import _vzp_get
+        from czechmedmcp.czech.vzp.search import _vzp_get
 
         result = json.loads(
             await _vzp_get("seznam_vykonu", "09513")
@@ -71,7 +71,7 @@ class TestVzpGetter:
 
     @pytest.mark.asyncio
     async def test_get_invalid_entry(self):
-        from biomcp.czech.vzp.search import _vzp_get
+        from czechmedmcp.czech.vzp.search import _vzp_get
 
         result = json.loads(
             await _vzp_get("seznam_vykonu", "INVALID")
@@ -80,7 +80,7 @@ class TestVzpGetter:
 
     @pytest.mark.asyncio
     async def test_get_point_value(self):
-        from biomcp.czech.vzp.search import _vzp_get
+        from czechmedmcp.czech.vzp.search import _vzp_get
 
         result = json.loads(
             await _vzp_get("seznam_vykonu", "09513")
@@ -89,7 +89,7 @@ class TestVzpGetter:
 
     @pytest.mark.asyncio
     async def test_get_specialty(self):
-        from biomcp.czech.vzp.search import _vzp_get
+        from czechmedmcp.czech.vzp.search import _vzp_get
 
         result = json.loads(
             await _vzp_get("seznam_vykonu", "09513")

@@ -2,7 +2,7 @@
 
 import json
 
-from biomcp.czech.response import format_czech_response
+from czechmedmcp.czech.response import format_czech_response
 
 
 class TestFormatCzechResponse:

@@ -10,7 +10,7 @@ class TestSuklSearchInternals:
     """Test internal search functions via DrugIndex."""
 
     def test_search_matches_by_name(self):
-        from biomcp.czech.sukl.drug_index import (
+        from czechmedmcp.czech.sukl.drug_index import (
             DrugIndex,
             _detail_to_entry,
             search_index,
@@ -30,7 +30,7 @@ class TestSuklSearchInternals:
         assert total == 1
 
     def test_search_matches_by_atc(self):
-        from biomcp.czech.sukl.drug_index import (
+        from czechmedmcp.czech.sukl.drug_index import (
             DrugIndex,
             _detail_to_entry,
             search_index,
@@ -50,7 +50,7 @@ class TestSuklSearchInternals:
         assert total == 1
 
     def test_search_matches_by_holder(self):
-        from biomcp.czech.sukl.drug_index import (
+        from czechmedmcp.czech.sukl.drug_index import (
             DrugIndex,
             _detail_to_entry,
             search_index,
@@ -70,7 +70,7 @@ class TestSuklSearchInternals:
         assert total == 1
 
     def test_search_no_match(self):
-        from biomcp.czech.sukl.drug_index import (
+        from czechmedmcp.czech.sukl.drug_index import (
             DrugIndex,
             _detail_to_entry,
             search_index,
@@ -90,7 +90,7 @@ class TestSuklSearchInternals:
         assert total == 0
 
     def test_search_empty_query(self):
-        from biomcp.czech.sukl.drug_index import (
+        from czechmedmcp.czech.sukl.drug_index import (
             DrugIndex,
             _detail_to_entry,
             search_index,
@@ -107,10 +107,10 @@ class TestSuklSearchInternals:
         assert total == 0
 
     def test_entry_to_summary(self):
-        from biomcp.czech.sukl.drug_index import (
+        from czechmedmcp.czech.sukl.drug_index import (
             _detail_to_entry,
         )
-        from biomcp.czech.sukl.search import (
+        from czechmedmcp.czech.sukl.search import (
             _entry_to_summary,
         )
 
@@ -130,7 +130,7 @@ class TestSuklGetterInternals:
     """Test internal getter functions."""
 
     def test_composition_to_substances(self):
-        from biomcp.czech.sukl.getter import (
+        from czechmedmcp.czech.sukl.getter import (
             _composition_to_substances,
         )
 
@@ -147,14 +147,14 @@ class TestSuklGetterInternals:
         assert result[0]["strength"] == "400 MG"
 
     def test_composition_to_substances_empty(self):
-        from biomcp.czech.sukl.getter import (
+        from czechmedmcp.czech.sukl.getter import (
             _composition_to_substances,
         )
 
         assert _composition_to_substances([]) == []
 
     def test_composition_no_amount(self):
-        from biomcp.czech.sukl.getter import (
+        from czechmedmcp.czech.sukl.getter import (
             _composition_to_substances,
         )
 
@@ -165,7 +165,7 @@ class TestSuklGetterInternals:
         assert result[0]["strength"] is None
 
     def test_build_doc_url(self):
-        from biomcp.czech.sukl.getter import _build_doc_url
+        from czechmedmcp.czech.sukl.getter import _build_doc_url
 
         url = _build_doc_url("0000123", "spc")
         assert "0000123" in url
@@ -173,7 +173,7 @@ class TestSuklGetterInternals:
 
     @pytest.mark.asyncio
     async def test_fetch_doc_metadata_404(self):
-        from biomcp.czech.sukl.getter import (
+        from czechmedmcp.czech.sukl.getter import (
             _fetch_doc_metadata,
         )
 
@@ -190,10 +190,10 @@ class TestSuklGetterInternals:
         )
 
         with patch(
-            "biomcp.czech.sukl.getter.get_cached_response",
+            "czechmedmcp.czech.sukl.getter.get_cached_response",
             return_value=None,
         ), patch(
-            "biomcp.czech.sukl.getter.httpx.AsyncClient",
+            "czechmedmcp.czech.sukl.getter.httpx.AsyncClient",
             return_value=mock_client,
         ):
             result = await _fetch_doc_metadata("9999999")
@@ -201,7 +201,7 @@ class TestSuklGetterInternals:
 
     @pytest.mark.asyncio
     async def test_fetch_composition_404(self):
-        from biomcp.czech.sukl.getter import (
+        from czechmedmcp.czech.sukl.getter import (
             _fetch_composition,
         )
 
@@ -218,10 +218,10 @@ class TestSuklGetterInternals:
         )
 
         with patch(
-            "biomcp.czech.sukl.getter.get_cached_response",
+            "czechmedmcp.czech.sukl.getter.get_cached_response",
             return_value=None,
         ), patch(
-            "biomcp.czech.sukl.getter.httpx.AsyncClient",
+            "czechmedmcp.czech.sukl.getter.httpx.AsyncClient",
             return_value=mock_client,
         ):
             result = await _fetch_composition("9999999")
@@ -233,7 +233,7 @@ class TestSuklAvailabilityInternals:
 
     @pytest.mark.asyncio
     async def test_check_distribution_404(self):
-        from biomcp.czech.sukl.availability import (
+        from czechmedmcp.czech.sukl.availability import (
             _check_distribution,
         )
 
@@ -250,20 +250,20 @@ class TestSuklAvailabilityInternals:
         )
 
         with patch(
-            "biomcp.czech.sukl.availability.get_cached_response",
+            "czechmedmcp.czech.sukl.availability.get_cached_response",
             return_value=None,
         ), patch(
-            "biomcp.czech.sukl.availability.httpx.AsyncClient",
+            "czechmedmcp.czech.sukl.availability.httpx.AsyncClient",
             return_value=mock_client,
         ), patch(
-            "biomcp.czech.sukl.availability.cache_response",
+            "czechmedmcp.czech.sukl.availability.cache_response",
         ):
             result = await _check_distribution("9999999")
             assert result == "unavailable"
 
     @pytest.mark.asyncio
     async def test_check_distribution_success(self):
-        from biomcp.czech.sukl.availability import (
+        from czechmedmcp.czech.sukl.availability import (
             _check_distribution,
         )
 
@@ -281,25 +281,25 @@ class TestSuklAvailabilityInternals:
         )
 
         with patch(
-            "biomcp.czech.sukl.availability.get_cached_response",
+            "czechmedmcp.czech.sukl.availability.get_cached_response",
             return_value=None,
         ), patch(
-            "biomcp.czech.sukl.availability.httpx.AsyncClient",
+            "czechmedmcp.czech.sukl.availability.httpx.AsyncClient",
             return_value=mock_client,
         ), patch(
-            "biomcp.czech.sukl.availability.cache_response",
+            "czechmedmcp.czech.sukl.availability.cache_response",
         ):
             result = await _check_distribution("0000123")
             assert result == "available"
 
     @pytest.mark.asyncio
     async def test_check_distribution_cached(self):
-        from biomcp.czech.sukl.availability import (
+        from czechmedmcp.czech.sukl.availability import (
             _check_distribution,
         )
 
         with patch(
-            "biomcp.czech.sukl.availability.get_cached_response",
+            "czechmedmcp.czech.sukl.availability.get_cached_response",
             return_value=json.dumps(
                 {"_status": "limited"}
             ),
@@ -309,13 +309,13 @@ class TestSuklAvailabilityInternals:
 
     @pytest.mark.asyncio
     async def test_fetch_drug_detail_cached(self):
-        from biomcp.czech.sukl.availability import (
+        from czechmedmcp.czech.sukl.availability import (
             _fetch_drug_detail,
         )
 
         cached_data = {"kodSukl": "0000123", "nazev": "Test"}
         with patch(
-            "biomcp.czech.sukl.client.get_cached_response",
+            "czechmedmcp.czech.sukl.client.get_cached_response",
             return_value=json.dumps(cached_data),
         ):
             result = await _fetch_drug_detail("0000123")

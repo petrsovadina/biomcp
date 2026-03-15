@@ -1,6 +1,6 @@
 """Unit tests for MKN-10 Pydantic models."""
 
-from biomcp.czech.mkn.models import (
+from czechmedmcp.czech.mkn.models import (
     Diagnosis,
     DiagnosisCategory,
     DiagnosisHierarchy,

@@ -10,9 +10,9 @@ Build a lazy-loaded in-memory drug index (~14 MB) from cached drug details, refr
 
 ## Files to Modify
 
-1. **New**: `src/biomcp/czech/sukl/drug_index.py` — DrugIndex singleton with lazy init + search
-2. **Modify**: `src/biomcp/czech/sukl/search.py` — Replace `_sukl_drug_search()` to use index
-3. **Modify**: `src/biomcp/czech/sukl/search.py` — Update `_find_pharmacies()` error handling
+1. **New**: `src/czechmedmcp/czech/sukl/drug_index.py` — DrugIndex singleton with lazy init + search
+2. **Modify**: `src/czechmedmcp/czech/sukl/search.py` — Replace `_sukl_drug_search()` to use index
+3. **Modify**: `src/czechmedmcp/czech/sukl/search.py` — Update `_find_pharmacies()` error handling
 4. **New**: `tests/tdd/czech/test_drug_index.py` — Unit tests for index build + search
 5. **Modify**: `tests/czech/test_sukl_search.py` — Update mocks for new search flow
 
@@ -35,7 +35,7 @@ uv run python -m pytest tests/tdd/ tests/czech/ -x -q
 # Live test
 uv run python -c "
 import asyncio
-from biomcp.core import mcp_app
+from czechmedmcp.core import mcp_app
 async def test():
     r = await mcp_app.call_tool('czechmed_search_medicine', {'query': 'ibuprofen'})
     print(str(r)[:500])

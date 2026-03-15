@@ -32,7 +32,7 @@ _MOCK_PROCEDURES = [
 @pytest.fixture(autouse=True)
 def inject_procedures():
     """Inject mock data into module-level cache."""
-    import biomcp.czech.szv.search as mod
+    import czechmedmcp.czech.szv.search as mod
 
     old = mod._PROCEDURES
     mod._PROCEDURES = list(_MOCK_PROCEDURES)
@@ -45,7 +45,7 @@ class TestSzvGetter:
 
     @pytest.mark.asyncio
     async def test_get_procedure_details(self):
-        from biomcp.czech.szv.search import _szv_get
+        from czechmedmcp.czech.szv.search import _szv_get
 
         result = json.loads(await _szv_get("09513"))
         assert result["code"] == "09513"
@@ -54,35 +54,35 @@ class TestSzvGetter:
 
     @pytest.mark.asyncio
     async def test_get_includes_point_value(self):
-        from biomcp.czech.szv.search import _szv_get
+        from czechmedmcp.czech.szv.search import _szv_get
 
         result = json.loads(await _szv_get("09513"))
         assert result["point_value"] == 113
 
     @pytest.mark.asyncio
     async def test_get_includes_time(self):
-        from biomcp.czech.szv.search import _szv_get
+        from czechmedmcp.czech.szv.search import _szv_get
 
         result = json.loads(await _szv_get("09513"))
         assert result["time_minutes"] == 10
 
     @pytest.mark.asyncio
     async def test_get_includes_specialty(self):
-        from biomcp.czech.szv.search import _szv_get
+        from czechmedmcp.czech.szv.search import _szv_get
 
         result = json.loads(await _szv_get("09513"))
         assert result["specialty"] == "101"
 
     @pytest.mark.asyncio
     async def test_get_invalid_code(self):
-        from biomcp.czech.szv.search import _szv_get
+        from czechmedmcp.czech.szv.search import _szv_get
 
         result = json.loads(await _szv_get("INVALID_CODE"))
         assert "error" in result
 
     @pytest.mark.asyncio
     async def test_get_description(self):
-        from biomcp.czech.szv.search import _szv_get
+        from czechmedmcp.czech.szv.search import _szv_get
 
         result = json.loads(await _szv_get("09513"))
         assert result["description"] == "Popis EKG"

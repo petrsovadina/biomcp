@@ -3,7 +3,7 @@
 import json
 from unittest.mock import patch
 
-from biomcp.czech.workflows.referral_assistant import (
+from czechmedmcp.czech.workflows.referral_assistant import (
     _referral_assistant,
 )
 
@@ -33,7 +33,7 @@ MOCK_PROVIDERS = json.dumps({
 
 def _patch_mkn(data=MOCK_DIAGNOSIS):
     return patch(
-        "biomcp.czech.workflows."
+        "czechmedmcp.czech.workflows."
         "referral_assistant._mkn_get",
         return_value=data,
     )
@@ -41,7 +41,7 @@ def _patch_mkn(data=MOCK_DIAGNOSIS):
 
 def _patch_nrpzs(data=MOCK_PROVIDERS):
     return patch(
-        "biomcp.czech.workflows."
+        "czechmedmcp.czech.workflows."
         "referral_assistant._nrpzs_search",
         return_value=data,
     )

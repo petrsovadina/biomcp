@@ -20,9 +20,9 @@ services:
       - ONCOKB_TOKEN=${ONCOKB_TOKEN:-}
       - CBIO_TOKEN=${CBIO_TOKEN:-}
     volumes:
-      - biomcp-cache:/root/.cache/biomcp
+      - czechmedmcp-cache:/root/.cache/czechmedmcp
     restart: unless-stopped
 
 volumes:
-  biomcp-cache:
+  czechmedmcp-cache:
     driver: local

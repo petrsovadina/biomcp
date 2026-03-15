@@ -6,7 +6,7 @@ from assertpy import assert_that
 from pytest_bdd import parsers, scenarios, then, when
 from typer.testing import CliRunner
 
-from biomcp.cli import app
+from czechmedmcp.cli import app
 
 scenarios("search.feature")
 
@@ -50,7 +50,7 @@ def get_value(data: dict, key: str) -> Any | None:
 )
 def variants_data(command) -> dict:
     """Run variant search command with --json and return parsed results."""
-    args = shlex.split(command)[1:]  # trim 'biomcp'
+    args = shlex.split(command)[1:]  # trim "czechmedmcp"
     args += ["--json"]
     if "--size" not in args:
         args.extend(["--size", "10"])

@@ -9,7 +9,7 @@ from starlette.responses import PlainTextResponse
 from starlette.routing import Route
 from starlette.testclient import TestClient
 
-from biomcp.auth import BearerTokenMiddleware, validate_auth_token
+from czechmedmcp.auth import BearerTokenMiddleware, validate_auth_token
 
 
 class TestValidateAuthToken:

@@ -1,6 +1,6 @@
 """Unit tests for SUKL Pydantic models."""
 
-from biomcp.czech.sukl.models import (
+from czechmedmcp.czech.sukl.models import (
     ActiveSubstance,
     AvailabilityStatus,
     Drug,

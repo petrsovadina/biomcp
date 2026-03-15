@@ -24,7 +24,7 @@
 ### Struktura projektu (skutečná)
 ```
 biomcp/
-├── src/biomcp/           # Python MCP server (60 nástrojů)
+├── src/czechmedmcp/           # Python MCP server (60 nástrojů)
 │   ├── router.py         # 2093 řádků — search() + fetch() god functions
 │   ├── router_handlers.py # 408 řádků — extrahované search handlery
 │   ├── individual_tools.py # 1951 řádků — 33 tool registrací
@@ -142,7 +142,7 @@ Nebo přidat explicitní `result: str = await ...` anotaci.
 ```python
 # fetch_handlers.py
 async def handle_fda_adverse_fetch(id: str, api_key: str | None) -> dict:
-    from biomcp.openfda import get_adverse_event
+    from czechmedmcp.openfda import get_adverse_event
     result = await get_adverse_event(id, api_key=api_key)
     return {
         "title": f"FDA Adverse Event Report {id}",

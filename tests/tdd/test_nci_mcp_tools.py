@@ -4,7 +4,7 @@ from unittest.mock import patch
 
 import pytest
 
-from biomcp.individual_tools import (
+from czechmedmcp.individual_tools import (
     nci_intervention_getter,
     nci_intervention_searcher,
     nci_organization_getter,
@@ -41,9 +41,9 @@ class TestOrganizationTools:
         }
 
         with (
-            patch("biomcp.organizations.search_organizations") as mock_search,
+            patch("czechmedmcp.organizations.search_organizations") as mock_search,
             patch(
-                "biomcp.organizations.search.format_organization_results"
+                "czechmedmcp.organizations.search.format_organization_results"
             ) as mock_format,
         ):
             mock_search.return_value = mock_results
@@ -87,9 +87,9 @@ class TestOrganizationTools:
         }
 
         with (
-            patch("biomcp.organizations.get_organization") as mock_get,
+            patch("czechmedmcp.organizations.get_organization") as mock_get,
             patch(
-                "biomcp.organizations.getter.format_organization_details"
+                "czechmedmcp.organizations.getter.format_organization_details"
             ) as mock_format,
         ):
             mock_get.return_value = mock_org
@@ -128,9 +128,9 @@ class TestInterventionTools:
         }
 
         with (
-            patch("biomcp.interventions.search_interventions") as mock_search,
+            patch("czechmedmcp.interventions.search_interventions") as mock_search,
             patch(
-                "biomcp.interventions.search.format_intervention_results"
+                "czechmedmcp.interventions.search.format_intervention_results"
             ) as mock_format,
         ):
             mock_search.return_value = mock_results
@@ -168,9 +168,9 @@ class TestInterventionTools:
         }
 
         with (
-            patch("biomcp.interventions.get_intervention") as mock_get,
+            patch("czechmedmcp.interventions.get_intervention") as mock_get,
             patch(
-                "biomcp.interventions.getter.format_intervention_details"
+                "czechmedmcp.interventions.getter.format_intervention_details"
             ) as mock_format,
         ):
             mock_get.return_value = mock_intervention
@@ -196,9 +196,9 @@ class TestToolsWithoutAPIKey:
     @pytest.mark.asyncio
     async def test_organization_searcher_no_api_key(self):
         """Test organization searcher without API key."""
-        from biomcp.integrations.cts_api import CTSAPIError
+        from czechmedmcp.integrations.cts_api import CTSAPIError
 
-        with patch("biomcp.organizations.search_organizations") as mock_search:
+        with patch("czechmedmcp.organizations.search_organizations") as mock_search:
             mock_search.side_effect = CTSAPIError("NCI API key required")
 
             with pytest.raises(CTSAPIError, match="NCI API key required"):
@@ -207,9 +207,9 @@ class TestToolsWithoutAPIKey:
     @pytest.mark.asyncio
     async def test_intervention_searcher_no_api_key(self):
         """Test intervention searcher without API key."""
-        from biomcp.integrations.cts_api import CTSAPIError
+        from czechmedmcp.integrations.cts_api import CTSAPIError
 
-        with patch("biomcp.interventions.search_interventions") as mock_search:
+        with patch("czechmedmcp.interventions.search_interventions") as mock_search:
             mock_search.side_effect = CTSAPIError("NCI API key required")
 
             with pytest.raises(CTSAPIError, match="NCI API key required"):
@@ -222,7 +222,7 @@ class TestElasticsearchErrorHandling:
     @pytest.mark.asyncio
     async def test_organization_searcher_elasticsearch_error(self):
         """Test organization searcher handles Elasticsearch bucket limit error gracefully."""
-        from biomcp.integrations.cts_api import CTSAPIError
+        from czechmedmcp.integrations.cts_api import CTSAPIError
 
         error_response = {
             "status": 503,
@@ -240,7 +240,7 @@ class TestElasticsearchErrorHandling:
             ],
         }
 
-        with patch("biomcp.organizations.search_organizations") as mock_search:
+        with patch("czechmedmcp.organizations.search_organizations") as mock_search:
             mock_search.side_effect = CTSAPIError(str(error_response))
 
             result = await nci_organization_searcher(
@@ -254,14 +254,14 @@ class TestElasticsearchErrorHandling:
     @pytest.mark.asyncio
     async def test_intervention_searcher_elasticsearch_error(self):
         """Test intervention searcher handles Elasticsearch bucket limit error gracefully."""
-        from biomcp.integrations.cts_api import CTSAPIError
+        from czechmedmcp.integrations.cts_api import CTSAPIError
 
         error_response = {
             "status": 503,
             "detail": "too_many_buckets_exception: Trying to create too many buckets. Must be less than or equal to: [75000]",
         }
 
-        with patch("biomcp.interventions.search_interventions") as mock_search:
+        with patch("czechmedmcp.interventions.search_interventions") as mock_search:
             mock_search.side_effect = CTSAPIError(str(error_response))
 
             result = await nci_intervention_searcher(
@@ -279,7 +279,7 @@ class TestBiomarkerTools:
     @pytest.mark.asyncio
     async def test_biomarker_searcher_tool(self):
         """Test biomarker searcher MCP tool."""
-        from biomcp.individual_tools import nci_biomarker_searcher
+        from czechmedmcp.individual_tools import nci_biomarker_searcher
 
         mock_results = {
             "total": 2,
@@ -302,9 +302,9 @@ class TestBiomarkerTools:
         }
 
         with (
-            patch("biomcp.biomarkers.search_biomarkers") as mock_search,
+            patch("czechmedmcp.biomarkers.search_biomarkers") as mock_search,
             patch(
-                "biomcp.biomarkers.search.format_biomarker_results"
+                "czechmedmcp.biomarkers.search.format_biomarker_results"
             ) as mock_format,
         ):
             mock_search.return_value = mock_results
@@ -332,7 +332,7 @@ class TestNCIDiseaseTools:
     @pytest.mark.asyncio
     async def test_nci_disease_searcher_tool(self):
         """Test NCI disease searcher MCP tool."""
-        from biomcp.individual_tools import nci_disease_searcher
+        from czechmedmcp.individual_tools import nci_disease_searcher
 
         mock_results = {
             "total": 2,
@@ -353,9 +353,9 @@ class TestNCIDiseaseTools:
         }
 
         with (
-            patch("biomcp.diseases.search_diseases") as mock_search,
+            patch("czechmedmcp.diseases.search_diseases") as mock_search,
             patch(
-                "biomcp.diseases.search.format_disease_results"
+                "czechmedmcp.diseases.search.format_disease_results"
             ) as mock_format,
         ):
             mock_search.return_value = mock_results
@@ -386,9 +386,9 @@ class TestToolsIntegration:
         """Test that organization searcher imports work correctly."""
         # This test verifies the dynamic imports in the tool function work
         with (
-            patch("biomcp.organizations.search_organizations") as mock_search,
+            patch("czechmedmcp.organizations.search_organizations") as mock_search,
             patch(
-                "biomcp.organizations.search.format_organization_results"
+                "czechmedmcp.organizations.search.format_organization_results"
             ) as mock_format,
         ):
             mock_search.return_value = {"total": 0, "organizations": []}
@@ -405,9 +405,9 @@ class TestToolsIntegration:
         """Test that intervention searcher imports work correctly."""
         # This test verifies the dynamic imports in the tool function work
         with (
-            patch("biomcp.interventions.search_interventions") as mock_search,
+            patch("czechmedmcp.interventions.search_interventions") as mock_search,
             patch(
-                "biomcp.interventions.search.format_intervention_results"
+                "czechmedmcp.interventions.search.format_intervention_results"
             ) as mock_format,
         ):
             mock_search.return_value = {"total": 0, "interventions": []}

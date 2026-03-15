@@ -5,8 +5,8 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from biomcp.articles.fetch import _article_details, is_doi, is_pmid
-from biomcp.articles.preprints import fetch_europe_pmc_article
+from czechmedmcp.articles.fetch import _article_details, is_doi, is_pmid
+from czechmedmcp.articles.preprints import fetch_europe_pmc_article
 
 
 class TestDOIDetection:
@@ -88,7 +88,7 @@ class TestEuropePMCFetch:
         ]
 
         with patch(
-            "biomcp.articles.preprints.http_client.request_api"
+            "czechmedmcp.articles.preprints.http_client.request_api"
         ) as mock_request:
             mock_request.return_value = (mock_response, None)
 
@@ -117,7 +117,7 @@ class TestEuropePMCFetch:
         mock_response.results = []
 
         with patch(
-            "biomcp.articles.preprints.http_client.request_api"
+            "czechmedmcp.articles.preprints.http_client.request_api"
         ) as mock_request:
             mock_request.return_value = (mock_response, None)
 
@@ -137,7 +137,7 @@ class TestEuropePMCFetch:
         mock_error.message = "Internal Server Error"
 
         with patch(
-            "biomcp.articles.preprints.http_client.request_api"
+            "czechmedmcp.articles.preprints.http_client.request_api"
         ) as mock_request:
             mock_request.return_value = (None, mock_error)
 
@@ -159,7 +159,7 @@ class TestArticleDetailsRouting:
         test_doi = "10.1101/2024.01.20.23288905"
 
         with patch(
-            "biomcp.articles.preprints.fetch_europe_pmc_article"
+            "czechmedmcp.articles.preprints.fetch_europe_pmc_article"
         ) as mock_europe_pmc:
             mock_europe_pmc.return_value = "Europe PMC result"
 
@@ -174,7 +174,7 @@ class TestArticleDetailsRouting:
         test_pmid = "35271234"
 
         with patch(
-            "biomcp.articles.fetch.fetch_articles"
+            "czechmedmcp.articles.fetch.fetch_articles"
         ) as mock_fetch_articles:
             mock_fetch_articles.return_value = "PubTator result"
 

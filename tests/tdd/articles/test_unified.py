@@ -5,8 +5,8 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from biomcp.articles.search import PubmedRequest
-from biomcp.articles.unified import (
+from czechmedmcp.articles.search import PubmedRequest
+from czechmedmcp.articles.unified import (
     _deduplicate_articles,
     _parse_search_results,
     search_articles_unified,
@@ -67,10 +67,10 @@ class TestUnifiedSearch:
         mock_preprints = AsyncMock(return_value=preprint_results)
 
         with (
-            patch("biomcp.articles.unified.search_articles", mock_pubmed),
-            patch("biomcp.articles.unified.search_preprints", mock_preprints),
+            patch("czechmedmcp.articles.unified.search_articles", mock_pubmed),
+            patch("czechmedmcp.articles.unified.search_preprints", mock_preprints),
             patch(
-                "biomcp.variants.cbioportal_search.CBioPortalSearchClient"
+                "czechmedmcp.variants.cbioportal_search.CBioPortalSearchClient"
             ) as mock_cbio,
         ):
             # Mock cBioPortal client to return None (no summary)
@@ -118,9 +118,9 @@ class TestUnifiedSearch:
         )  # No gene, so no cBioPortal
 
         with (
-            patch("biomcp.articles.unified.search_articles") as mock_pubmed,
+            patch("czechmedmcp.articles.unified.search_articles") as mock_pubmed,
             patch(
-                "biomcp.articles.unified.search_preprints"
+                "czechmedmcp.articles.unified.search_preprints"
             ) as mock_preprints,
         ):
             mock_pubmed.return_value = pubmed_results
@@ -152,9 +152,9 @@ class TestUnifiedSearch:
         )  # No gene, so no cBioPortal
 
         with (
-            patch("biomcp.articles.unified.search_articles") as mock_pubmed,
+            patch("czechmedmcp.articles.unified.search_articles") as mock_pubmed,
             patch(
-                "biomcp.articles.unified.search_preprints"
+                "czechmedmcp.articles.unified.search_preprints"
             ) as mock_preprints,
         ):
             mock_preprints.return_value = preprint_results
@@ -182,9 +182,9 @@ class TestUnifiedSearch:
         )  # No gene, so no cBioPortal
 
         with (
-            patch("biomcp.articles.unified.search_articles") as mock_pubmed,
+            patch("czechmedmcp.articles.unified.search_articles") as mock_pubmed,
             patch(
-                "biomcp.articles.unified.search_preprints"
+                "czechmedmcp.articles.unified.search_preprints"
             ) as mock_preprints,
         ):
             # PubMed succeeds
@@ -213,7 +213,7 @@ class TestUnifiedSearch:
 
         mock_pubmed = AsyncMock(return_value=pubmed_results)
 
-        with patch("biomcp.articles.unified.search_articles", mock_pubmed):
+        with patch("czechmedmcp.articles.unified.search_articles", mock_pubmed):
             result = await search_articles_unified(
                 request,
                 include_pubmed=True,

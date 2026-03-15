@@ -5,7 +5,7 @@ from unittest.mock import patch
 
 import pytest
 
-from biomcp.czech.mkn.parser import _parse_csv
+from czechmedmcp.czech.mkn.parser import _parse_csv
 
 # Minimal CSV sample matching the real MZ ČR open data schema
 SAMPLE_CSV = """\
@@ -108,7 +108,7 @@ class TestLoadMkn10:
     @pytest.mark.asyncio
     async def test_diskcache_used_on_hit(self):
         """load_mkn10 returns cached result without download."""
-        from biomcp.czech.mkn.parser import load_mkn10
+        from czechmedmcp.czech.mkn.parser import load_mkn10
 
         cached_payload = json.dumps(
             {
@@ -119,7 +119,7 @@ class TestLoadMkn10:
             }
         )
         with patch(
-            "biomcp.czech.mkn.parser.get_cached_response",
+            "czechmedmcp.czech.mkn.parser.get_cached_response",
             return_value=cached_payload,
         ):
             code_index, text_index = await load_mkn10()

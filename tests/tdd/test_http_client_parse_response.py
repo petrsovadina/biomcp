@@ -1,4 +1,4 @@
-from biomcp.http_client import parse_response
+from czechmedmcp.http_client import parse_response
 
 
 def test_parse_response_csv_strips_bom_and_newlines():

@@ -30,7 +30,7 @@ _MOCK_PROVIDERS = [
 @pytest.fixture(autouse=True)
 def inject_providers():
     """Inject mock data into module-level cache."""
-    import biomcp.czech.nrpzs.search as mod
+    import czechmedmcp.czech.nrpzs.search as mod
 
     old = mod._PROVIDERS
     mod._PROVIDERS = list(_MOCK_PROVIDERS)
@@ -43,7 +43,7 @@ class TestNrpzsGetter:
 
     @pytest.mark.asyncio
     async def test_get_provider_details(self):
-        from biomcp.czech.nrpzs.search import _nrpzs_get
+        from czechmedmcp.czech.nrpzs.search import _nrpzs_get
 
         result = json.loads(await _nrpzs_get("12345"))
         assert result["provider_id"] == "12345"
@@ -52,7 +52,7 @@ class TestNrpzsGetter:
 
     @pytest.mark.asyncio
     async def test_get_provider_address(self):
-        from biomcp.czech.nrpzs.search import _nrpzs_get
+        from czechmedmcp.czech.nrpzs.search import _nrpzs_get
 
         result = json.loads(await _nrpzs_get("12345"))
         address = result["address"]
@@ -63,7 +63,7 @@ class TestNrpzsGetter:
 
     @pytest.mark.asyncio
     async def test_get_provider_contact(self):
-        from biomcp.czech.nrpzs.search import _nrpzs_get
+        from czechmedmcp.czech.nrpzs.search import _nrpzs_get
 
         result = json.loads(await _nrpzs_get("12345"))
         contact = result["contact"]
@@ -72,7 +72,7 @@ class TestNrpzsGetter:
 
     @pytest.mark.asyncio
     async def test_get_invalid_id(self):
-        from biomcp.czech.nrpzs.search import _nrpzs_get
+        from czechmedmcp.czech.nrpzs.search import _nrpzs_get
 
         result = json.loads(
             await _nrpzs_get("nonexistent999")
@@ -82,14 +82,14 @@ class TestNrpzsGetter:
 
     @pytest.mark.asyncio
     async def test_get_provider_specialties(self):
-        from biomcp.czech.nrpzs.search import _nrpzs_get
+        from czechmedmcp.czech.nrpzs.search import _nrpzs_get
 
         result = json.loads(await _nrpzs_get("12345"))
         assert "kardiologie" in result["specialties"]
 
     @pytest.mark.asyncio
     async def test_get_provider_legal_form(self):
-        from biomcp.czech.nrpzs.search import _nrpzs_get
+        from czechmedmcp.czech.nrpzs.search import _nrpzs_get
 
         result = json.loads(await _nrpzs_get("12345"))
         assert result["legal_form"] == "fyzická osoba"

@@ -1,6 +1,6 @@
 """Tests for diacritics normalization utility."""
 
-from biomcp.czech.diacritics import normalize_query, strip_diacritics
+from czechmedmcp.czech.diacritics import normalize_query, strip_diacritics
 
 
 class TestStripDiacritics:

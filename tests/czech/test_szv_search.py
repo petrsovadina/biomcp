@@ -25,7 +25,7 @@ _MOCK_PROCEDURES = [
 @pytest.fixture(autouse=True)
 def inject_procedures():
     """Inject mock data into module-level cache."""
-    import biomcp.czech.szv.search as mod
+    import czechmedmcp.czech.szv.search as mod
 
     old = mod._PROCEDURES
     mod._PROCEDURES = list(_MOCK_PROCEDURES)
@@ -38,7 +38,7 @@ class TestSzvSearch:
 
     @pytest.mark.asyncio
     async def test_search_by_code(self):
-        from biomcp.czech.szv.search import _szv_search
+        from czechmedmcp.czech.szv.search import _szv_search
 
         result = json.loads(await _szv_search("09513"))
         assert result["total"] >= 1
@@ -46,7 +46,7 @@ class TestSzvSearch:
 
     @pytest.mark.asyncio
     async def test_search_by_name(self):
-        from biomcp.czech.szv.search import _szv_search
+        from czechmedmcp.czech.szv.search import _szv_search
 
         result = json.loads(await _szv_search("EKG"))
         assert result["total"] >= 1
@@ -57,14 +57,14 @@ class TestSzvSearch:
 
     @pytest.mark.asyncio
     async def test_search_by_name_partial(self):
-        from biomcp.czech.szv.search import _szv_search
+        from czechmedmcp.czech.szv.search import _szv_search
 
         result = json.loads(await _szv_search("svodove"))
         assert result["total"] >= 1
 
     @pytest.mark.asyncio
     async def test_search_empty_results(self):
-        from biomcp.czech.szv.search import _szv_search
+        from czechmedmcp.czech.szv.search import _szv_search
 
         result = json.loads(
             await _szv_search("XYZNONEXISTENT99999")
@@ -74,7 +74,7 @@ class TestSzvSearch:
 
     @pytest.mark.asyncio
     async def test_search_result_has_keys(self):
-        from biomcp.czech.szv.search import _szv_search
+        from czechmedmcp.czech.szv.search import _szv_search
 
         result = json.loads(await _szv_search("09513"))
         entry = result["results"][0]
@@ -83,7 +83,7 @@ class TestSzvSearch:
 
     @pytest.mark.asyncio
     async def test_search_diacritics(self):
-        from biomcp.czech.szv.search import _szv_search
+        from czechmedmcp.czech.szv.search import _szv_search
 
         result = json.loads(
             await _szv_search(
@@ -94,7 +94,7 @@ class TestSzvSearch:
 
     @pytest.mark.asyncio
     async def test_search_respects_max_results(self):
-        from biomcp.czech.szv.search import _szv_search
+        from czechmedmcp.czech.szv.search import _szv_search
 
         result = json.loads(
             await _szv_search("EKG", max_results=1)
@@ -103,8 +103,8 @@ class TestSzvSearch:
 
     @pytest.mark.asyncio
     async def test_search_error_on_load_failure(self):
-        import biomcp.czech.szv.search as mod
-        from biomcp.czech.szv.search import _szv_search
+        import czechmedmcp.czech.szv.search as mod
+        from czechmedmcp.czech.szv.search import _szv_search
 
         old = mod._PROCEDURES
         mod._PROCEDURES = None

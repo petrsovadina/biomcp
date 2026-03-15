@@ -3,7 +3,7 @@
 import json
 from unittest.mock import patch
 
-from biomcp.czech.workflows.drug_profile import (
+from czechmedmcp.czech.workflows.drug_profile import (
     _drug_profile,
 )
 
@@ -39,21 +39,21 @@ MOCK_EVIDENCE = json.dumps([
 
 def _patch_search():
     return patch(
-        "biomcp.czech.sukl.search._sukl_drug_search",
+        "czechmedmcp.czech.sukl.search._sukl_drug_search",
         return_value=MOCK_SEARCH,
     )
 
 
 def _patch_detail():
     return patch(
-        "biomcp.czech.sukl.getter._sukl_drug_details",
+        "czechmedmcp.czech.sukl.getter._sukl_drug_details",
         return_value=MOCK_DETAIL,
     )
 
 
 def _patch_avail():
     return patch(
-        "biomcp.czech.sukl.availability."
+        "czechmedmcp.czech.sukl.availability."
         "_sukl_availability_check",
         return_value=MOCK_AVAIL,
     )
@@ -61,7 +61,7 @@ def _patch_avail():
 
 def _patch_reimb():
     return patch(
-        "biomcp.czech.sukl.reimbursement."
+        "czechmedmcp.czech.sukl.reimbursement."
         "_get_reimbursement",
         return_value=MOCK_REIMB,
     )
@@ -69,7 +69,7 @@ def _patch_reimb():
 
 def _patch_evidence():
     return patch(
-        "biomcp.articles.search._article_searcher",
+        "czechmedmcp.articles.search._article_searcher",
         return_value=MOCK_EVIDENCE,
     )
 
@@ -122,7 +122,7 @@ class TestDrugProfile:
             _patch_search(),
             _patch_detail(),
             patch(
-                "biomcp.czech.sukl.availability."
+                "czechmedmcp.czech.sukl.availability."
                 "_sukl_availability_check",
                 side_effect=_fail,
             ),
@@ -143,7 +143,7 @@ class TestDrugProfile:
         """Should return error for unknown drug."""
         no_results = json.dumps({"results": []})
         with patch(
-            "biomcp.czech.sukl.search._sukl_drug_search",
+            "czechmedmcp.czech.sukl.search._sukl_drug_search",
             return_value=no_results,
         ):
             result = await _drug_profile("neexistuje")

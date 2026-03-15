@@ -19,7 +19,7 @@ class TestSzvApiIntegration:
     @pytest.mark.asyncio
     async def test_search_returns_non_empty_list(self):
         """Search for a common procedure returns at least one result."""
-        from biomcp.czech.szv.search import _szv_search
+        from czechmedmcp.czech.szv.search import _szv_search
 
         result = json.loads(await _szv_search("EKG"))
         # The API may be unreachable in some environments; we only
@@ -31,7 +31,7 @@ class TestSzvApiIntegration:
     @pytest.mark.asyncio
     async def test_search_by_numeric_code(self):
         """Search by a known procedure code prefix returns results."""
-        from biomcp.czech.szv.search import _szv_search
+        from czechmedmcp.czech.szv.search import _szv_search
 
         result = json.loads(await _szv_search("09"))
         assert "total" in result
@@ -40,7 +40,7 @@ class TestSzvApiIntegration:
     @pytest.mark.asyncio
     async def test_get_procedure_detail_structure(self):
         """Fetching a known code returns expected fields."""
-        from biomcp.czech.szv.search import _szv_get
+        from czechmedmcp.czech.szv.search import _szv_get
 
         result = json.loads(await _szv_get("09513"))
         # Either a valid procedure or a structured error
@@ -51,7 +51,7 @@ class TestSzvApiIntegration:
     @pytest.mark.asyncio
     async def test_get_unknown_code_returns_error(self):
         """Fetching a nonsense code returns an error payload."""
-        from biomcp.czech.szv.search import _szv_get
+        from czechmedmcp.czech.szv.search import _szv_get
 
         result = json.loads(await _szv_get("XYZNONEXISTENT99999"))
         assert "error" in result
@@ -64,7 +64,7 @@ class TestVzpApiIntegration:
     @pytest.mark.asyncio
     async def test_search_returns_structure(self):
         """VZP search returns a valid JSON structure."""
-        from biomcp.czech.vzp.search import _vzp_search
+        from czechmedmcp.czech.vzp.search import _vzp_search
 
         result = json.loads(
             await _vzp_search("EKG", "seznam_vykonu")
@@ -76,7 +76,7 @@ class TestVzpApiIntegration:
     @pytest.mark.asyncio
     async def test_get_entry_structure(self):
         """VZP get returns a valid JSON structure."""
-        from biomcp.czech.vzp.search import _vzp_get
+        from czechmedmcp.czech.vzp.search import _vzp_get
 
         result = json.loads(
             await _vzp_get("seznam_vykonu", "09513")

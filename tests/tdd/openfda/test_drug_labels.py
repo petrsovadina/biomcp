@@ -6,7 +6,7 @@ from unittest.mock import patch
 
 import pytest
 
-from biomcp.openfda.drug_labels import get_drug_label, search_drug_labels
+from czechmedmcp.openfda.drug_labels import get_drug_label, search_drug_labels
 
 
 @pytest.mark.asyncio
@@ -35,7 +35,7 @@ async def test_search_drug_labels_by_name():
     }
 
     with patch(
-        "biomcp.openfda.drug_labels.make_openfda_request"
+        "czechmedmcp.openfda.drug_labels.make_openfda_request"
     ) as mock_request:
         mock_request.return_value = (mock_response, None)
 
@@ -76,7 +76,7 @@ async def test_search_drug_labels_by_indication():
     }
 
     with patch(
-        "biomcp.openfda.drug_labels.make_openfda_request"
+        "czechmedmcp.openfda.drug_labels.make_openfda_request"
     ) as mock_request:
         mock_request.return_value = (mock_response, None)
 
@@ -116,7 +116,7 @@ async def test_search_drug_labels_boxed_warning_filter():
     }
 
     with patch(
-        "biomcp.openfda.drug_labels.make_openfda_request"
+        "czechmedmcp.openfda.drug_labels.make_openfda_request"
     ) as mock_request:
         mock_request.return_value = (mock_response, None)
 
@@ -160,7 +160,7 @@ async def test_get_drug_label_detail():
     }
 
     with patch(
-        "biomcp.openfda.drug_labels.make_openfda_request"
+        "czechmedmcp.openfda.drug_labels.make_openfda_request"
     ) as mock_request:
         mock_request.return_value = (mock_response, None)
 
@@ -206,7 +206,7 @@ async def test_get_drug_label_specific_sections():
     }
 
     with patch(
-        "biomcp.openfda.drug_labels.make_openfda_request"
+        "czechmedmcp.openfda.drug_labels.make_openfda_request"
     ) as mock_request:
         mock_request.return_value = (mock_response, None)
 
@@ -226,7 +226,7 @@ async def test_get_drug_label_specific_sections():
 async def test_get_drug_label_not_found():
     """Test handling when drug label is not found."""
     with patch(
-        "biomcp.openfda.drug_labels.make_openfda_request"
+        "czechmedmcp.openfda.drug_labels.make_openfda_request"
     ) as mock_request:
         mock_request.return_value = ({"results": []}, None)
 

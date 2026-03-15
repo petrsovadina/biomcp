@@ -25,7 +25,7 @@ _MOCK_PROVIDERS = [
 @pytest.fixture(autouse=True)
 def inject_providers():
     """Inject mock data into module-level cache."""
-    import biomcp.czech.nrpzs.search as mod
+    import czechmedmcp.czech.nrpzs.search as mod
 
     old = mod._PROVIDERS
     mod._PROVIDERS = list(_MOCK_PROVIDERS)
@@ -38,7 +38,7 @@ class TestNrpzsSearch:
 
     @pytest.mark.asyncio
     async def test_search_by_city(self):
-        from biomcp.czech.nrpzs.search import _nrpzs_search
+        from czechmedmcp.czech.nrpzs.search import _nrpzs_search
 
         result = json.loads(
             await _nrpzs_search(city="Praha")
@@ -48,7 +48,7 @@ class TestNrpzsSearch:
 
     @pytest.mark.asyncio
     async def test_search_by_specialty(self):
-        from biomcp.czech.nrpzs.search import _nrpzs_search
+        from czechmedmcp.czech.nrpzs.search import _nrpzs_search
 
         result = json.loads(
             await _nrpzs_search(specialty="kardiologie")
@@ -57,7 +57,7 @@ class TestNrpzsSearch:
 
     @pytest.mark.asyncio
     async def test_search_by_name(self):
-        from biomcp.czech.nrpzs.search import _nrpzs_search
+        from czechmedmcp.czech.nrpzs.search import _nrpzs_search
 
         result = json.loads(
             await _nrpzs_search(query="Novák")
@@ -68,7 +68,7 @@ class TestNrpzsSearch:
 
     @pytest.mark.asyncio
     async def test_search_combined_filters(self):
-        from biomcp.czech.nrpzs.search import _nrpzs_search
+        from czechmedmcp.czech.nrpzs.search import _nrpzs_search
 
         result = json.loads(
             await _nrpzs_search(
@@ -84,7 +84,7 @@ class TestNrpzsSearch:
 
     @pytest.mark.asyncio
     async def test_search_empty_results(self):
-        from biomcp.czech.nrpzs.search import _nrpzs_search
+        from czechmedmcp.czech.nrpzs.search import _nrpzs_search
 
         result = json.loads(
             await _nrpzs_search(query="nonexistentxyz")
@@ -94,7 +94,7 @@ class TestNrpzsSearch:
 
     @pytest.mark.asyncio
     async def test_search_diacritics(self):
-        from biomcp.czech.nrpzs.search import _nrpzs_search
+        from czechmedmcp.czech.nrpzs.search import _nrpzs_search
 
         result = json.loads(
             await _nrpzs_search(query="Novak")
@@ -103,7 +103,7 @@ class TestNrpzsSearch:
 
     @pytest.mark.asyncio
     async def test_search_pagination(self):
-        from biomcp.czech.nrpzs.search import _nrpzs_search
+        from czechmedmcp.czech.nrpzs.search import _nrpzs_search
 
         result = json.loads(
             await _nrpzs_search(page=1, page_size=1)
@@ -115,8 +115,8 @@ class TestNrpzsSearch:
     @pytest.mark.asyncio
     async def test_search_error_on_load_failure(self):
         """Load failure returns error JSON."""
-        import biomcp.czech.nrpzs.search as mod
-        from biomcp.czech.nrpzs.search import _nrpzs_search
+        import czechmedmcp.czech.nrpzs.search as mod
+        from czechmedmcp.czech.nrpzs.search import _nrpzs_search
 
         old = mod._PROVIDERS
         mod._PROVIDERS = None

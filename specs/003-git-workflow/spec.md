@@ -2,7 +2,7 @@
 
 **Feature Branch**: `003-git-workflow`
 **Created**: 2026-03-16
-**Status**: Draft
+**Status**: Complete
 **Input**: Zjednodušení a systematizace git workflow projektu CzechMedMCP. Dvě hlavní branches (main a python-main), python-main 17 commitů ahead bez remote, origin/main zastaralý. Stale tracking. Cíl: jedna hlavní branch, čistý remote, definovaný branching model.
 
 ## User Scenarios & Testing *(mandatory)*

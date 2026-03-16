@@ -19,9 +19,9 @@
 
 **Purpose**: Ověřit výchozí stav před destruktivními git operacemi.
 
-- [ ] T001 Ověřit, že working tree je čistý: `git status` — musí ukazovat 0 dirty files
-- [ ] T002 Ověřit, že `python-main` obsahuje vše z `main`: `git log --oneline main..python-main` — musí vrátit commity, `git log --oneline python-main..main` — musí být prázdný
-- [ ] T003 Záloha aktuálního stavu: `git tag backup/python-main-final python-main` — pojistka pro rollback
+- [x] T001 Ověřit, že working tree je čistý: `git status` — musí ukazovat 0 dirty files
+- [x] T002 Ověřit, že `python-main` obsahuje vše z `main`: `git log --oneline main..python-main` — musí vrátit commity, `git log --oneline python-main..main` — musí být prázdný
+- [x] T003 Záloha aktuálního stavu: `git tag backup/python-main-final python-main` — pojistka pro rollback
 
 **Checkpoint**: Stav ověřen, záloha vytvořena. Destruktivní operace mohou začít.
 
@@ -33,11 +33,11 @@
 
 **Independent Test**: `git log --oneline -5 main` ukazuje rename commit, `git push origin main` proběhne bez chyb
 
-- [ ] T004 [US1] Checkout `main` a reset na `python-main` HEAD: `git checkout main && git reset --hard python-main`
-- [ ] T005 [US1] Force-push `main` na remote: `git push --force-with-lease origin main`
-- [ ] T006 [US1] Smazat lokální `python-main` branch: `git branch -D python-main`
-- [ ] T007 [US1] Nastavit tracking `main` → `origin/main`: `git branch --set-upstream-to=origin/main main`
-- [ ] T008 [US1] Ověřit: `git log --oneline -5 main` ukazuje rename commit a `git status` ukazuje up-to-date s remote
+- [x] T004 [US1] Checkout `main` a reset na `python-main` HEAD: `git checkout main && git reset --hard python-main`
+- [x] T005 [US1] Force-push `main` na remote: `git push --force-with-lease origin main`
+- [x] T006 [US1] Smazat lokální `python-main` branch: `git branch -D python-main`
+- [x] T007 [US1] Nastavit tracking `main` → `origin/main`: `git branch --set-upstream-to=origin/main main`
+- [x] T008 [US1] Ověřit: `git log --oneline -5 main` ukazuje rename commit a `git status` ukazuje up-to-date s remote
 
 **Checkpoint**: US1 hotovo — jedna branch `main`, synchronizovaná s remote.
 
@@ -49,10 +49,10 @@
 
 **Independent Test**: `git branch -vv` ukazuje pouze `main` s platným tracking, žádné `[gone]`
 
-- [ ] T009 [US2] Fetch a prune remote refs: `git fetch --all --prune`
-- [ ] T010 [US2] Odstranit stale tracking config: `git config --unset branch.claude/sub-pr-2.remote` a `git config --unset branch.claude/sub-pr-2.merge` (a totéž pro `manus-like`, pokud existuje)
-- [ ] T011 [US2] Smazat backup tag po úspěšné verifikaci: `git tag -d backup/python-main-final` (volitelné — ponechat jako historický marker)
-- [ ] T012 [US2] Ověřit: `git branch -vv` ukazuje pouze `* main` s platným tracking na `origin/main`
+- [x] T009 [US2] Fetch a prune remote refs: `git fetch --all --prune`
+- [x] T010 [US2] Odstranit stale tracking config: `git config --unset branch.claude/sub-pr-2.remote` a `git config --unset branch.claude/sub-pr-2.merge` (a totéž pro `manus-like`, pokud existuje)
+- [x] T011 [US2] Smazat backup tag po úspěšné verifikaci: `git tag -d backup/python-main-final` (volitelné — ponechat jako historický marker)
+- [x] T012 [US2] Ověřit: `git branch -vv` ukazuje pouze `* main` s platným tracking na `origin/main`
 
 **Checkpoint**: US2 hotovo — čistý git stav, žádné stale references.
 
@@ -64,8 +64,8 @@
 
 **Independent Test**: `.github/workflows/ci.yml` obsahuje `branches: [main]` pro push i PR triggers
 
-- [ ] T013 [US4] Aktualizovat `.github/workflows/ci.yml` — změnit branch triggers z `python-main` na `main` pro push i pull_request sekce
-- [ ] T014 [US4] Ověřit: `grep -A2 "branches:" .github/workflows/ci.yml` ukazuje `main` (ne `python-main`)
+- [x] T013 [US4] Aktualizovat `.github/workflows/ci.yml` — změnit branch triggers z `python-main` na `main` pro push i pull_request sekce
+- [x] T014 [US4] Ověřit: `grep -A2 "branches:" .github/workflows/ci.yml` ukazuje `main` (ne `python-main`)
 
 **Checkpoint**: US4 hotovo — CI targetuje správnou branch.
 
@@ -77,15 +77,15 @@
 
 **Independent Test**: CLAUDE.md obsahuje sekci "Git Workflow" s min. 10 řádky
 
-- [ ] T015 [US3] Přidat sekci "Git Workflow" do CLAUDE.md s pravidly:
+- [x] T015 [US3] Přidat sekci "Git Workflow" do CLAUDE.md s pravidly:
   - Hlavní branch: `main` (jediná dlouhodobá branch)
   - Feature branches: `NNN-feature-name` (vytvořené přes speckit)
   - Workflow: `/speckit.specify` → `/speckit.plan` → `/speckit.tasks` → `/speckit.implement`
   - Merge: PR do `main` přes `gh pr create`, po merge smazat branch
   - Commit style: conventional commits (`feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`)
   - Branch protection: žádná (single developer), PR workflow dobrovolný
-- [ ] T016 [P] [US3] Odstranit auto-generated "Active Technologies" sekci z CLAUDE.md (přidanou speckit agent context skriptem) — nepatří do CLAUDE.md
-- [ ] T017 [US3] Ověřit: `grep -c "Git Workflow" CLAUDE.md` vrací alespoň 1
+- [x] T016 [P] [US3] Odstranit auto-generated "Active Technologies" sekci z CLAUDE.md (přidanou speckit agent context skriptem) — nepatří do CLAUDE.md
+- [x] T017 [US3] Ověřit: `grep -c "Git Workflow" CLAUDE.md` vrací alespoň 1
 
 **Checkpoint**: US3 hotovo — branching model dokumentován.
 
@@ -95,13 +95,13 @@
 
 **Purpose**: Ověření všech success criteria, commit a cleanup
 
-- [ ] T018 Commitnout všechny změny na feature branch `003-git-workflow`
-- [ ] T019 Ověřit SC-001: `git branch -a` — pouze `main` + `remotes/origin/main` (+ aktuální feature branch)
-- [ ] T020 Ověřit SC-002: `git branch -vv` — `main` s platným tracking
-- [ ] T021 Ověřit SC-003: Working tree čistý po commitu
-- [ ] T022 Ověřit SC-004: CI triggers odpovídají `main` branch
-- [ ] T023 Ověřit SC-005: CLAUDE.md obsahuje git workflow sekci
-- [ ] T024 Mergovat `003-git-workflow` do `main` a smazat feature branch
+- [x] T018 Commitnout všechny změny na feature branch `003-git-workflow`
+- [x] T019 Ověřit SC-001: `git branch -a` — pouze `main` + `remotes/origin/main` (+ aktuální feature branch)
+- [x] T020 Ověřit SC-002: `git branch -vv` — `main` s platným tracking
+- [x] T021 Ověřit SC-003: Working tree čistý po commitu
+- [x] T022 Ověřit SC-004: CI triggers odpovídají `main` branch
+- [x] T023 Ověřit SC-005: CLAUDE.md obsahuje git workflow sekci
+- [x] T024 Mergovat `003-git-workflow` do `main` a smazat feature branch
 
 **Checkpoint**: Všechna SC splněna. Git workflow systematizován.
 

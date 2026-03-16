@@ -3,7 +3,7 @@
 ## Instalace
 
 ```bash
-uv tool install biomcp-python
+uv tool install czechmedmcp
 # nebo
 pip install czechmedmcp
 ```
@@ -12,7 +12,7 @@ pip install czechmedmcp
 
 ```bash
 czechmedmcp run           # MCP server (stdio)
-biomcp --help        # Nápověda
+czechmedmcp --help        # Nápověda
 ```
 
 ## Claude Desktop konfigurace
@@ -22,7 +22,7 @@ biomcp --help        # Nápověda
   "mcpServers": {
     "czechmedmcp": {
       "command": "uv",
-      "args": ["run", "--with", "biomcp-python", "biomcp", "run"]
+      "args": ["run", "--with", "czechmedmcp", "czechmedmcp", "run"]
     }
   }
 }
@@ -51,6 +51,6 @@ biomcp --help        # Nápověda
 
 ## Cache
 
-- Umístění: `~/.cache/biomcp/http_cache`
+- Umístění: `~/.cache/czechmedmcp/http_cache`
 - Výchozí TTL: 1 týden
-- Vymazání: `rm -rf ~/.cache/biomcp/`
+- Vymazání: `rm -rf ~/.cache/czechmedmcp/`

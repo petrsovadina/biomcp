@@ -13,7 +13,7 @@ czechmedmcp.__main__:main()
 
 ## Registrace nástrojů
 
-Všech 60 nástrojů se registruje dekorátorem `@mcp_app.tool()` přes importy v `src/biomcp/__init__.py`:
+Všech 60 nástrojů se registruje dekorátorem `@mcp_app.tool()` přes importy v `src/czechmedmcp/__init__.py`:
 
 | Modul | Nástrojů | Soubor |
 |-------|----------|--------|
@@ -36,11 +36,11 @@ Každá doména (`articles/`, `trials/`, `variants/`, `czech/sukl/` atd.) má:
 
 | Soubor | Účel |
 |--------|------|
-| `src/biomcp/core.py` | FastMCP singleton, `StrEnum`, `ensure_list()` |
-| `src/biomcp/constants.py` | API URL, timeouty, limity |
-| `src/biomcp/http_client.py` | HTTP vrstva s cache, retry, circuit breaker |
-| `src/biomcp/exceptions.py` | Hierarchie výjimek |
-| `src/biomcp/individual_tools.py` | 33 standardních registrací |
-| `src/biomcp/czech/czech_tools.py` | 23 českých registrací |
-| `src/biomcp/router.py` | Unifikované search + fetch |
-| `src/biomcp/router_handlers.py` | Doménově specifické handlery |
+| `src/czechmedmcp/core.py` | FastMCP singleton, `StrEnum`, `ensure_list()` |
+| `src/czechmedmcp/constants.py` | API URL, timeouty, limity |
+| `src/czechmedmcp/http_client.py` | HTTP vrstva s cache, retry, circuit breaker |
+| `src/czechmedmcp/exceptions.py` | Hierarchie výjimek |
+| `src/czechmedmcp/individual_tools.py` | 33 standardních registrací |
+| `src/czechmedmcp/czech/czech_tools.py` | 23 českých registrací |
+| `src/czechmedmcp/router.py` | Unifikované search + fetch |
+| `src/czechmedmcp/router_handlers.py` | Doménově specifické handlery |

@@ -6,53 +6,53 @@ CzechMedMCP poskytuje CLI přes příkaz `czechmedmcp`.
 
 ```bash
 czechmedmcp run                    # Spuštění MCP serveru
-biomcp --help                 # Nápověda
-biomcp --version              # Verze
+czechmedmcp --help                 # Nápověda
+czechmedmcp --version              # Verze
 ```
 
 ## Články
 
 ```bash
-biomcp article search --gene BRAF --disease melanoma --limit 5
-biomcp article get --pmid 12345678
+czechmedmcp article search --gene BRAF --disease melanoma --limit 5
+czechmedmcp article get --pmid 12345678
 ```
 
 ## Klinické studie
 
 ```bash
-biomcp trial search --condition "lung cancer" --status RECRUITING
-biomcp trial get --nct-id NCT04236687
+czechmedmcp trial search --condition "lung cancer" --status RECRUITING
+czechmedmcp trial get --nct-id NCT04236687
 ```
 
 ## Varianty
 
 ```bash
-biomcp variant search --gene TP53 --significance pathogenic
-biomcp variant get --variant-id "chr17:g.7577120G>A"
+czechmedmcp variant search --gene TP53 --significance pathogenic
+czechmedmcp variant get --variant-id "chr17:g.7577120G>A"
 ```
 
 ## České nástroje
 
 ```bash
 # SUKL
-biomcp czech sukl search --query "Ibuprofen"
-biomcp czech sukl detail --sukl-code "0001234"
+czechmedmcp czech sukl search --query "Ibuprofen"
+czechmedmcp czech sukl detail --sukl-code "0001234"
 
 # MKN-10
-biomcp czech mkn10 search --query "diabetes mellitus"
-biomcp czech mkn10 detail --code "E11"
+czechmedmcp czech mkn10 search --query "diabetes mellitus"
+czechmedmcp czech mkn10 detail --code "E11"
 
 # NRPZS
-biomcp czech nrpzs search --city "Praha" --specialty "kardiologie"
+czechmedmcp czech nrpzs search --city "Praha" --specialty "kardiologie"
 
 # SZV
-biomcp czech szv search --query "EKG"
+czechmedmcp czech szv search --query "EKG"
 ```
 
 ## Geny, nemoci, léčiva
 
 ```bash
-biomcp gene get TP53
-biomcp disease get "melanoma"
-biomcp drug get "imatinib"
+czechmedmcp gene get TP53
+czechmedmcp disease get "melanoma"
+czechmedmcp drug get "imatinib"
 ```

@@ -2,7 +2,7 @@
 
 ## Server se nespustí
 
-### `ModuleNotFoundError: No module named 'biomcp'`
+### `ModuleNotFoundError: No module named 'czechmedmcp'`
 
 ```bash
 # Přeinstalujte balíček
@@ -11,11 +11,11 @@ uv pip install -e .
 pip install czechmedmcp
 ```
 
-### `command not found: biomcp`
+### `command not found: czechmedmcp`
 
 ```bash
 # Ověřte instalaci
-uv tool list | grep biomcp
+uv tool list | grep czechmedmcp
 # Nebo zkuste přes uv run
 uv run czechmedmcp run
 ```
@@ -34,7 +34,7 @@ uv run czechmedmcp run
      "mcpServers": {
        "czechmedmcp": {
          "command": "/Users/vase_jmeno/.cargo/bin/uv",
-         "args": ["run", "--with", "biomcp-python", "biomcp", "run"]
+         "args": ["run", "--with", "czechmedmcp", "czechmedmcp", "run"]
        }
      }
    }
@@ -45,8 +45,8 @@ uv run czechmedmcp run
 CzechMedMCP cachuje HTTP odpovědi. První dotaz může být pomalší, následné budou rychlejší.
 
 - Cache TTL: 1 týden (výchozí)
-- Umístění: `~/.cache/biomcp/http_cache`
-- Vymazání: `rm -rf ~/.cache/biomcp/`
+- Umístění: `~/.cache/czechmedmcp/http_cache`
+- Vymazání: `rm -rf ~/.cache/czechmedmcp/`
 
 ## Chyby českých zdrojů
 
@@ -68,6 +68,6 @@ curl -s https://mkn10.uzis.cz/api/ | head -c 100
 ## Hlášení chyb
 
 Nahlaste problém na [GitHub Issues](https://github.com/petrsovadina/czechmedmcp/issues) s:
-- Verzí CzechMedMCP (`biomcp --version`)
+- Verzí CzechMedMCP (`czechmedmcp --version`)
 - Verzí Pythonu (`python --version`)
 - Popisem problému a error logem

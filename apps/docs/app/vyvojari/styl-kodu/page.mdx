@@ -23,12 +23,12 @@ async def my_tool(
 
 - Vždy vracejí `str`
 - Parametry s `Annotated[type, Field(description="...")]`
-- Volitelný `@track_performance("biomcp.tool_name")`
+- Volitelný `@track_performance("czechmedmcp.tool_name")`
 
 ## Paginace
 
 ```python
-from biomcp.constants import compute_skip
+from czechmedmcp.constants import compute_skip
 
 # Správně
 skip = compute_skip(page, page_size)
@@ -40,7 +40,7 @@ skip = (page - 1) * page_size
 ## Cache
 
 ```python
-from biomcp.constants import DEFAULT_CACHE_TIMEOUT, CACHE_TTL_DAY
+from czechmedmcp.constants import DEFAULT_CACHE_TIMEOUT, CACHE_TTL_DAY
 
 # Nikdy hardcoded hodnoty
 ```
@@ -48,7 +48,7 @@ from biomcp.constants import DEFAULT_CACHE_TIMEOUT, CACHE_TTL_DAY
 ## Timeout
 
 ```python
-from biomcp.constants import CZECH_HTTP_TIMEOUT
+from czechmedmcp.constants import CZECH_HTTP_TIMEOUT
 
 # Nikdy hardcoded 30.0
 ```

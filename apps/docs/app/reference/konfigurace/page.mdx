@@ -14,7 +14,7 @@ GOOGLE_CLOUD_PROJECT=   # BigQuery logging
 
 ## Konstanty
 
-Všechny konfigurační konstanty jsou v `src/biomcp/constants.py`:
+Všechny konfigurační konstanty jsou v `src/czechmedmcp/constants.py`:
 
 | Konstanta | Výchozí | Popis |
 |-----------|---------|-------|
@@ -36,9 +36,9 @@ services:
     environment:
       - NCBI_API_KEY=${NCBI_API_KEY}
     volumes:
-      - biomcp-cache:/root/.cache/biomcp
+      - czechmedmcp-cache:/root/.cache/czechmedmcp
 volumes:
-  biomcp-cache:
+  czechmedmcp-cache:
 ```
 
 ## Transport

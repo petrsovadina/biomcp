@@ -133,6 +133,23 @@ jobs:
         run: |
           uv run python -m pytest tests/tdd/test_mcp_integration.py -v
 
+  # Deploy to Railway on push to main (after tests pass)
+  deploy-railway:
+    runs-on: ubuntu-latest
+    name: Deploy to Railway
+    needs: [quality, tests-and-type-check, build-package, test-mcp]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Deploy
+        run: railway up --detach --ci -m "Auto-deploy from ${{ github.sha }}"
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
   # Run integration tests separately - allowed to fail
   integration-tests:
     runs-on: ubuntu-latest

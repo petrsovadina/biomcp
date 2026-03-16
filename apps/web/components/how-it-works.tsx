@@ -1,6 +1,4 @@
-'use client'
-
-import { motion } from 'framer-motion'
+import { FadeIn } from '@/components/fade-in'
 
 const steps = [
   {
@@ -27,27 +25,15 @@ export function HowItWorks() {
   return (
     <section id="jak-to-funguje" className="bg-[#030303] py-24 md:py-32">
       <div className="mx-auto max-w-4xl px-6">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center"
-        >
+        <FadeIn className="text-center">
           <h2 className="text-3xl font-bold tracking-tight text-white md:text-4xl">
             3 kroky k nasazení
           </h2>
-        </motion.div>
+        </FadeIn>
 
         <div className="mt-16 space-y-12">
           {steps.map((s, i) => (
-            <motion.div
-              key={s.num}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.15 }}
-              className="flex gap-6"
-            >
+            <FadeIn key={s.num} delay={i * 0.15} className="flex gap-6">
               <div className="flex flex-col items-center">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-500/20 text-sm font-bold text-blue-400">
                   {s.num}
@@ -63,7 +49,7 @@ export function HowItWorks() {
                   {s.code}
                 </div>
               </div>
-            </motion.div>
+            </FadeIn>
           ))}
         </div>
       </div>

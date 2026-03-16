@@ -1,6 +1,4 @@
-'use client'
-
-import { motion } from 'framer-motion'
+import { FadeIn } from '@/components/fade-in'
 
 const items = [
   {
@@ -25,12 +23,7 @@ export function ProblemSolution() {
   return (
     <section className="border-t border-white/[0.06] py-24 md:py-32">
       <div className="mx-auto max-w-6xl px-6">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center"
-        >
+        <FadeIn className="text-center">
           <h2 className="text-3xl font-bold tracking-tight text-white md:text-4xl">
             Problém → Řešení
           </h2>
@@ -38,16 +31,13 @@ export function ProblemSolution() {
             AI asistenti jsou mocní, ale bez přístupu k českým zdravotnickým
             datům jsou slepí. CzechMedMCP jim dává oči.
           </p>
-        </motion.div>
+        </FadeIn>
 
         <div className="mt-16 grid gap-6 md:grid-cols-2">
           {items.map((item, i) => (
-            <motion.div
+            <FadeIn
               key={i}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
+              delay={i * 0.1}
               className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-6"
             >
               <p className="text-white/40 line-through decoration-red-400/50">
@@ -56,7 +46,7 @@ export function ProblemSolution() {
               <p className="mt-3 font-semibold text-white">
                 {item.solution}
               </p>
-            </motion.div>
+            </FadeIn>
           ))}
         </div>
       </div>

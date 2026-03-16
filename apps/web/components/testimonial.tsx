@@ -1,6 +1,4 @@
-'use client'
-
-import { motion } from 'framer-motion'
+import { FadeIn } from '@/components/fade-in'
 
 const stats = [
   { value: '60', label: 'MCP nástrojů' },
@@ -14,12 +12,7 @@ export function Testimonial() {
     <section className="border-t border-white/[0.06] py-24 md:py-32">
       <div className="mx-auto max-w-6xl px-6">
         <div className="grid gap-12 md:grid-cols-2 md:items-center">
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
+          <FadeIn direction="left">
             <h2 className="text-3xl font-bold tracking-tight text-white md:text-4xl">
               Čísla, která mluví
             </h2>
@@ -40,16 +33,14 @@ export function Testimonial() {
               </a>{' '}
               — AI asistent pro české lékaře.
             </p>
-          </motion.div>
+          </FadeIn>
 
           <div className="grid grid-cols-2 gap-6">
             {stats.map((s, i) => (
-              <motion.div
+              <FadeIn
                 key={s.label}
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: i * 0.1 }}
+                delay={i * 0.1}
+                direction="scale"
                 className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-6 text-center"
               >
                 <div className="text-3xl font-bold text-blue-400 md:text-4xl">
@@ -58,7 +49,7 @@ export function Testimonial() {
                 <div className="mt-2 text-sm text-white/40">
                   {s.label}
                 </div>
-              </motion.div>
+              </FadeIn>
             ))}
           </div>
         </div>

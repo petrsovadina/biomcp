@@ -13,6 +13,18 @@ export const metadata: Metadata = {
     'MCP', 'AI', 'zdravotnictví', 'SUKL', 'MKN-10', 'PubMed',
     'Claude', 'Cursor', 'české zdravotnictví', 'biomedicína',
   ],
+  openGraph: {
+    title: 'CzechMedMCP — AI napojení na české zdravotnictví',
+    description: '60 AI nástrojů pro biomedicínský výzkum a české zdravotnictví. SUKL, MKN-10, PubMed a další.',
+    siteName: 'CzechMedMCP',
+    type: 'website',
+    locale: 'cs_CZ',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'CzechMedMCP — AI napojení na české zdravotnictví',
+    description: '60 AI nástrojů pro biomedicínský výzkum a české zdravotnictví.',
+  },
 }
 
 export default function RootLayout({

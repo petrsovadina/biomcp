@@ -69,7 +69,7 @@ export default async function RootLayout({
         <Layout
           navbar={navbar}
           pageMap={await getPageMap()}
-          docsRepositoryBase="https://github.com/petrsovadina/biomcp/tree/python-main/docs-site"
+          docsRepositoryBase="https://github.com/petrsovadina/biomcp/tree/main/apps/docs"
           footer={footer}
           sidebar={{ defaultMenuCollapseLevel: 1 }}
           editLink="Upravit stránku"

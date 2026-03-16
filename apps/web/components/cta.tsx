@@ -1,6 +1,4 @@
-'use client'
-
-import { motion } from 'framer-motion'
+import { FadeIn } from '@/components/fade-in'
 
 export function CTA() {
   return (
@@ -11,12 +9,7 @@ export function CTA() {
       </div>
 
       <div className="relative mx-auto max-w-4xl px-6 text-center">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-        >
+        <FadeIn>
           <h2 className="text-3xl font-bold tracking-tight text-white md:text-5xl">
             Připraveni začít?
           </h2>
@@ -46,7 +39,7 @@ export function CTA() {
               Dokumentace
             </a>
           </div>
-        </motion.div>
+        </FadeIn>
       </div>
     </section>
   )

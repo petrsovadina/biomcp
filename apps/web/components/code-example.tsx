@@ -1,32 +1,19 @@
-'use client'
-
-import { motion } from 'framer-motion'
+import { FadeIn } from '@/components/fade-in'
 
 export function CodeExample() {
   return (
     <section className="bg-[#030303] py-24 md:py-32">
       <div className="mx-auto max-w-6xl px-6">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center"
-        >
+        <FadeIn className="text-center">
           <h2 className="text-3xl font-bold tracking-tight text-white md:text-4xl">
             Jak to vypadá v praxi
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-white/50">
             Přirozený dialog s AI — CzechMedMCP pracuje na pozadí.
           </p>
-        </motion.div>
+        </FadeIn>
 
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="mx-auto mt-16 max-w-3xl"
-        >
+        <FadeIn delay={0.2} className="mx-auto mt-16 max-w-3xl">
           <div className="overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-sm">
             <div className="border-b border-white/[0.06] px-6 py-4">
               <span className="text-sm font-medium text-white/60">
@@ -65,7 +52,7 @@ export function CodeExample() {
               </div>
             </div>
           </div>
-        </motion.div>
+        </FadeIn>
       </div>
     </section>
   )

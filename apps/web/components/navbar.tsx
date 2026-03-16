@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { motion } from 'framer-motion'
 
 const links = [
   { label: 'Funkce', href: '#funkce' },
@@ -14,12 +13,7 @@ export function Navbar() {
   const [open, setOpen] = useState(false)
 
   return (
-    <motion.nav
-      initial={{ y: -20, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.5 }}
-      className="fixed top-0 z-50 w-full border-b border-white/[0.06] bg-[#030303]/80 backdrop-blur-xl"
-    >
+    <nav className="animate-nav fixed top-0 z-50 w-full border-b border-white/[0.06] bg-[#030303]/80 backdrop-blur-xl">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
         <a href="/" className="text-lg font-bold text-white">
           <span className="text-blue-400">Czech</span>Med
@@ -75,6 +69,6 @@ export function Navbar() {
           ))}
         </div>
       )}
-    </motion.nav>
+    </nav>
   )
 }

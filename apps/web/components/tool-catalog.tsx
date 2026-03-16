@@ -1,6 +1,4 @@
-'use client'
-
-import { motion } from 'framer-motion'
+import { FadeIn } from '@/components/fade-in'
 
 const tools = [
   { name: 'czechmed_search_medicine', group: 'SUKL', desc: 'Vyhledání léku podle názvu nebo účinné látky' },
@@ -30,12 +28,7 @@ export function ToolCatalog() {
   return (
     <section id="nastroje" className="border-t border-white/[0.06] py-24 md:py-32">
       <div className="mx-auto max-w-6xl px-6">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center"
-        >
+        <FadeIn className="text-center">
           <h2 className="text-3xl font-bold tracking-tight text-white md:text-4xl">
             Ukázka nástrojů
           </h2>
@@ -43,16 +36,14 @@ export function ToolCatalog() {
             12 z 60 dostupných nástrojů. Každý přijímá strukturované parametry
             a vrací formátovaný markdown.
           </p>
-        </motion.div>
+        </FadeIn>
 
         <div className="mt-16 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {tools.map((t, i) => (
-            <motion.div
+            <FadeIn
               key={t.name}
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.05 }}
+              delay={i * 0.05}
+              direction="left"
               className="rounded-xl border border-white/[0.08] bg-white/[0.03] p-4 transition hover:border-white/[0.15]"
             >
               <div className="flex items-start justify-between gap-2">
@@ -62,7 +53,7 @@ export function ToolCatalog() {
                 </span>
               </div>
               <p className="mt-2 text-xs text-white/40">{t.desc}</p>
-            </motion.div>
+            </FadeIn>
           ))}
         </div>
       </div>

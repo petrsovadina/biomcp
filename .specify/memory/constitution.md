@@ -39,9 +39,9 @@ MCP compliance ensures interoperability with any MCP-compatible client
 
 Each biomedical domain (articles, trials, variants, genes, diseases,
 drugs, biomarkers, organizations, interventions, openfda) MUST be
-implemented as an independent module under `src/biomcp/`. Czech
+implemented as an independent module under `src/czechmedmcp/`. Czech
 healthcare domains (sukl, mkn, nrpzs, szv, vzp) MUST be organized
-under the `src/biomcp/czech/` namespace with tool registrations
+under the `src/czechmedmcp/czech/` namespace with tool registrations
 centralized in `czech/czech_tools.py`. Modules MUST NOT import from
 sibling domain modules directly. Shared functionality MUST live in
 top-level utility modules (`http_client.py`, `cbioportal_helper.py`,
@@ -85,7 +85,7 @@ decision support for Czech-speaking users.
 
 Every search and fetch operation MUST be accessible via both the MCP
 server (tools) and the CLI (`biomcp` command). The CLI module under
-`src/biomcp/cli/` MUST mirror the MCP tool surface. Output MUST support
+`src/czechmedmcp/cli/` MUST mirror the MCP tool surface. Output MUST support
 both JSON (machine-readable) and human-readable formats. CLI commands
 MUST use stdout for data and stderr for errors/diagnostics.
 
@@ -128,23 +128,28 @@ reliable CI while still validating real API behavior in dedicated runs.
 
 ## Development Workflow
 
-- **Branching**: Feature branches from `main`, merged via pull request
-- **Code review**: All PRs MUST be reviewed before merge
-- **Testing gate**: `make test` (unit tests) MUST pass before merge;
-  integration tests run separately and are advisory
+- **Branching**: Feature branches (`NNN-feature-name`) from `main`,
+  created via speckit (`/speckit.specify`), merged via pull request
+- **Workflow**: speckit-driven — specify → plan → tasks → implement
+- **Code review**: Self-review for single developer; PR workflow
+  ensures change visibility and CI validation
+- **Testing gate**: `uv run python -m pytest -m "not integration"` MUST
+  pass before merge; integration tests run separately and are advisory
 - **Commit style**: Conventional commits preferred
   (`feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`)
 - **Documentation**: New MCP tools MUST be documented in `README.md`
-  and relevant developer guides under `docs/`
+  and `CLAUDE.md`
 - **Dependency management**: `pyproject.toml` is the single source of
   truth; use `uv` for dependency resolution
 - **Pre-commit hooks**: `pre-commit` MUST be installed for local
   development (`ruff` checks enforced)
+- **Branch cleanup**: After merge, feature branch MUST be deleted
+  (locally and remote)
 
 ## Governance
 
-This constitution is the authoritative reference for BioMCP development
-decisions. It supersedes ad-hoc conventions and informal agreements.
+This constitution is the authoritative reference for CzechMedMCP
+development decisions. It supersedes ad-hoc conventions and informal agreements.
 
 **Amendment process**:
 1. Propose the change in a PR modifying this file
@@ -162,4 +167,4 @@ decisions. It supersedes ad-hoc conventions and informal agreements.
 - Violations MUST be documented and justified in PR description
 - Complexity beyond the minimum required MUST be justified
 
-**Version**: 1.1.0 | **Ratified**: 2026-02-17 | **Last Amended**: 2026-02-25
+**Version**: 1.2.0 | **Ratified**: 2026-02-17 | **Last Amended**: 2026-03-16

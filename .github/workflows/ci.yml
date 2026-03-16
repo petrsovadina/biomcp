@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [python-main]
+    branches: [main]
   pull_request:
-    branches: [python-main]
+    branches: [main]
   workflow_dispatch:
 
 env:

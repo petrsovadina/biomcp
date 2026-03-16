@@ -37,6 +37,6 @@ export default {
   '###': { type: 'separator' },
   github: {
     title: 'GitHub',
-    href: 'https://github.com/petrsovadina/biomcp',
+    href: 'https://github.com/petrsovadina/CzechMedMCP',
   },
 }

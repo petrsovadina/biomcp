@@ -18,7 +18,7 @@ export function Footer() {
               Dokumentace
             </a>
             <a
-              href="https://github.com/petrsovadina/biomcp"
+              href="https://github.com/petrsovadina/CzechMedMCP"
               target="_blank"
               rel="noopener"
               className="transition hover:text-white"
@@ -26,7 +26,7 @@ export function Footer() {
               GitHub
             </a>
             <a
-              href="https://github.com/petrsovadina/biomcp/issues"
+              href="https://github.com/petrsovadina/CzechMedMCP/issues"
               target="_blank"
               rel="noopener"
               className="transition hover:text-white"

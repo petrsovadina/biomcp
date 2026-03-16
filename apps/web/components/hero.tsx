@@ -61,7 +61,7 @@ export function Hero() {
             Začít za 2 minuty
           </a>
           <a
-            href="https://github.com/petrsovadina/biomcp"
+            href="https://github.com/petrsovadina/CzechMedMCP"
             target="_blank"
             rel="noopener"
             className="w-full rounded-xl border border-white/10 px-8 py-4 text-center font-semibold text-white/70 transition hover:border-white/20 hover:text-white sm:w-auto"

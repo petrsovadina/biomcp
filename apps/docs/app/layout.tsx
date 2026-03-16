@@ -37,7 +37,7 @@ const navbar = (
         🏥 CzechMedMCP
       </span>
     }
-    projectLink="https://github.com/petrsovadina/biomcp"
+    projectLink="https://github.com/petrsovadina/CzechMedMCP"
   />
 )
 
@@ -69,7 +69,7 @@ export default async function RootLayout({
         <Layout
           navbar={navbar}
           pageMap={await getPageMap()}
-          docsRepositoryBase="https://github.com/petrsovadina/biomcp/tree/main/apps/docs"
+          docsRepositoryBase="https://github.com/petrsovadina/CzechMedMCP/tree/main/apps/docs"
           footer={footer}
           sidebar={{ defaultMenuCollapseLevel: 1 }}
           editLink="Upravit stránku"

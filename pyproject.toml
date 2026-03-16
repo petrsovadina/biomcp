@@ -37,8 +37,8 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/petrsovadina/biomcp"
-Repository = "https://github.com/petrsovadina/biomcp"
+Homepage = "https://github.com/petrsovadina/CzechMedMCP"
+Repository = "https://github.com/petrsovadina/CzechMedMCP"
 Documentation = "https://petrsovadina.github.io/biomcp/"
 
 [dependency-groups]

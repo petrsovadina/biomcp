@@ -2,9 +2,9 @@
 
 Open source MCP server se **60 nástroji** pro české i globální zdravotnické zdroje. Propojuje Claude, Cursor a další AI asistenty s SUKL, MKN-10, PubMed a dalšími databázemi.
 
-**[Landing page](https://web-sovadina.vercel.app)** · **[Dokumentace](https://docs-sovadina.vercel.app)** · **[GitHub](https://github.com/petrsovadina/biomcp)**
+**[Landing page](https://web-sovadina.vercel.app)** · **[Dokumentace](https://docs-sovadina.vercel.app)** · **[GitHub](https://github.com/petrsovadina/CzechMedMCP)**
 
-## Rychlý start.
+## Rychlý start
 
 ```bash
 pip install czechmedmcp
@@ -32,7 +32,7 @@ Přidejte do konfigurace MCP serverů:
 czechmedmcp run
 
 # HTTP (remote, Medevio integrace)
-czechmedmcp run --mode streamable_http --host 0.0.0.0 --port 8080
+czechmedmcp run --mode streamable_http --host 0.0.0.0 --port 8000
 ```
 
 ### MCP Inspector (testování)
@@ -88,7 +88,7 @@ cp .env.example .env
 # Instalace a nastavení
 uv sync --all-extras && uv run pre-commit install
 
-# Spuštění testů (736 testů)
+# Spuštění testů
 uv run python -m pytest -x --ff -n auto --dist loadscope
 
 # Lint + formátování

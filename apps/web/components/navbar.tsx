@@ -31,7 +31,7 @@ export function Navbar() {
             </a>
           ))}
           <a
-            href="https://github.com/petrsovadina/biomcp"
+            href="https://github.com/petrsovadina/CzechMedMCP"
             target="_blank"
             rel="noopener"
             className="rounded-lg bg-white/10 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/20"

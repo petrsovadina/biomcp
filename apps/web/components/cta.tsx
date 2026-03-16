@@ -25,7 +25,7 @@ export function CTA() {
 
           <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <a
-              href="https://github.com/petrsovadina/biomcp"
+              href="https://github.com/petrsovadina/CzechMedMCP"
               target="_blank"
               rel="noopener"
               className="w-full rounded-xl bg-white px-8 py-4 text-center font-semibold text-[#030303] shadow-lg shadow-white/10 transition hover:bg-white/90 sm:w-auto"

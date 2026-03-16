@@ -7,7 +7,7 @@ Krok za krokem, jak přidat nový nástroj do CzechMedMCP.
 Vytvořte privátní funkci v doménovém subpackage:
 
 ```python
-# src/biomcp/czech/muj_modul/search.py
+# src/czechmedmcp/czech/muj_modul/search.py
 async def _search_my_data(query: str, page: int = 1) -> dict:
     """Implementace vyhledávání."""
     # ... API volání, zpracování dat
@@ -19,7 +19,7 @@ async def _search_my_data(query: str, page: int = 1) -> dict:
 Přidejte registraci do `czech_tools.py` (české) nebo `individual_tools.py` (globální):
 
 ```python
-# src/biomcp/czech/czech_tools.py
+# src/czechmedmcp/czech/czech_tools.py
 @mcp_app.tool()
 async def czechmed_my_tool(
     query: Annotated[str, Field(description="Hledaný výraz")],
@@ -33,7 +33,7 @@ async def czechmed_my_tool(
 ## 3. CLI příkaz
 
 ```python
-# src/biomcp/cli/my_module.py
+# src/czechmedmcp/cli/my_module.py
 @app.command()
 def search(query: str):
     result = asyncio.run(_search_my_data(query))

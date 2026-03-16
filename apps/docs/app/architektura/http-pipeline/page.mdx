@@ -17,7 +17,7 @@ request_api()
 
 ### Cache
 
-- Backend: diskcache/SQLite (`~/.cache/biomcp/http_cache`)
+- Backend: diskcache/SQLite (`~/.cache/czechmedmcp/http_cache`)
 - Výchozí TTL: 1 týden (`DEFAULT_CACHE_TIMEOUT`)
 - Další TTL: `CACHE_TTL_DAY`, `CACHE_TTL_HOUR`, `CACHE_TTL_MONTH`
 - Klíč: `generate_cache_key()` — hash URL + parametrů
@@ -35,7 +35,7 @@ Exponenciální backoff s jitterem pro přechodné chyby (5xx, timeout).
 České moduly (`czech/`) používají `httpx.AsyncClient` přímo, ale sdílejí cache infrastrukturu:
 
 ```python
-from biomcp.czech.utils import generate_cache_key, cache_response, get_cached_response
+from czechmedmcp.czech.utils import generate_cache_key, cache_response, get_cached_response
 
 # Kontrola cache
 cached = await get_cached_response(cache_key)

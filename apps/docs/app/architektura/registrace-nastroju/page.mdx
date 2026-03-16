@@ -5,7 +5,7 @@
 CzechMedMCP používá dekorátor `@mcp_app.tool()` z FastMCP frameworku. Každý nástroj je async funkce vracející `str` (markdown).
 
 ```python
-from biomcp.core import mcp_app
+from czechmedmcp.core import mcp_app
 from typing import Annotated
 from pydantic import Field
 
@@ -29,11 +29,11 @@ async def czechmed_search_medicine(
 
 | Skupina | Soubor | Počet |
 |---------|--------|-------|
-| Standardní | `src/biomcp/individual_tools.py` | 33 |
-| České | `src/biomcp/czech/czech_tools.py` | 23 |
-| Router | `src/biomcp/router.py` | 2 |
-| Think | `src/biomcp/thinking_tool.py` | 1 |
-| Metrics | `src/biomcp/metrics_handler.py` | 1 |
+| Standardní | `src/czechmedmcp/individual_tools.py` | 33 |
+| České | `src/czechmedmcp/czech/czech_tools.py` | 23 |
+| Router | `src/czechmedmcp/router.py` | 2 |
+| Think | `src/czechmedmcp/thinking_tool.py` | 1 |
+| Metrics | `src/czechmedmcp/metrics_handler.py` | 1 |
 
 ## Přidání nového nástroje
 

@@ -12,17 +12,17 @@ Claude automaticky použije nástroje `czechmed_search_medicine` a `czechmed_che
 
 ```bash
 # Vyhledání léku
-biomcp czech sukl search --query "Ibuprofen"
+czechmedmcp czech sukl search --query "Ibuprofen"
 
 # Vyhledání diagnózy
-biomcp czech mkn10 search --query "diabetes mellitus"
+czechmedmcp czech mkn10 search --query "diabetes mellitus"
 
 # Vyhledání poskytovatele
-biomcp czech nrpzs search --city "Praha" --specialty "kardiologie"
+czechmedmcp czech nrpzs search --city "Praha" --specialty "kardiologie"
 
 # Globální vyhledávání
-biomcp article search --gene BRAF --disease melanoma
-biomcp trial search --condition "lung cancer" --status RECRUITING
+czechmedmcp article search --gene BRAF --disease melanoma
+czechmedmcp trial search --condition "lung cancer" --status RECRUITING
 ```
 
 ## Ukázkové scénáře

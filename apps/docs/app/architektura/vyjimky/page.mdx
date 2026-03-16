@@ -1,6 +1,6 @@
 # Hierarchie výjimek
 
-CzechMedMCP definuje stromovou strukturu výjimek v `src/biomcp/exceptions.py`:
+CzechMedMCP definuje stromovou strukturu výjimek v `src/czechmedmcp/exceptions.py`:
 
 ```
 BioMCPError
@@ -16,7 +16,7 @@ BioMCPError
 ## Použití
 
 ```python
-from biomcp.exceptions import InvalidDomainError
+from czechmedmcp.exceptions import InvalidDomainError
 
 if domain not in VALID_DOMAINS:
     raise InvalidDomainError(f"Neplatná doména: {domain}")

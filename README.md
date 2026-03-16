@@ -11,7 +11,7 @@ Open source MCP server se **60 nástroji** pro české i globální zdravotnick�
 pip install git+https://github.com/petrsovadina/CzechMedMCP.git
 ```
 
-### Claude Desktop / Cursor / VS Code
+### Claude Desktop / Cursor / VS Code...
 
 Přidejte do konfigurace MCP serverů:
 

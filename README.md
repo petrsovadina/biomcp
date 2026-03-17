@@ -2,15 +2,16 @@
 
 Open source MCP server se **60 nástroji** pro české i globální zdravotnické zdroje. Propojuje Claude, Cursor a další AI asistenty s SUKL, MKN-10, PubMed a dalšími databázemi.
 
-**[Landing page](https://web-sovadina.vercel.app)** · **[Dokumentace](https://docs-sovadina.vercel.app)** · **[GitHub](https://github.com/petrsovadina/CzechMedMCP)**
+**[Landing page](https://czech-med-mcp-web.vercel.app)** · **[Dokumentace](https://czech-med-mcp-docs.vercel.app)** · **[GitHub](https://github.com/petrsovadina/CzechMedMCP)**
 
 ## Rychlý start
 
 ```bash
-pip install czechmedmcp
+# Instalace z GitHubu
+uv tool install git+https://github.com/petrsovadina/CzechMedMCP.git
 ```
 
-### Claude Desktop / Cursor / VS Code
+### Claude Desktop / Cursor / VS Code...
 
 Přidejte do konfigurace MCP serverů:
 
@@ -25,13 +26,11 @@ Přidejte do konfigurace MCP serverů:
 }
 ```
 
-### Spuštění serveru
+### Remote HTTP server
+
+Pro vzdálený přístup (produkce běží na Railway):
 
 ```bash
-# STDIO (lokální vývoj, Claude Desktop)
-czechmedmcp run
-
-# HTTP (remote, Medevio integrace)
 czechmedmcp run --mode streamable_http --host 0.0.0.0 --port 8000
 ```
 
@@ -100,11 +99,40 @@ make check
 
 ## Deployment
 
-| Komponenta | Platforma |
-|---|---|
-| MCP Server | [Railway](https://biomcp-production-0eb2.up.railway.app/health) |
-| Landing page | [Vercel](https://web-sovadina.vercel.app) |
-| Dokumentace | [Vercel](https://docs-sovadina.vercel.app) |
+| Komponenta | Platforma | URL |
+|---|---|---|
+| MCP Server | Railway | [/health](https://biomcp-production-0eb2.up.railway.app/health) |
+| Landing page | Vercel | [czech-med-mcp-web.vercel.app](https://czech-med-mcp-web.vercel.app) |
+| Dokumentace | Vercel | [czech-med-mcp-docs.vercel.app](https://czech-med-mcp-docs.vercel.app) |
+
+### Docker (lokální)
+
+```bash
+docker compose up --build
+# MCP endpoint: http://localhost:8000/mcp
+# Health:       http://localhost:8000/health
+```
+
+### Railway
+
+Push na `main` spustí auto-deploy (CI musí projít). Konfigurace:
+
+- `Dockerfile` — Python 3.11-slim, `.[worker]` extras
+- `railway.json` — healthcheck na `/health`, restart on failure
+- Env vars: `MCP_MODE=streamable_http`, `PORT` nastavuje Railway automaticky
+
+Ruční deploy:
+
+```bash
+railway up --detach
+```
+
+### Vercel (web + docs)
+
+Obě Next.js aplikace se deployují automaticky z monorepa:
+
+- **Landing page**: root directory `apps/`, framework Next.js
+- **Dokumentace**: root directory `apps/docs`, static export (`output: 'export'`)
 
 ## Licence
 

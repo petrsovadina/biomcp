@@ -20,7 +20,7 @@ export function CTA() {
 
           <div className="mx-auto mt-10 max-w-md overflow-hidden rounded-xl border border-white/[0.1] bg-white/[0.03] px-6 py-4 font-mono text-sm backdrop-blur">
             <span className="text-white/30">$</span>{' '}
-            <span className="text-emerald-400">pip install czechmedmcp</span>
+            <span className="text-emerald-400">uv tool install git+https://github.com/petrsovadina/CzechMedMCP.git</span>
           </div>
 
           <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
@@ -33,7 +33,7 @@ export function CTA() {
               Zobrazit na GitHub
             </a>
             <a
-              href="https://docs-sovadina.vercel.app"
+              href="https://czech-med-mcp-docs.vercel.app"
               className="w-full rounded-xl border border-white/[0.1] px-8 py-4 text-center font-semibold text-white/70 transition hover:border-white/20 hover:text-white sm:w-auto"
             >
               Dokumentace

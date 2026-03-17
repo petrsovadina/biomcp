@@ -6,7 +6,7 @@ const links = [
   { label: 'Funkce', href: '#funkce' },
   { label: 'Nástroje', href: '#nastroje' },
   { label: 'Jak to funguje', href: '#jak-to-funguje' },
-  { label: 'Dokumentace', href: 'https://docs-sovadina.vercel.app' },
+  { label: 'Dokumentace', href: 'https://czech-med-mcp-docs.vercel.app' },
 ]
 
 export function Navbar() {

@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
-  "installCommand": "cd ../.. && npm install",
+  "installCommand": "cd ../.. && npm install && cd apps/docs && npm rebuild @napi-rs/simple-git",
   "buildCommand": "cd ../.. && npx turbo build --filter=czechmedmcp-docs"
 }

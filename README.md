@@ -2,13 +2,13 @@
 
 Open source MCP server se **60 nástroji** pro české i globální zdravotnické zdroje. Propojuje Claude, Cursor a další AI asistenty s SUKL, MKN-10, PubMed a dalšími databázemi.
 
-**[Landing page](https://web-sovadina.vercel.app)** · **[Dokumentace](https://docs-sovadina.vercel.app)** · **[GitHub](https://github.com/petrsovadina/CzechMedMCP)**
+**[Landing page](https://czech-med-mcp-web.vercel.app)** · **[Dokumentace](https://czech-med-mcp-docs.vercel.app)** · **[GitHub](https://github.com/petrsovadina/CzechMedMCP)**
 
 ## Rychlý start
 
 ```bash
 # Instalace z GitHubu
-pip install git+https://github.com/petrsovadina/CzechMedMCP.git
+uv tool install git+https://github.com/petrsovadina/CzechMedMCP.git
 ```
 
 ### Claude Desktop / Cursor / VS Code...
@@ -102,8 +102,8 @@ make check
 | Komponenta | Platforma | URL |
 |---|---|---|
 | MCP Server | Railway | [/health](https://biomcp-production-0eb2.up.railway.app/health) |
-| Landing page | Vercel | [web-sovadina.vercel.app](https://web-sovadina.vercel.app) |
-| Dokumentace | Vercel | [docs-sovadina.vercel.app](https://docs-sovadina.vercel.app) |
+| Landing page | Vercel | [czech-med-mcp-web.vercel.app](https://czech-med-mcp-web.vercel.app) |
+| Dokumentace | Vercel | [czech-med-mcp-docs.vercel.app](https://czech-med-mcp-docs.vercel.app) |
 
 ### Docker (lokální)
 
@@ -131,8 +131,8 @@ railway up --detach
 
 Obě Next.js aplikace se deployují automaticky z monorepa:
 
-- **Landing page**: root directory `apps/web/`, framework Next.js
-- **Dokumentace**: root directory `apps/docs/`, static export (`output: 'export'`)
+- **Landing page**: root directory `apps/`, framework Next.js
+- **Dokumentace**: root directory `apps/docs`, static export (`output: 'export'`)
 
 ## Licence
 

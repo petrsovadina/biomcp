@@ -21,18 +21,6 @@ export function Testimonial() {
               biomedicínskými databázemi. Vše přístupné přes jeden MCP server —
               bez API klíčů, bez složité konfigurace.
             </p>
-            <p className="mt-4 text-gray-600 dark:text-white/50 leading-relaxed">
-              Postaveno pro platformu{' '}
-              <a
-                href="https://medevio.com"
-                target="_blank"
-                rel="noopener"
-                className="font-medium text-gray-900 dark:text-white underline underline-offset-4"
-              >
-                Medevio
-              </a>{' '}
-              — AI asistent pro české lékaře.
-            </p>
           </FadeIn>
 
           <div className="grid grid-cols-2 gap-6">

@@ -33,14 +33,6 @@ export function Footer() {
             >
               Issues
             </a>
-            <a
-              href="https://medevio.com"
-              target="_blank"
-              rel="noopener"
-              className="transition hover:text-gray-900 dark:hover:text-white"
-            >
-              Medevio
-            </a>
           </div>
         </div>
 

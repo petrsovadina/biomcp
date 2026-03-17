@@ -21,13 +21,13 @@ const items = [
 
 export function ProblemSolution() {
   return (
-    <section className="border-t border-white/[0.06] py-24 md:py-32">
+    <section className="border-t border-gray-200 dark:border-white/[0.06] py-24 md:py-32">
       <div className="mx-auto max-w-6xl px-6">
         <FadeIn className="text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-white md:text-4xl">
+          <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white md:text-4xl">
             Problém → Řešení
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-white/50">
+          <p className="mx-auto mt-4 max-w-2xl text-gray-500 dark:text-white/50">
             AI asistenti jsou mocní, ale bez přístupu k českým zdravotnickým
             datům jsou slepí. CzechMedMCP jim dává oči.
           </p>
@@ -38,12 +38,12 @@ export function ProblemSolution() {
             <FadeIn
               key={i}
               delay={i * 0.1}
-              className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-6"
+              className="rounded-2xl border border-gray-200 dark:border-white/[0.08] bg-gray-50 dark:bg-white/[0.03] p-6"
             >
-              <p className="text-white/40 line-through decoration-red-400/50">
+              <p className="text-gray-400 dark:text-white/40 line-through decoration-red-500 dark:decoration-red-400/50">
                 {item.problem}
               </p>
-              <p className="mt-3 font-semibold text-white">
+              <p className="mt-3 font-semibold text-gray-900 dark:text-white">
                 {item.solution}
               </p>
             </FadeIn>

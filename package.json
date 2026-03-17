@@ -1,6 +1,9 @@
 {
   "name": "czechmedmcp",
   "private": true,
+  "engines": {
+    "node": "20.x"
+  },
   "workspaces": ["apps/*", "packages/*"],
   "scripts": {
     "dev": "turbo dev",

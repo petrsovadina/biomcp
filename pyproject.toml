@@ -52,18 +52,11 @@ dev = [
     "pytest-cov>=4.0.0",
     "pytest-asyncio>=0.24.0",
     "ruff>=0.9.2",
-    "mkdocs>=1.4.2",
-    "mkdocs-material>=8.5.10",
-    "mkdocstrings[python]>=0.26.1",
     "anyio>=4.8.0",
-    # "ipython>=9.0.2",
     "pytest-bdd>=8.1.0",
-    "tomlkit>=0.13.2",
     "assertpy>=1.1",
     "twine>=4.0.0",
     "pandas>=2.0.0",  # Used for mocking AlphaGenome responses in tests
-    "PyYAML>=6.0.0",  # Used for mkdocs.yml parsing in scripts
-    "pydantic-ai>=0.0.14",  # For testing Pydantic AI integration
 ]
 
 [project.optional-dependencies]

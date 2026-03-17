@@ -10,8 +10,7 @@
 
 ```bash
 git clone https://github.com/petrsovadina/czechmedmcp.git
-cd biomcp
-git checkout python-main
+cd CzechMedMCP
 
 # Instalace závislostí
 uv sync --all-extras
@@ -55,7 +54,7 @@ make build
 ## Struktura projektu
 
 ```
-biomcp/
+CzechMedMCP/
 ├── src/czechmedmcp/          # Zdrojový kód
 │   ├── __init__.py      # Import registrace nástrojů
 │   ├── core.py          # FastMCP singleton
@@ -72,6 +71,6 @@ biomcp/
 │   ├── czech/           # Testy českých modulů
 │   ├── bdd/             # BDD testy
 │   └── integration/     # Live API testy
-├── docs-site/           # Nextra dokumentace
+├── apps/docs/           # Nextra dokumentace
 └── pyproject.toml       # Konfigurace projektu
 ```

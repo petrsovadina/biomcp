@@ -9,24 +9,19 @@
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
 # Instalace CzechMedMCP jako CLI nástroj
-uv tool install czechmedmcp
+uv tool install git+https://github.com/petrsovadina/CzechMedMCP.git
 
 # Ověření
 czechmedmcp --help
 ```
 
-## Alternativa: pip
-
-```bash
-pip install czechmedmcp
-```
+> **Poznámka**: Balíček zatím není na PyPI — instalace probíhá přímo z Git repozitáře.
 
 ## Pro vývojáře (editovatelná instalace)
 
 ```bash
 git clone https://github.com/petrsovadina/czechmedmcp.git
-cd biomcp
-git checkout python-main
+cd CzechMedMCP
 uv sync --all-extras
 uv run pre-commit install
 ```

@@ -87,7 +87,7 @@ export function Hero() {
               <p className="mt-4 text-white/30"># Spuštění MCP serveru</p>
               <p className="text-emerald-400">$ czechmedmcp run</p>
               <p className="mt-2 text-white/50">
-                CzechMedMCP v0.7.3 — 60 nástrojů připraveno
+                CzechMedMCP v0.8.0 — 60 nástrojů připraveno
               </p>
             </div>
           </div>

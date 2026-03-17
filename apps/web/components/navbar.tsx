@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { ThemeToggle } from '@/components/theme-toggle'
 
 const links = [
   { label: 'Funkce', href: '#funkce' },
@@ -13,11 +14,11 @@ export function Navbar() {
   const [open, setOpen] = useState(false)
 
   return (
-    <nav className="animate-nav fixed top-0 z-50 w-full border-b border-white/[0.06] bg-[#030303]/80 backdrop-blur-xl">
+    <nav className="animate-nav fixed top-0 z-50 w-full border-b border-gray-200 dark:border-white/[0.06] bg-white/80 dark:bg-[#030303]/80 backdrop-blur-xl">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-        <a href="/" className="text-lg font-bold text-white">
-          <span className="text-blue-400">Czech</span>Med
-          <span className="text-blue-400">MCP</span>
+        <a href="/" className="text-lg font-bold text-gray-900 dark:text-white">
+          <span className="text-blue-600 dark:text-blue-400">Czech</span>Med
+          <span className="text-blue-600 dark:text-blue-400">MCP</span>
         </a>
 
         <div className="hidden items-center gap-8 md:flex">
@@ -25,16 +26,17 @@ export function Navbar() {
             <a
               key={l.href}
               href={l.href}
-              className="text-sm text-white/50 transition hover:text-white"
+              className="text-sm text-gray-400 dark:text-white/50 transition hover:text-gray-900 dark:hover:text-white"
             >
               {l.label}
             </a>
           ))}
+          <ThemeToggle />
           <a
             href="https://github.com/petrsovadina/CzechMedMCP"
             target="_blank"
             rel="noopener"
-            className="rounded-lg bg-white/10 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/20"
+            className="rounded-lg bg-gray-100 dark:bg-white/10 px-4 py-2 text-sm font-medium text-gray-900 dark:text-white transition hover:bg-gray-200 dark:hover:bg-white/20"
           >
             GitHub
           </a>
@@ -42,7 +44,7 @@ export function Navbar() {
 
         <button
           onClick={() => setOpen(!open)}
-          className="text-white/60 md:hidden"
+          className="text-gray-600 dark:text-white/60 md:hidden"
           aria-label="Menu"
         >
           <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -56,17 +58,20 @@ export function Navbar() {
       </div>
 
       {open && (
-        <div className="border-t border-white/[0.06] px-6 py-4 md:hidden">
+        <div className="border-t border-gray-200 dark:border-white/[0.06] px-6 py-4 md:hidden">
           {links.map((l) => (
             <a
               key={l.href}
               href={l.href}
               onClick={() => setOpen(false)}
-              className="block py-2 text-sm text-white/50 transition hover:text-white"
+              className="block py-2 text-sm text-gray-400 dark:text-white/50 transition hover:text-gray-900 dark:hover:text-white"
             >
               {l.label}
             </a>
           ))}
+          <div className="py-2">
+            <ThemeToggle />
+          </div>
         </div>
       )}
     </nav>

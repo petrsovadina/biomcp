@@ -15,8 +15,29 @@
 }
 
 body {
-  background-color: #030303;
-  color: #f5f5f5;
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+:root {
+  --color-background: #ffffff;
+  --color-foreground: #111111;
+  --color-muted: #f5f5f5;
+  --color-muted-foreground: #6b7280;
+  --color-border: rgba(0, 0, 0, 0.1);
+  --color-card: rgba(0, 0, 0, 0.03);
+  --color-card-foreground: #111111;
+}
+
+.dark {
+  --color-background: #030303;
+  --color-foreground: #f5f5f5;
+  --color-muted: #111111;
+  --color-muted-foreground: #a3a3a3;
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-card: rgba(255, 255, 255, 0.03);
+  --color-card-foreground: #f5f5f5;
 }
 
 /* FadeIn animation classes */

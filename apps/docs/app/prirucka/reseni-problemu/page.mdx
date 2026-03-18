@@ -5,10 +5,10 @@
 ### `ModuleNotFoundError: No module named 'czechmedmcp'`
 
 ```bash
-# Přeinstalujte balíček
-uv pip install -e .
-# Nebo
-uv tool install czechmedmcp
+# Přeinstalujte balíček (pro vývojáře)
+uv sync --all-extras
+# Nebo přeinstalujte CLI nástroj
+uv tool install git+https://github.com/petrsovadina/CzechMedMCP.git --force
 ```
 
 ### `command not found: czechmedmcp`

@@ -99,10 +99,11 @@ make check
 
 ## Deployment
 
-| Komponenta | Platforma | URL |
+| Komponenta | Platforma | Konfigurace |
 |---|---|---|
-| MCP Server | Railway | [/health](https://biomcp-production-0eb2.up.railway.app/health) |
-| Landing page | Vercel | [czech-med-mcp-web.vercel.app](https://czech-med-mcp-web.vercel.app) |
+| MCP Server | Railway | `Dockerfile`, `railway.json` |
+| MCP Server | Arcade Cloud | `arcade deploy -e src/czechmedmcp/arcade/entrypoint.py` |
+| Landing page | Vercel | root directory `apps/` |
 | Dokumentace | Vercel | [czech-med-mcp-docs.vercel.app](https://czech-med-mcp-docs.vercel.app) |
 
 ### Docker (lokální)
@@ -126,6 +127,24 @@ Ruční deploy:
 ```bash
 railway up --detach
 ```
+
+### Arcade Cloud
+
+Alternativní deployment přes [Arcade](https://arcade.dev) — spravovaná platforma s auth, discovery a multi-user přístupem:
+
+```bash
+# Instalace CLI
+uv tool install arcade-mcp
+
+# Login + deploy (60 nástrojů)
+arcade login
+arcade deploy -e src/czechmedmcp/arcade/entrypoint.py
+
+# PoC deploy (5 nástrojů pro validaci)
+arcade deploy -e src/czechmedmcp/arcade/poc_entrypoint.py
+```
+
+Arcade vyžaduje optional dependency: `uv sync --extra arcade`
 
 ### Vercel (web + docs)
 

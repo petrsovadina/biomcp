@@ -2,9 +2,9 @@
 
 Open source MCP server se **60 nástroji** pro české i globální zdravotnické zdroje. Propojuje Claude, Cursor a další AI asistenty s SUKL, MKN-10, PubMed a dalšími databázemi.
 
-**[Landing page](https://czech-med-mcp-web.vercel.app)** · **[Dokumentace](https://czech-med-mcp-docs.vercel.app)** · **[GitHub](https://github.com/petrsovadina/CzechMedMCP)**
+**[Dokumentace](https://czech-med-mcp-docs.vercel.app)** · **[GitHub](https://github.com/petrsovadina/CzechMedMCP)**
 
-## Rychlý start
+## Rychlý startů
 
 ```bash
 # Instalace z GitHubu

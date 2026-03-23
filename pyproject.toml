@@ -39,7 +39,7 @@ dependencies = [
 [project.urls]
 Homepage = "https://github.com/petrsovadina/CzechMedMCP"
 Repository = "https://github.com/petrsovadina/CzechMedMCP"
-Documentation = "https://petrsovadina.github.io/biomcp/"
+Documentation = "https://czech-med-mcp-docs.vercel.app"
 
 [dependency-groups]
 dev = [

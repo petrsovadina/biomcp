@@ -2,7 +2,7 @@
 
 **Feature Branch**: `005-deployment-cleanup`
 **Created**: 2026-03-16
-**Status**: Draft
+**Status**: Completed
 **Input**: Odstranění mrtvých deployment konfigurací (Fly.io, Docker Compose prod, Caddyfile), konsolidace Dockerfiles, příprava Vercel pro web a docs aplikace.
 
 ## User Scenarios & Testing *(mandatory)*

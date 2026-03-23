@@ -2,7 +2,7 @@
 
 **Feature Branch**: `006-repo-cleanup`
 **Created**: 2026-03-16
-**Status**: Draft
+**Status**: Completed
 **Input**: Důkladná analýza projektu, identifikace a odstranění mrtvého kódu, nepoužívaných závislostí a nepotřebných souborů pro pročištění celého repozitáře.
 
 ## User Scenarios & Testing *(mandatory)*

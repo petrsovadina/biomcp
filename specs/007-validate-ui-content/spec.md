@@ -2,7 +2,7 @@
 
 **Feature Branch**: `007-validate-ui-content`
 **Created**: 2026-03-17
-**Status**: Draft
+**Status**: Completed
 **Input**: Důkladná analýza a validace všech informací v uživatelském rozhraní, aby neobsahovaly zavádějící nebo mystifikující texty a tvrzení.
 
 ## User Scenarios & Testing *(mandatory)*

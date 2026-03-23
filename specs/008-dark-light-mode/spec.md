@@ -2,7 +2,7 @@
 
 **Feature Branch**: `008-dark-light-mode`
 **Created**: 2026-03-17
-**Status**: Draft
+**Status**: Completed
 **Input**: Implementovat dark/light mode přepínač na landing page (apps/web). Aktuálně je stránka čistě dark s hardcoded barvami. Přidat theme toggle do navbaru a umožnit uživatelům přepínat mezi tmavým a světlým režimem.
 
 ## User Scenarios & Testing *(mandatory)*

@@ -2,7 +2,7 @@
 
 **Feature Branch**: `001-fix-sukl-search`
 **Created**: 2026-03-10
-**Status**: Draft
+**Status**: Merged
 **Input**: User description: "Fix SUKL drug search performance - search_medicine fetches all 68K drugs causing timeout, blocking 3 tools"
 
 ## Clarifications

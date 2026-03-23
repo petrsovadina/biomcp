@@ -1,7 +1,7 @@
-# Specification Quality Checklist: Repository Cleanup
+# Specification Quality Checklist: Repo Cleanup
 
 **Purpose**: Validate specification completeness and quality before proceeding to planning
-**Created**: 2026-03-16
+**Created**: 2026-03-22
 **Feature**: [spec.md](../spec.md)
 
 ## Content Quality
@@ -31,6 +31,7 @@
 
 ## Notes
 
-- All items pass. Spec is ready for `/speckit.plan`.
-- Scope is precisely bounded: 3 files to delete, 6 deps to remove, docs update.
-- FR-012 explicitly protects http_client_simple.py from accidental deletion.
+- All items pass validation.
+- Spec references specific file names and paths as domain facts (the files to clean), not implementation details.
+- Edge cases cover data preservation, backwards compatibility, and deployment safety.
+- Out of Scope explicitly excludes git history rewriting and code refactoring.

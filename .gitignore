@@ -157,3 +157,15 @@ lzyank.toml
 experiment/
 alphagenome
 spike/
+
+# Build artifacts
+build/
+dist/
+
+# macOS Finder copy artifacts (prevent " 2", " 3" duplicates)
+*\ [0-9]*
+*\ [0-9]
+
+# Root-level screenshots (development artifacts)
+/*.jpeg
+/*.png

@@ -69,6 +69,10 @@ worker = [
     "uvicorn>=0.28.0",
 ]
 
+arcade = [
+    "arcade-mcp-server>=1.17.0",
+]
+
 [build-system]
 requires = ["setuptools >= 61.0"]
 build-backend = "setuptools.build_meta"

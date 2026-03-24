@@ -13,7 +13,10 @@ from typing import TYPE_CHECKING
 
 import httpx
 
-from czechmedmcp.constants import DEFAULT_CACHE_TIMEOUT
+from czechmedmcp.constants import (
+    CACHE_TTL_MONTH,
+    DEFAULT_CACHE_TIMEOUT,
+)
 from czechmedmcp.czech.response import format_czech_response
 from czechmedmcp.czech.sukl.client import (
     SUKL_DLP_V1,
@@ -38,6 +41,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 _CACHE_TTL = DEFAULT_CACHE_TIMEOUT
+_SUBSTANCE_CACHE_TTL = CACHE_TTL_MONTH
 
 # PIL section mapping (Czech headings → keys)
 _PIL_SECTIONS: dict[str, str] = {
@@ -140,10 +144,86 @@ def _build_doc_url(
     )
 
 
-def _composition_to_substances(
+async def _fetch_substance_name(
+    substance_code: int,
+) -> str | None:
+    """Look up substance name by code from SUKL API.
+
+    Uses ``/latky/{kodLatky}`` endpoint with long-term
+    cache (substance names are stable).
+    """
+    url = f"{SUKL_DLP_V1}/latky/{substance_code}"
+    cache_key = generate_cache_key("GET", url, {})
+
+    cached = get_cached_response(cache_key)
+    if cached:
+        data = json.loads(cached)
+        return data.get("nazev") or data.get(
+            "nazevLatky"
+        )
+
+    try:
+        async with httpx.AsyncClient(
+            timeout=SUKL_HTTP_TIMEOUT
+        ) as client:
+            resp = await client.get(url)
+            if resp.status_code == 404:
+                return None
+            resp.raise_for_status()
+            data = resp.json()
+    except httpx.HTTPError:
+        logger.warning(
+            "Failed to fetch substance name for %s",
+            substance_code,
+        )
+        return None
+
+    cache_response(
+        cache_key,
+        json.dumps(data, ensure_ascii=False),
+        _SUBSTANCE_CACHE_TTL,
+    )
+    return data.get("nazev") or data.get("nazevLatky")
+
+
+async def _resolve_substance_names(
+    composition: list[dict],
+) -> dict[int, str | None]:
+    """Resolve substance names for all codes."""
+    codes: set[int] = set()
+    for item in composition:
+        code = item.get("kodLatky", 0)
+        if code:
+            codes.add(code)
+
+    # Also check if composition already has name
+    names: dict[int, str | None] = {}
+    for item in composition:
+        code = item.get("kodLatky", 0)
+        # Some responses include nazevLatky inline
+        name = item.get("nazevLatky") or item.get(
+            "nazev"
+        )
+        if name:
+            names[code] = name
+
+    # Fetch missing names via API
+    for code in codes:
+        if code not in names:
+            names[code] = await _fetch_substance_name(
+                code
+            )
+
+    return names
+
+
+async def _composition_to_substances(
     composition: list[dict],
 ) -> list[dict]:
     """Convert API composition to active substances."""
+    substance_names = await _resolve_substance_names(
+        composition
+    )
     substances = []
     seen: set[int] = set()
     for item in composition:
@@ -156,9 +236,11 @@ def _composition_to_substances(
         strength = (
             f"{amount} {unit}".strip() if amount else None
         )
-        substances.append(
-            {"substance_code": code, "strength": strength}
-        )
+        substances.append({
+            "substance_code": code,
+            "substance_name": substance_names.get(code),
+            "strength": strength,
+        })
     return substances
 
 
@@ -181,24 +263,35 @@ async def _sukl_drug_details(sukl_code: str) -> str:
         d for d in doc_meta if d.get("typ") == "pil"
     ]
 
-    spc_url = (
-        _build_doc_url(sukl_code, "spc")
-        if spc_docs
-        else None
-    )
-    pil_url = (
-        _build_doc_url(sukl_code, "pil")
-        if pil_docs
-        else None
+    spc_url: str | None = None
+    spc_note: str | None = None
+    if spc_docs:
+        spc_url = _build_doc_url(sukl_code, "spc")
+    else:
+        spc_note = (
+            "SPC dokument není dostupný v SÚKL "
+            "databázi pro tento přípravek"
+        )
+
+    pil_url: str | None = None
+    pil_note: str | None = None
+    if pil_docs:
+        pil_url = _build_doc_url(sukl_code, "pil")
+    else:
+        pil_note = (
+            "PIL dokument není dostupný v SÚKL "
+            "databázi pro tento přípravek"
+        )
+
+    active_substances = (
+        await _composition_to_substances(composition)
     )
 
     result = {
         "sukl_code": detail.get("kodSUKL", sukl_code),
         "name": detail.get("nazev", ""),
         "strength": detail.get("sila"),
-        "active_substances": _composition_to_substances(
-            composition
-        ),
+        "active_substances": active_substances,
         "pharmaceutical_form": detail.get(
             "lekovaFormaKod"
         ),
@@ -212,7 +305,9 @@ async def _sukl_drug_details(sukl_code: str) -> str:
         ),
         "is_delivered": detail.get("jeDodavka"),
         "spc_url": spc_url,
+        "spc_note": spc_note,
         "pil_url": pil_url,
+        "pil_note": pil_note,
         "source": "SUKL",
     }
 

@@ -129,7 +129,10 @@ class TestSuklSearchInternals:
 class TestSuklGetterInternals:
     """Test internal getter functions."""
 
-    def test_composition_to_substances(self):
+    @pytest.mark.asyncio
+    async def test_composition_to_substances(self):
+        from unittest.mock import AsyncMock, patch
+
         from czechmedmcp.czech.sukl.getter import (
             _composition_to_substances,
         )
@@ -141,19 +144,31 @@ class TestSuklGetterInternals:
                 "jednotkaKod": "MG",
             }
         ]
-        result = _composition_to_substances(comp)
+        with patch(
+            "czechmedmcp.czech.sukl.getter"
+            "._fetch_substance_name",
+            new_callable=AsyncMock,
+            return_value="TESTSUBSTANCE",
+        ):
+            result = await _composition_to_substances(
+                comp
+            )
         assert len(result) == 1
         assert result[0]["substance_code"] == 1234
         assert result[0]["strength"] == "400 MG"
 
-    def test_composition_to_substances_empty(self):
+    @pytest.mark.asyncio
+    async def test_composition_to_substances_empty(self):
         from czechmedmcp.czech.sukl.getter import (
             _composition_to_substances,
         )
 
-        assert _composition_to_substances([]) == []
+        assert await _composition_to_substances([]) == []
 
-    def test_composition_no_amount(self):
+    @pytest.mark.asyncio
+    async def test_composition_no_amount(self):
+        from unittest.mock import AsyncMock, patch
+
         from czechmedmcp.czech.sukl.getter import (
             _composition_to_substances,
         )
@@ -161,7 +176,15 @@ class TestSuklGetterInternals:
         comp = [
             {"kodLatky": 99, "mnozstvi": "", "jednotkaKod": ""}
         ]
-        result = _composition_to_substances(comp)
+        with patch(
+            "czechmedmcp.czech.sukl.getter"
+            "._fetch_substance_name",
+            new_callable=AsyncMock,
+            return_value=None,
+        ):
+            result = await _composition_to_substances(
+                comp
+            )
         assert result[0]["strength"] is None
 
     def test_build_doc_url(self):

@@ -12,8 +12,8 @@ from czechmedmcp.variants.search import (
 
 @pytest.fixture
 def basic_query():
-    """Create a basic gene query."""
-    return VariantQuery(gene="BRAF")
+    """Create a basic gene query with narrowing filter."""
+    return VariantQuery(gene="BRAF", hgvsp="V600E")
 
 
 @pytest.fixture
@@ -22,16 +22,15 @@ def complex_query():
     return VariantQuery(
         gene="BRCA1",
         significance=ClinicalSignificance.PATHOGENIC,
-        min_frequency=0.0001,
         max_frequency=0.01,
     )
 
 
 def test_query_validation():
     """Test VariantQuery model validation."""
-    # Test basic query with gene
-    query = VariantQuery(gene="BRAF")
-    assert query.gene == "BRAF"
+    # Gene-only query is now rejected (too many results)
+    with pytest.raises(ValueError, match="too many results"):
+        VariantQuery(gene="BRAF")
 
     # Test query with rsid
     query = VariantQuery(rsid="rs113488022")
@@ -41,26 +40,34 @@ def test_query_validation():
     with pytest.raises(ValueError):
         VariantQuery()
 
-    # Test query with clinical significance enum requires a search parameter
-    query = VariantQuery(
-        gene="BRCA1", significance=ClinicalSignificance.PATHOGENIC
-    )
-    assert query.significance == ClinicalSignificance.PATHOGENIC
+    # Gene + significance only is also rejected
+    with pytest.raises(ValueError, match="too many results"):
+        VariantQuery(
+            gene="BRCA1",
+            significance=ClinicalSignificance.PATHOGENIC,
+        )
 
-    # Test query with prediction scores
+    # Gene + narrowing filter works
+    query = VariantQuery(gene="BRAF", hgvsp="V600E")
+    assert query.gene == "BRAF"
+
+    # Gene + prediction scores works (polyphen/sift narrow results)
     query = VariantQuery(
         gene="TP53",
         polyphen=PolyPhenPrediction.PROBABLY_DAMAGING,
         sift=SiftPrediction.DELETERIOUS,
     )
-    assert query.polyphen == PolyPhenPrediction.PROBABLY_DAMAGING
-    assert query.sift == SiftPrediction.DELETERIOUS
+    assert query.gene == "TP53"
+
+    # Gene + cadd works
+    query = VariantQuery(gene="TP53", cadd=20.0)
+    assert query.gene == "TP53"
 
 
 def test_build_query_string():
     """Test build_query_string function."""
-    # Test single field
-    query = VariantQuery(gene="BRAF")
+    # Test single gene field (with narrowing filter)
+    query = VariantQuery(gene="BRAF", hgvsp="V600E")
     q_string = build_query_string(query)
     assert 'dbnsfp.genename:"BRAF"' in q_string
 
@@ -99,8 +106,8 @@ async def test_search_variants_basic(basic_query, anyio_backend):
 
 async def test_search_variants_complex(complex_query, anyio_backend):
     """Test search_variants function with a complex query."""
-    # Use a simple common query that will return results
-    simple_query = VariantQuery(gene="TP53")
+    # Use a narrowed query that will return results
+    simple_query = VariantQuery(gene="TP53", cadd=20.0)
     result = await search_variants(simple_query)
 
     # Verify response formatting
@@ -109,7 +116,9 @@ async def test_search_variants_complex(complex_query, anyio_backend):
 
 async def test_search_variants_no_results(anyio_backend):
     """Test search_variants function with a query that returns no results."""
-    query = VariantQuery(gene="UNKNOWN_XYZ")
+    query = VariantQuery(
+        gene="UNKNOWN_XYZ", hgvsp="X999Y"
+    )
     result = await search_variants(query, output_json=True)
     assert result == "[]"
 
@@ -117,7 +126,7 @@ async def test_search_variants_no_results(anyio_backend):
 async def test_search_variants_with_limit(anyio_backend):
     """Test search_variants function with size limit."""
     # Query with a small limit
-    query = VariantQuery(gene="TP53", size=3)
+    query = VariantQuery(gene="TP53", cadd=20.0, size=3)
     result = await search_variants(query)
 
     # Result should be valid but limited

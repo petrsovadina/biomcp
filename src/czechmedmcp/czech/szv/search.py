@@ -36,7 +36,12 @@ _PROCEDURES: list[dict] | None = None
 
 
 async def _download_excel() -> list[dict]:
-    """Download SZV Excel export and parse procedures."""
+    """Download SZV Excel export and parse procedures.
+
+    Raises:
+        RuntimeError: When download or parse fails,
+            with a descriptive message for the caller.
+    """
     cache_key = generate_cache_key(
         "PARSED", "szv:procedures", {}
     )
@@ -44,20 +49,60 @@ async def _download_excel() -> list[dict]:
     if cached:
         return json.loads(cached)
 
-    async with httpx.AsyncClient(
-        timeout=CZECH_HTTP_TIMEOUT,
-        follow_redirects=True,
-    ) as client:
-        resp = await client.get(_SZV_EXPORT_URL)
-        resp.raise_for_status()
-        content = resp.content
+    try:
+        async with httpx.AsyncClient(
+            timeout=CZECH_HTTP_TIMEOUT,
+            follow_redirects=True,
+        ) as client:
+            resp = await client.get(_SZV_EXPORT_URL)
+            resp.raise_for_status()
+            content = resp.content
+    except httpx.TimeoutException:
+        logger.error(
+            "SZV Excel download timed out: %s",
+            _SZV_EXPORT_URL,
+        )
+        raise RuntimeError(
+            "SZV server timeout — try again later"
+        ) from None
+    except httpx.HTTPStatusError as exc:
+        logger.error(
+            "SZV Excel HTTP %s: %s",
+            exc.response.status_code,
+            _SZV_EXPORT_URL,
+        )
+        raise RuntimeError(
+            f"SZV server HTTP "
+            f"{exc.response.status_code}"
+        ) from None
+    except httpx.ConnectError:
+        logger.error(
+            "SZV connection failed: %s",
+            _SZV_EXPORT_URL,
+        )
+        raise RuntimeError(
+            "SZV server unreachable"
+        ) from None
+    except httpx.HTTPError as exc:
+        logger.error("SZV HTTP error: %s", exc)
+        raise RuntimeError(
+            f"SZV download failed: {exc}"
+        ) from None
 
-    wb = openpyxl.load_workbook(
-        io.BytesIO(content), read_only=True
-    )
-    ws = wb["Export"]
-    rows = list(ws.iter_rows(values_only=True))
-    wb.close()
+    try:
+        wb = openpyxl.load_workbook(
+            io.BytesIO(content), read_only=True
+        )
+        ws = wb["Export"]
+        rows = list(ws.iter_rows(values_only=True))
+        wb.close()
+    except Exception as exc:
+        logger.error(
+            "SZV Excel parse error: %s", exc
+        )
+        raise RuntimeError(
+            f"SZV Excel parse failed: {exc}"
+        ) from None
 
     if not rows:
         return []

@@ -5,7 +5,12 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from czechmedmcp.articles.fetch import _article_details, is_doi, is_pmid
+from czechmedmcp.articles.fetch import (
+    _article_details,
+    is_doi,
+    is_pmc_id,
+    is_pmid,
+)
 from czechmedmcp.articles.preprints import fetch_europe_pmc_article
 
 
@@ -47,7 +52,6 @@ class TestDOIDetection:
     def test_invalid_identifiers(self):
         """Test that invalid identifiers are rejected by both functions."""
         invalid_ids = [
-            "PMC11193658",  # PMC ID
             "abc123",  # Random string
             "10.1101",  # Incomplete DOI
             "nature12373",  # DOI without prefix
@@ -60,6 +64,9 @@ class TestDOIDetection:
             assert (
                 is_pmid(identifier) is False
             ), f"Expected {identifier} NOT to be identified as PMID"
+            assert (
+                is_pmc_id(identifier) is False
+            ), f"Expected {identifier} NOT to be identified as PMC ID"
 
 
 class TestEuropePMCFetch:
@@ -188,11 +195,11 @@ class TestArticleDetailsRouting:
     @pytest.mark.asyncio
     async def test_invalid_identifier_returns_error(self):
         """Test that invalid identifiers return an error."""
-        invalid_id = "PMC12345"
+        invalid_id = "not_a_valid_id"
 
         result = await _article_details("Test", invalid_id)
 
         data = json.loads(result)
         assert len(data) == 1
         assert "Invalid identifier format" in data[0]["error"]
-        assert "PMC12345" in data[0]["error"]
+        assert "not_a_valid_id" in data[0]["error"]

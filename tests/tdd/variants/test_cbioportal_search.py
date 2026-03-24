@@ -149,7 +149,7 @@ class TestCBioPortalSearch:
     @pytest.mark.integration
     async def test_search_with_cbioportal_summary(self):
         """Test variant search with cBioPortal summary included."""
-        query = VariantQuery(gene="BRAF", size=5)
+        query = VariantQuery(gene="BRAF", hgvsp="V600E", size=5)
 
         result = await search_variants(query, include_cbioportal=True)
 
@@ -289,7 +289,7 @@ class TestCBioPortalSearch:
     @pytest.mark.integration
     async def test_json_output_with_cbioportal(self):
         """Test JSON output includes cBioPortal summary."""
-        query = VariantQuery(gene="BRAF", size=2)
+        query = VariantQuery(gene="BRAF", hgvsp="V600E", size=2)
 
         result = await search_variants(
             query, output_json=True, include_cbioportal=True

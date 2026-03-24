@@ -4,16 +4,16 @@ Feature: Search for genetic variants via CLI
   So that I can find relevant variants for my research
 
   Scenario: Search for variants by gene symbol
-    When I run "czechmedmcp variant search --gene BRCA1"
+    When I run "czechmedmcp variant search --gene BRCA1 --max-frequency 0.01"
     Then each variant should have gene that is equal to BRCA1
 
   Scenario: Filter variants by clinical significance (Pathogenic)
-    When I run "czechmedmcp variant search --gene BRAF --significance Pathogenic"
+    When I run "czechmedmcp variant search --gene BRAF --hgvsp p.Val600Glu --significance Pathogenic"
     Then each variant should have gene that is equal to BRAF
     Then each variant should have significance that contains Pathogenic
 
   Scenario: Filter variants by clinical significance (Likely Benign)
-    When I run "czechmedmcp variant search --gene TP53 --significance "likely benign" --size 5"
+    When I run "czechmedmcp variant search --gene TP53 --significance "likely benign" --max-frequency 0.01 --size 5"
     Then each variant should have gene that is equal to TP53
     Then each variant should have significance that is equal to Likely benign
     Then the number of variants is less than or equal to 5
@@ -89,12 +89,12 @@ Feature: Search for genetic variants via CLI
     Then each variant should have frequency that is less than or equal to 0.01
 
   Scenario: Limit number of search results (size=5)
-    When I run "czechmedmcp variant search --gene TP53 --size 5"
+    When I run "czechmedmcp variant search --gene TP53 --max-frequency 0.01 --size 5"
     Then each variant should have gene that is equal to TP53
     Then the number of variants is less than or equal to 5
 
   Scenario: Limit number of search results (size=1)
-    When I run "czechmedmcp variant search --gene TP53 --size 1"
+    When I run "czechmedmcp variant search --gene TP53 --max-frequency 0.01 --size 1"
     Then each variant should have gene that is equal to TP53
     Then the number of variants is equal to 1
 #

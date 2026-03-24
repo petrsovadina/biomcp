@@ -66,8 +66,8 @@ async def _compare_alternatives(
     """Compare drug price alternatives in same ATC group.
 
     1. Get reference drug from SUKL (extract ATC).
-    2. Search SUKL by ATC → find alternatives.
-    3. Get reimbursement for each → sort by copay.
+    2. Search SUKL by ATC -> find alternatives.
+    3. Get reimbursement for each -> sort by copay.
 
     Returns:
         Dual output JSON string.
@@ -79,10 +79,16 @@ async def _compare_alternatives(
             ensure_ascii=False,
         )
 
-    name = detail.get("name", detail.get("nazev", ""))
-    atc = detail.get("atc_code", detail.get("ATCkod"))
+    name = detail.get(
+        "name", detail.get("nazev", "")
+    )
+    atc = detail.get(
+        "atc_code", detail.get("ATCkod")
+    )
     ref_reimb = await _fetch_reimbursement(sukl_code)
     ref_copay = ref_reimb.get("patient_copay")
+
+    reimb_available = bool(ref_reimb)
 
     alts: list[DrugAlternative] = []
     if atc:
@@ -99,7 +105,9 @@ async def _compare_alternatives(
         total_alternatives=len(alts),
     )
 
-    md = _format_alt_markdown(model)
+    md = _format_alt_markdown(
+        model, reimb_available
+    )
     return format_czech_response(
         data=model.model_dump(),
         tool_name="compare_alternatives",
@@ -235,6 +243,7 @@ def _format_reimb_markdown(
 
 def _format_alt_markdown(
     r: AlternativeComparison,
+    reimb_available: bool = True,
 ) -> str:
     """Format alternative comparison as Markdown."""
     lines = [
@@ -247,6 +256,11 @@ def _format_alt_markdown(
         lines.append(
             f"**Referenční doplatek**: "
             f"{r.reference_copay} CZK"
+        )
+    elif not reimb_available:
+        lines.append(
+            "**Referenční doplatek**: N/A "
+            "(údaje o úhradě nedostupné)"
         )
 
     if r.alternatives:
@@ -270,6 +284,8 @@ def _format_alt_markdown(
                 f"| {a.name} | {copay} | {savings} |"
             )
     else:
-        lines.append("\n*Žádné alternativy nalezeny.*")
+        lines.append(
+            "\n*Žádné alternativy nalezeny.*"
+        )
 
     return "\n".join(lines)

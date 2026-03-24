@@ -1,13 +1,26 @@
 import json
+import logging
 import re
 from ssl import TLSVersion
 from typing import Annotated, Any
 
+import httpx
 from pydantic import BaseModel, Field, computed_field
 
 from .. import http_client, render
-from ..constants import PUBTATOR3_FULLTEXT_URL
-from ..http_client import RequestError
+from ..constants import (
+    CACHE_TTL_MONTH,
+    NCBI_PMC_CONVERTER_URL,
+    PUBTATOR3_FULLTEXT_URL,
+)
+from ..http_client import (
+    RequestError,
+    cache_response,
+    generate_cache_key,
+    get_cached_response,
+)
+
+logger = logging.getLogger(__name__)
 
 
 class PassageInfo(BaseModel):
@@ -207,7 +220,65 @@ def is_pmid(identifier: str) -> bool:
     return str(identifier).isdigit()
 
 
-async def _article_details(
+def is_pmc_id(identifier: str) -> bool:
+    """Check if the identifier is a PMC ID (e.g., PMC11193658)."""
+    return bool(re.match(r"^PMC\d{7,8}$", str(identifier), re.IGNORECASE))
+
+
+async def _convert_pmc_to_pmid(pmc_id: str) -> int | None:
+    """Convert a PMC ID to a PMID via NCBI ID Converter API.
+
+    Results are cached for CACHE_TTL_MONTH to avoid repeated
+    API calls for the same PMC ID.
+
+    Returns the integer PMID, or None if conversion fails.
+    """
+    cache_key = generate_cache_key(
+        "GET", NCBI_PMC_CONVERTER_URL, {"ids": pmc_id}
+    )
+    cached = get_cached_response(cache_key)
+    if cached is not None:
+        try:
+            return int(cached)
+        except (ValueError, TypeError):
+            pass
+
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            resp = await client.get(
+                NCBI_PMC_CONVERTER_URL,
+                params={
+                    "ids": pmc_id,
+                    "format": "json",
+                    "tool": "czechmedmcp",
+                },
+            )
+            resp.raise_for_status()
+            data = resp.json()
+    except Exception:
+        logger.warning(
+            "PMC ID conversion failed for %s", pmc_id, exc_info=True
+        )
+        return None
+
+    records = data.get("records", [])
+    if not records:
+        return None
+
+    pmid_raw = records[0].get("pmid")
+    if pmid_raw is None:
+        return None
+
+    try:
+        pmid = int(pmid_raw)
+    except (ValueError, TypeError):
+        return None
+
+    cache_response(cache_key, str(pmid), CACHE_TTL_MONTH)
+    return pmid
+
+
+async def _article_details(  # noqa: C901
     call_benefit: Annotated[
         str,
         "Define and summarize why this function is being called and the intended benefit",
@@ -219,10 +290,11 @@ async def _article_details(
 
     Parameters:
     - call_benefit: Define and summarize why this function is being called and the intended benefit
-    - pmid: An article identifier - either a PubMed ID (e.g., 34397683) or DOI (e.g., 10.1101/2024.01.20.23288905)
+    - pmid: An article identifier - either a PubMed ID (e.g., 34397683), PMC ID (e.g., PMC11193658), or DOI (e.g., 10.1101/2024.01.20.23288905)
 
     Process:
     - For PMIDs: Calls the PubTator3 API to fetch the article's title, abstract, and full text (if available)
+    - For PMC IDs: Converts to PMID via NCBI ID Converter, then uses PubTator3 flow
     - For DOIs: Calls Europe PMC API to fetch preprint details
 
     Output: A JSON formatted string containing the retrieved article content.
@@ -233,19 +305,129 @@ async def _article_details(
     if is_doi(identifier):
         from .preprints import fetch_europe_pmc_article
 
-        return await fetch_europe_pmc_article(identifier, output_json=True)
+        try:
+            return await fetch_europe_pmc_article(
+                identifier, output_json=True
+            )
+        except Exception as exc:
+            logger.error(
+                "Europe PMC fetch failed for DOI %s: %s",
+                identifier,
+                exc,
+            )
+            return json.dumps(
+                [
+                    {
+                        "error": (
+                            f"Failed to fetch article for DOI"
+                            f" {identifier}."
+                            f" The Europe PMC service may be"
+                            f" temporarily unavailable."
+                        )
+                    }
+                ],
+                indent=2,
+                ensure_ascii=False,
+            )
+
+    # Check if it's a PMC ID — convert to PMID first
+    if is_pmc_id(identifier):
+        converted = await _convert_pmc_to_pmid(identifier)
+        if converted is None:
+            return json.dumps(
+                [
+                    {
+                        "error": (
+                            f"Could not convert {identifier}"
+                            f" to a PMID. The PMC ID may be"
+                            f" invalid or the NCBI converter"
+                            f" service is unavailable."
+                        )
+                    }
+                ],
+                indent=2,
+                ensure_ascii=False,
+            )
+        identifier = str(converted)
+        # Fall through to PMID handling below
+
     # Check if it's a PMID (PubMed article)
-    elif is_pmid(identifier):
-        return await fetch_articles(
-            [int(identifier)], full=True, output_json=True
-        )
-    else:
-        # Unknown identifier format
+    if is_pmid(identifier):
+        try:
+            result = await fetch_articles(
+                [int(identifier)], full=True, output_json=True
+            )
+        except Exception as exc:
+            logger.error(
+                "PubTator3 fetch failed for PMID %s: %s",
+                identifier,
+                exc,
+            )
+            result = None
+
+        # If PubTator3 succeeded, return the result
+        if result is not None:
+            try:
+                parsed = json.loads(result)
+                if parsed and not any(
+                    "error" in item for item in parsed
+                ):
+                    return result
+            except (json.JSONDecodeError, TypeError):
+                return result
+
+        # Fallback: try Europe PMC by PMID
+        try:
+            from .preprints import fetch_europe_pmc_article
+
+            fallback = await fetch_europe_pmc_article(
+                identifier, output_json=True
+            )
+            parsed_fb = json.loads(fallback)
+            if parsed_fb and not any(
+                "error" in item for item in parsed_fb
+            ):
+                return fallback
+        except Exception:
+            logger.debug(
+                "Europe PMC fallback also failed for %s",
+                identifier,
+                exc_info=True,
+            )
+
+        # Return original PubTator3 result (may contain error)
+        if result is not None:
+            return result
+
         return json.dumps(
             [
                 {
-                    "error": f"Invalid identifier format: {identifier}. Expected either a PMID (numeric) or DOI (10.xxxx/xxxx format)."
+                    "error": (
+                        f"Failed to fetch article for PMID"
+                        f" {identifier}. Both PubTator3 and"
+                        f" Europe PMC services are"
+                        f" unavailable."
+                    )
                 }
             ],
             indent=2,
+            ensure_ascii=False,
         )
+
+    # Unknown identifier format
+    return json.dumps(
+        [
+            {
+                "error": (
+                    f"Invalid identifier format:"
+                    f" {pmid!s}. Expected a PMID"
+                    f" (numeric, e.g. 34397683),"
+                    f" PMC ID (e.g. PMC11193658),"
+                    f" or DOI (e.g."
+                    f" 10.1101/2024.01.20.23288905)."
+                )
+            }
+        ],
+        indent=2,
+        ensure_ascii=False,
+    )

@@ -26,10 +26,32 @@ async def _drug_profile(query: str) -> str:
     Returns:
         Dual output JSON string.
     """
-    sukl_code = await _resolve_sukl_code(query)
+    try:
+        sukl_code = await _resolve_sukl_code(query)
+    except Exception as exc:
+        logger.error(
+            "Drug profile resolve error: %s", exc
+        )
+        return json.dumps(
+            {
+                "error": (
+                    f"Failed to search for drug: "
+                    f"{exc}"
+                ),
+            },
+            ensure_ascii=False,
+        )
+
     if not sukl_code:
         return json.dumps(
-            {"error": f"Drug not found: {query}"},
+            {
+                "error": (
+                    f"Drug not found: '{query}'. "
+                    "Try a different name, "
+                    "active substance, "
+                    "or 7-digit SUKL code."
+                ),
+            },
             ensure_ascii=False,
         )
 
@@ -62,10 +84,19 @@ async def _resolve_sukl_code(query: str) -> str | None:
         data = json.loads(raw)
         results = data.get("results", [])
         if results:
-            return results[0].get("sukl_code")
-    except Exception:
+            code = results[0].get("sukl_code")
+            logger.debug(
+                "Resolved '%s' -> SUKL %s",
+                query, code,
+            )
+            return code
+        logger.info(
+            "No SUKL results for query '%s'", query
+        )
+    except Exception as exc:
         logger.warning(
-            "Failed to resolve SUKL code for %s", query
+            "Failed to resolve SUKL code for '%s': %s",
+            query, exc,
         )
     return None
 
@@ -121,7 +152,9 @@ async def _fetch_detail(sukl_code: str) -> dict | None:
     raw = await _sukl_drug_details(sukl_code)
     data = json.loads(raw)
     if "error" in data:
-        return None
+        raise ValueError(
+            data.get("error", "Detail unavailable")
+        )
     return data
 
 
@@ -136,7 +169,11 @@ async def _fetch_availability(
     raw = await _sukl_availability_check(sukl_code)
     data = json.loads(raw)
     if "error" in data:
-        return None
+        raise ValueError(
+            data.get(
+                "error", "Availability unavailable"
+            )
+        )
     return data
 
 
@@ -152,7 +189,12 @@ async def _fetch_reimbursement(
     data = json.loads(raw)
     sc = data.get("structuredContent", data)
     if "error" in sc:
-        return None
+        raise ValueError(
+            sc.get(
+                "error",
+                "Reimbursement unavailable",
+            )
+        )
     return sc
 
 
@@ -188,6 +230,16 @@ def _format_markdown(p: DrugProfile) -> str:
         "",
     ]
 
+    ok_count = sum(
+        1 for s in p.sections if s.status == "ok"
+    )
+    total = len(p.sections)
+    if ok_count < total:
+        lines.append(
+            f"*{ok_count}/{total} sekcí dostupných*"
+        )
+        lines.append("")
+
     for s in p.sections:
         title = {
             "registration": "Registrace",
@@ -196,9 +248,16 @@ def _format_markdown(p: DrugProfile) -> str:
             "evidence": "Evidence (PubMed)",
         }.get(s.section, s.section)
 
-        lines.append(f"### {title}")
+        status_icon = (
+            "✅" if s.status == "ok" else "⚠️"
+        )
+        lines.append(
+            f"### {status_icon} {title}"
+        )
         if s.status == "error":
-            lines.append(f"*Chyba: {s.error}*")
+            lines.append(
+                f"*Nedostupné: {s.error}*"
+            )
         elif s.data:
             for k, v in s.data.items():
                 if v is not None and k != "source":

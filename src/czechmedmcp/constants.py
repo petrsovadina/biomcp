@@ -97,6 +97,9 @@ DIAGNOSIS_SPECIALTY_MAP: dict[str, str] = {
 # External Resource URLs
 PUBMED_BASE_URL = "https://pubmed.ncbi.nlm.nih.gov/"
 PMC_BASE_URL = "https://www.ncbi.nlm.nih.gov/pmc/articles/"
+NCBI_PMC_CONVERTER_URL = (
+    "https://pmc.ncbi.nlm.nih.gov/tools/idconv/api/v1/articles/"
+)
 DOI_BASE_URL = "https://doi.org/"
 DBSNP_BASE_URL = "https://www.ncbi.nlm.nih.gov/snp/"
 CLINVAR_BASE_URL = "https://www.ncbi.nlm.nih.gov/clinvar/variation/"

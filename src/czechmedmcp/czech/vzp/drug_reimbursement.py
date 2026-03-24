@@ -2,12 +2,18 @@
 
 Uses SUKL reimbursement data + SUKL drug registry
 for ATC-based alternative comparison.
+Falls back to VZP static CSV dataset when SUKL API
+returns no reimbursement data.
 """
 
 import json
 import logging
 
 from czechmedmcp.czech.response import format_czech_response
+from czechmedmcp.czech.vzp.data_loader import (
+    get_vzp_reimbursement_for_code,
+    load_vzp_reimbursement_data,
+)
 from czechmedmcp.czech.vzp.models import (
     AlternativeComparison,
     DrugAlternative,
@@ -22,8 +28,8 @@ async def _get_vzp_drug_reimbursement(
 ) -> str:
     """Get VZP drug reimbursement details.
 
-    Fetches reimbursement data from SUKL and formats
-    it as VZP-specific output.
+    Fetches reimbursement data from SUKL; when SUKL
+    returns null, falls back to VZP static CSV dataset.
 
     Returns:
         Dual output JSON string.
@@ -37,16 +43,22 @@ async def _get_vzp_drug_reimbursement(
 
     reimb = await _fetch_reimbursement(sukl_code)
 
+    # Fallback: if SUKL returned no reimbursement data,
+    # try VZP static CSV dataset
+    if not _has_reimbursement_data(reimb):
+        vzp_data = await _vzp_fallback(sukl_code)
+        if vzp_data:
+            reimb = vzp_data
+
     model = DrugReimbursement(
         sukl_code=sukl_code,
         name=detail.get("name", detail.get("nazev", "")),
-        reimbursement_group=reimb.get(
-            "reimbursement_group"
+        reimbursement_group=reimb.get("reimbursement_group"),
+        max_price=reimb.get(
+            "max_retail_price",
+            reimb.get("max_price"),
         ),
-        max_price=reimb.get("max_retail_price"),
-        reimbursement_amount=reimb.get(
-            "reimbursement_amount"
-        ),
+        reimbursement_amount=reimb.get("reimbursement_amount"),
         patient_copay=reimb.get("patient_copay"),
         prescription_conditions=reimb.get("conditions"),
         valid_from=reimb.get("valid_from"),
@@ -66,8 +78,8 @@ async def _compare_alternatives(
     """Compare drug price alternatives in same ATC group.
 
     1. Get reference drug from SUKL (extract ATC).
-    2. Search SUKL by ATC → find alternatives.
-    3. Get reimbursement for each → sort by copay.
+    2. Search SUKL by ATC -> find alternatives.
+    3. Get reimbursement for each -> sort by copay.
 
     Returns:
         Dual output JSON string.
@@ -84,11 +96,11 @@ async def _compare_alternatives(
     ref_reimb = await _fetch_reimbursement(sukl_code)
     ref_copay = ref_reimb.get("patient_copay")
 
+    reimb_available = bool(ref_reimb)
+
     alts: list[DrugAlternative] = []
     if atc:
-        alts = await _find_atc_alternatives(
-            atc, sukl_code, ref_copay
-        )
+        alts = await _find_atc_alternatives(atc, sukl_code, ref_copay)
 
     model = AlternativeComparison(
         reference_sukl_code=sukl_code,
@@ -99,7 +111,7 @@ async def _compare_alternatives(
         total_alternatives=len(alts),
     )
 
-    md = _format_alt_markdown(model)
+    md = _format_alt_markdown(model, reimb_available)
     return format_czech_response(
         data=model.model_dump(),
         tool_name="compare_alternatives",
@@ -161,9 +173,7 @@ async def _find_atc_alternatives(
             _sukl_drug_search,
         )
 
-        raw = await _sukl_drug_search(
-            atc_code, page=1, page_size=20
-        )
+        raw = await _sukl_drug_search(atc_code, page=1, page_size=20)
         data = json.loads(raw)
     except Exception:
         logger.warning(
@@ -186,17 +196,43 @@ async def _find_atc_alternatives(
         if copay is not None and ref_copay is not None:
             savings = round(ref_copay - copay, 2)
 
-        alts.append(DrugAlternative(
-            sukl_code=code,
-            name=drug.get("name", ""),
-            patient_copay=copay,
-            savings_vs_reference=savings,
-        ))
+        alts.append(
+            DrugAlternative(
+                sukl_code=code,
+                name=drug.get("name", ""),
+                patient_copay=copay,
+                savings_vs_reference=savings,
+            )
+        )
 
-    alts.sort(
-        key=lambda a: a.patient_copay or 9999
-    )
+    alts.sort(key=lambda a: a.patient_copay or 9999)
     return alts
+
+
+def _has_reimbursement_data(reimb: dict) -> bool:
+    """Check if reimbursement dict has actual data."""
+    return any(
+        reimb.get(k) is not None
+        for k in (
+            "reimbursement_group",
+            "max_retail_price",
+            "max_price",
+            "reimbursement_amount",
+            "patient_copay",
+        )
+    )
+
+
+async def _vzp_fallback(
+    sukl_code: str,
+) -> dict | None:
+    """Try VZP static CSV dataset as fallback."""
+    try:
+        await load_vzp_reimbursement_data()
+        return get_vzp_reimbursement_for_code(sukl_code)
+    except Exception:
+        logger.warning("VZP fallback failed for %s", sukl_code)
+        return None
 
 
 def _format_reimb_markdown(
@@ -207,34 +243,37 @@ def _format_reimb_markdown(
         f"## VZP Úhrada: {r.name}",
         "",
     ]
+
+    has_data = any(
+        v is not None
+        for v in (
+            r.reimbursement_group,
+            r.max_price,
+            r.reimbursement_amount,
+            r.patient_copay,
+        )
+    )
+
+    if not has_data:
+        lines.append("Úhradová data nejsou dostupná pro tento SÚKL kód.")
+        return "\n".join(lines)
+
     if r.reimbursement_group:
-        lines.append(
-            f"**Úhradová skupina**: "
-            f"{r.reimbursement_group}"
-        )
+        lines.append(f"**Úhradová skupina**: {r.reimbursement_group}")
     if r.max_price is not None:
-        lines.append(
-            f"**Max. cena**: {r.max_price} CZK"
-        )
+        lines.append(f"**Max. cena**: {r.max_price} CZK")
     if r.reimbursement_amount is not None:
-        lines.append(
-            f"**Úhrada**: "
-            f"{r.reimbursement_amount} CZK"
-        )
+        lines.append(f"**Úhrada**: {r.reimbursement_amount} CZK")
     if r.patient_copay is not None:
-        lines.append(
-            f"**Doplatek**: {r.patient_copay} CZK"
-        )
+        lines.append(f"**Doplatek**: {r.patient_copay} CZK")
     if r.prescription_conditions:
-        lines.append(
-            f"**Podmínky**: "
-            f"{r.prescription_conditions}"
-        )
+        lines.append(f"**Podmínky**: {r.prescription_conditions}")
     return "\n".join(lines)
 
 
 def _format_alt_markdown(
     r: AlternativeComparison,
+    reimb_available: bool = True,
 ) -> str:
     """Format alternative comparison as Markdown."""
     lines = [
@@ -244,9 +283,10 @@ def _format_alt_markdown(
     if r.atc_code:
         lines.append(f"**ATC skupina**: {r.atc_code}")
     if r.reference_copay is not None:
+        lines.append(f"**Referenční doplatek**: {r.reference_copay} CZK")
+    elif not reimb_available:
         lines.append(
-            f"**Referenční doplatek**: "
-            f"{r.reference_copay} CZK"
+            "**Referenční doplatek**: N/A (údaje o úhradě nedostupné)"
         )
 
     if r.alternatives:
@@ -266,9 +306,7 @@ def _format_alt_markdown(
                 if a.savings_vs_reference is not None
                 else "N/A"
             )
-            lines.append(
-                f"| {a.name} | {copay} | {savings} |"
-            )
+            lines.append(f"| {a.name} | {copay} | {savings} |")
     else:
         lines.append("\n*Žádné alternativy nalezeny.*")
 

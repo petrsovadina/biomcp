@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 # Check if metrics are enabled via environment variable
 METRICS_ENABLED = (
-    os.getenv("BIOMCP_METRICS_ENABLED", "false").lower() == "true"
+    os.getenv("BIOMCP_METRICS_ENABLED", "true").lower() == "true"
 )
 
 

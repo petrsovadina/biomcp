@@ -4,6 +4,7 @@ import csv
 import io
 import json
 import logging
+from pathlib import Path
 
 import httpx
 
@@ -28,10 +29,10 @@ logger = logging.getLogger(__name__)
 
 _CACHE_TTL = CACHE_TTL_DAY * 7  # 7 days
 
+_LOCAL_DATA_DIR = Path(__file__).parent / "data"
 
-async def _get_diagnosis_stats(
-    code: str, year: int | None = None
-) -> str:
+
+async def _get_diagnosis_stats(code: str, year: int | None = None) -> str:
     """Get epidemiological statistics for a diagnosis.
 
     Args:
@@ -42,18 +43,14 @@ async def _get_diagnosis_stats(
         JSON string with dual output.
     """
     actual_year = year or 2024
-    cache_key = generate_cache_key(
-        "NZIP_STATS", f"{code}:{actual_year}", {}
-    )
+    cache_key = generate_cache_key("NZIP_STATS", f"{code}:{actual_year}", {})
     cached = get_cached_response(cache_key)
 
     if cached:
         data = json.loads(cached)
     else:
         data = await _fetch_and_aggregate(code, actual_year)
-        cache_response(
-            cache_key, json.dumps(data), _CACHE_TTL
-        )
+        cache_response(cache_key, json.dumps(data), _CACHE_TTL)
 
     model = DiagnosisStats(
         code=code,
@@ -63,13 +60,12 @@ async def _get_diagnosis_stats(
         male_count=data.get("male_count"),
         female_count=data.get("female_count"),
         age_distribution=[
-            AgeGroupStats(**a)
-            for a in data.get("age_distribution", [])
+            AgeGroupStats(**a) for a in data.get("age_distribution", [])
         ],
         region_distribution=[
-            RegionStats(**r)
-            for r in data.get("region_distribution", [])
+            RegionStats(**r) for r in data.get("region_distribution", [])
         ],
+        data_available=data.get("data_available", True),
     )
 
     md = _format_markdown(model)
@@ -80,9 +76,7 @@ async def _get_diagnosis_stats(
     )
 
 
-async def _fetch_and_aggregate(
-    code: str, year: int
-) -> dict:
+async def _fetch_and_aggregate(code: str, year: int) -> dict:
     """Fetch NZIP CSV and aggregate by diagnosis code."""
     url = f"{NZIP_CSV_BASE_URL}/hospitalizace_{year}.csv"
 
@@ -92,18 +86,51 @@ async def _fetch_and_aggregate(
         ) as client:
             resp = await client.get(url)
             if not resp.is_success:
-                return _empty_stats(code, year)
+                logger.warning(
+                    "NZIP CSV unavailable: HTTP %d for year %d",
+                    resp.status_code,
+                    year,
+                )
+                return _try_local_fallback(code, year)
             text = resp.text
-    except httpx.HTTPError as e:
-        logger.warning("NZIP fetch failed: %s", e)
-        return _empty_stats(code, year)
+            if not text.strip():
+                logger.warning("NZIP CSV empty for year %d", year)
+                return _try_local_fallback(code, year)
+    except httpx.HTTPError as exc:
+        logger.warning("NZIP fetch failed: %s", exc)
+        return _try_local_fallback(code, year)
 
     return _parse_csv(text, code, year)
 
 
+def _try_local_fallback(code: str, year: int) -> dict:
+    """Try local CSV fallback data."""
+    fallback_path = _LOCAL_DATA_DIR / f"hospitalizace_{year}.csv"
+    if fallback_path.exists():
+        try:
+            text = fallback_path.read_text(encoding="utf-8")
+            if text.strip():
+                logger.info(
+                    "Using local NZIP fallback for %d",
+                    year,
+                )
+                return _parse_csv(text, code, year)
+        except OSError as exc:
+            logger.warning(
+                "Local NZIP fallback read error: %s",
+                exc,
+            )
+
+    return _unavailable_stats(code, year)
+
+
 def _parse_csv(text: str, code: str, year: int) -> dict:
     """Parse NZIP CSV and aggregate stats for code."""
-    reader = csv.DictReader(io.StringIO(text), delimiter=";")
+    # Detect delimiter
+    first_line = text.split("\n", 1)[0]
+    delimiter = ";" if ";" in first_line else ","
+
+    reader = csv.DictReader(io.StringIO(text), delimiter=delimiter)
 
     total = 0
     male = 0
@@ -117,7 +144,7 @@ def _parse_csv(text: str, code: str, year: int) -> dict:
         if not mkn.startswith(code):
             continue
 
-        count = int(row.get("pocet", row.get("count", 0)))
+        count = _safe_int(row.get("pocet", row.get("count", "0")))
         total += count
 
         gender = row.get("pohlavi", "")
@@ -132,13 +159,12 @@ def _parse_csv(text: str, code: str, year: int) -> dict:
 
         region = row.get("kraj", "")
         if region:
-            region_map[region] = (
-                region_map.get(region, 0) + count
-            )
+            region_map[region] = region_map.get(region, 0) + count
 
         if name_cs == code:
             name_cs = row.get(
-                "nazev", row.get("diagnoza_nazev", code)
+                "nazev",
+                row.get("diagnoza_nazev", code),
             )
 
     return {
@@ -147,8 +173,7 @@ def _parse_csv(text: str, code: str, year: int) -> dict:
         "male_count": male or None,
         "female_count": female or None,
         "age_distribution": [
-            {"age_group": k, "count": v}
-            for k, v in sorted(age_map.items())
+            {"age_group": k, "count": v} for k, v in sorted(age_map.items())
         ],
         "region_distribution": [
             {"region": k, "count": v}
@@ -157,7 +182,16 @@ def _parse_csv(text: str, code: str, year: int) -> dict:
                 key=lambda x: -x[1],
             )
         ],
+        "data_available": True,
     }
+
+
+def _safe_int(val: str | int) -> int:
+    """Parse int safely, return 0 on failure."""
+    try:
+        return int(val)
+    except (ValueError, TypeError):
+        return 0
 
 
 def _empty_stats(code: str, year: int) -> dict:
@@ -169,6 +203,20 @@ def _empty_stats(code: str, year: int) -> dict:
         "female_count": None,
         "age_distribution": [],
         "region_distribution": [],
+        "data_available": True,
+    }
+
+
+def _unavailable_stats(code: str, year: int) -> dict:
+    """Return stats indicating data is unavailable."""
+    return {
+        "name_cs": code,
+        "total_cases": 0,
+        "male_count": None,
+        "female_count": None,
+        "age_distribution": [],
+        "region_distribution": [],
+        "data_available": False,
     }
 
 
@@ -178,8 +226,17 @@ def _format_markdown(s: DiagnosisStats) -> str:
         f"## Statistika: {s.code} — {s.name_cs}",
         "",
         f"**Rok**: {s.year}",
-        f"**Celkem případů**: {s.total_cases:,}",
     ]
+
+    if not s.data_available:
+        lines.append(
+            "\n**Data nejsou dostupná** pro zadaný "
+            "rok. NZIP CSV soubor nebyl nalezen "
+            "nebo není přístupný."
+        )
+        return "\n".join(lines)
+
+    lines.append(f"**Celkem případů**: {s.total_cases:,}")
     if s.male_count is not None:
         lines.append(f"**Muži**: {s.male_count:,}")
     if s.female_count is not None:

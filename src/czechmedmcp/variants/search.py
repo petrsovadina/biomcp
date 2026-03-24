@@ -137,7 +137,35 @@ class VariantQuery(BaseModel):
     @model_validator(mode="after")
     def validate_query_params(self) -> "VariantQuery":
         if not self.model_dump(exclude_none=True, exclude_defaults=True):
-            raise ValueError("At least one search parameter is required")
+            raise ValueError(
+                "At least one search parameter is required"
+            )
+
+        # Gene-only queries return too many results and timeout
+        has_narrowing_id = any([
+            self.hgvsp, self.hgvsc, self.rsid, self.region,
+        ])
+        has_narrowing_filter = any([
+            self.min_frequency is not None,
+            self.max_frequency is not None,
+            self.cadd is not None,
+            self.polyphen is not None,
+            self.sift is not None,
+        ])
+        if (
+            self.gene
+            and not has_narrowing_id
+            and not has_narrowing_filter
+        ):
+            raise ValueError(
+                "Gene-only query without additional filters "
+                "may return too many results and timeout. "
+                "Please specify at least one of: hgvsp "
+                "(e.g., p.V600E), hgvsc, rsid, region, "
+                "frequency_max, or cadd_score_min to narrow "
+                "the search."
+            )
+
         return self
 
 

@@ -244,6 +244,48 @@ def _format_no_results(
     return f"No device adverse event reports found for {desc}."
 
 
+async def _fetch_device_by_key(
+    key: str, api_key: str | None = None
+) -> tuple[dict | None, str | None]:
+    """Fetch a device event by MDR report key.
+
+    Tries unquoted key first (numeric exact match).
+    Falls back to quoted key if first attempt finds
+    no results.
+
+    Returns:
+        (result_dict, error_message) — one is None.
+    """
+    for search_val in (
+        f"mdr_report_key:{key}",
+        f'mdr_report_key:"{key}"',
+    ):
+        params = {"search": search_val, "limit": 1}
+        try:
+            response, error = await make_openfda_request(
+                OPENFDA_DEVICE_EVENTS_URL,
+                params,
+                "openfda_device_event_detail",
+                api_key,
+            )
+        except Exception as exc:
+            logger.warning(
+                "Device event fetch failed for %s: %s",
+                key,
+                exc,
+            )
+            return None, str(exc)
+
+        if error:
+            return None, error
+
+        results = (response or {}).get("results", [])
+        if results:
+            return results[0], None
+
+    return None, None
+
+
 async def get_device_event(
     mdr_report_key: str, api_key: str | None = None
 ) -> str:
@@ -251,34 +293,37 @@ async def get_device_event(
     Get detailed information for a specific device event report.
 
     Args:
-        mdr_report_key: MDR report key
-        api_key: Optional OpenFDA API key (overrides OPENFDA_API_KEY env var)
+        mdr_report_key: MDR report key (string or numeric)
+        api_key: Optional OpenFDA API key
 
     Returns:
         Formatted string with detailed report information
     """
-    params = {
-        "search": f'mdr_report_key:"{mdr_report_key}"',
-        "limit": 1,
-    }
+    # Normalize key: strip whitespace, accept both str/int
+    key = str(mdr_report_key).strip()
+    if not key:
+        return (
+            "⚠️ Invalid MDR report key: empty value. "
+            "Please provide a valid MDR report key."
+        )
 
-    response, error = await make_openfda_request(
-        OPENFDA_DEVICE_EVENTS_URL,
-        params,
-        "openfda_device_event_detail",
-        api_key,
-    )
+    # Try exact-match first (unquoted, because
+    # build_safe_query strips quotes from search param).
+    # OpenFDA accepts unquoted numeric keys for exact
+    # mdr_report_key lookup.
+    result, error_msg = await _fetch_device_by_key(key, api_key)
 
-    if error:
-        return f"⚠️ Error retrieving device event report: {error}"
+    if error_msg:
+        return f"⚠️ Error retrieving device event report: {error_msg}"
 
-    if not response or not response.get("results"):
-        return f"Device event report '{mdr_report_key}' not found."
-
-    result = response["results"][0]
+    if not result:
+        return (
+            f"Device event report '{key}' not found. "
+            f"Verify the MDR report key is correct."
+        )
 
     # Build detailed output
-    output = format_device_detail_header(result, mdr_report_key)
+    output = format_device_detail_header(result, key)
 
     # Device details
     if devices := result.get("device", []):

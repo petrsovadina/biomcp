@@ -1,14 +1,20 @@
 """Diagnosis assistant workflow.
 
-Orchestrates MKN-10 search + PubMed evidence lookup.
+Orchestrates hybrid symptom→MKN-10 search + PubMed evidence
+lookup.  Uses the symptom mapping dictionary for better
+matching of lay symptom descriptions to clinical codes.
 """
 
 import asyncio
 import json
 import logging
 
-from czechmedmcp.czech.mkn.models import DiagnosisAssistantResult
-from czechmedmcp.czech.mkn.search import _mkn_search
+from czechmedmcp.czech.diagnosis_embed.searcher import (
+    search_diagnoses,
+)
+from czechmedmcp.czech.mkn.models import (
+    DiagnosisAssistantResult,
+)
 from czechmedmcp.czech.response import format_czech_response
 
 logger = logging.getLogger(__name__)
@@ -20,15 +26,30 @@ async def _diagnosis_assistant(
     """Suggest MKN-10 codes for symptoms with evidence.
 
     Args:
-        symptoms: Symptom description in Czech.
+        symptoms: Symptom description (CZ or EN).
         max_candidates: Max diagnosis candidates (1-10).
 
     Returns:
         JSON string with dual output.
     """
-    candidates = await _search_candidates(
-        symptoms, max_candidates
-    )
+    try:
+        candidates = await _search_candidates(
+            symptoms, max_candidates
+        )
+    except ValueError as exc:
+        # User passed MKN code or empty input
+        model = DiagnosisAssistantResult(
+            query=symptoms,
+            candidates=[],
+            evidence=[],
+        )
+        md = _format_error(symptoms, str(exc))
+        return format_czech_response(
+            data=model.model_dump(),
+            tool_name="diagnosis_assistant",
+            markdown_template=md,
+        )
+
     evidence = await _fetch_evidence(candidates)
 
     model = DiagnosisAssistantResult(
@@ -48,22 +69,17 @@ async def _diagnosis_assistant(
 async def _search_candidates(
     symptoms: str, max_candidates: int
 ) -> list[dict]:
-    """Search MKN-10 for matching diagnoses."""
-    mkn_raw = await _mkn_search(symptoms, max_candidates)
-    mkn_data = json.loads(mkn_raw)
-
-    if isinstance(mkn_data, dict):
-        results = mkn_data.get("results", [])
-    elif isinstance(mkn_data, list):
-        results = mkn_data
-    else:
-        results = []
+    """Search for matching diagnoses via hybrid searcher."""
+    results = await search_diagnoses(
+        symptoms, max_candidates
+    )
 
     return [
         {
             "code": it.get("code", ""),
-            "name": it.get("name", it.get("name_cs", "")),
+            "name": it.get("name_cs", ""),
             "score": it.get("score"),
+            "match_type": it.get("match_type", ""),
         }
         for it in results[:max_candidates]
     ]
@@ -74,23 +90,34 @@ async def _fetch_evidence(
 ) -> list[dict]:
     """Fetch PubMed evidence for top candidates."""
     evidence: list[dict] = []
+    if not candidates:
+        return evidence
+
     try:
-        from czechmedmcp.articles.search import _article_searcher
+        from czechmedmcp.articles.search import (
+            _article_searcher,
+        )
     except ImportError:
         logger.warning(
-            "czechmedmcp.articles not available for evidence"
+            "czechmedmcp.articles not available"
+            " for evidence"
         )
         return evidence
 
     tasks = [
         _article_searcher(
             call_benefit=(
-                f"Find evidence for diagnosis {c['code']}"
+                f"Find evidence for diagnosis"
+                f" {c['code']}"
             ),
             keywords=[c["name"], "diagnosis"],
         )
         for c in candidates[:3]
+        if c.get("name")
     ]
+
+    if not tasks:
+        return evidence
 
     results_raw = await asyncio.gather(
         *tasks, return_exceptions=True
@@ -139,14 +166,29 @@ def _format_markdown(r: DiagnosisAssistantResult) -> str:
         "### Navrhované diagnózy",
         "",
     ]
-    for i, c in enumerate(r.candidates, 1):
+
+    if not r.candidates:
         lines.append(
-            f"{i}. **{c.get('code', '?')}** — "
-            f"{c.get('name', '?')}"
+            "_Nebyly nalezeny žádné odpovídající "
+            "diagnózy. Zkuste upřesnit popis symptomů._"
         )
+    else:
+        for i, c in enumerate(r.candidates, 1):
+            match_info = ""
+            mt = c.get("match_type", "")
+            if mt == "exact_map":
+                match_info = " ✓"
+            elif mt == "fuzzy_map":
+                match_info = " ~"
+            lines.append(
+                f"{i}. **{c.get('code', '?')}** — "
+                f"{c.get('name', '?')}{match_info}"
+            )
 
     if r.evidence:
-        lines.extend(["", "### Podpůrná literatura", ""])
+        lines.extend(
+            ["", "### Podpůrná literatura", ""]
+        )
         for e in r.evidence:
             lines.append(
                 f"- [{e.get('title', '?')}]"
@@ -161,3 +203,13 @@ def _format_markdown(r: DiagnosisAssistantResult) -> str:
         f"*{r.disclaimer}*",
     ])
     return "\n".join(lines)
+
+
+def _format_error(query: str, message: str) -> str:
+    """Format an error/guidance message as Markdown."""
+    return (
+        f'## Diagnostický asistent: "{query}"\n\n'
+        f"⚠️ {message}\n\n---\n"
+        "*Tento nástroj slouží pouze jako pomůcka. "
+        "Konečná diagnóza je vždy na lékaři.*"
+    )

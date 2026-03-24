@@ -3,7 +3,11 @@
 import json
 from unittest.mock import patch
 
-from czechmedmcp.czech.mkn.stats import _get_diagnosis_stats
+from czechmedmcp.czech.mkn.stats import (
+    _get_diagnosis_stats,
+    _parse_csv,
+    _unavailable_stats,
+)
 
 MOCK_CSV = (
     "mkn;nazev;pohlavi;vekova_skupina;kraj;pocet\n"
@@ -39,6 +43,18 @@ def _patch_nzip(csv_text=MOCK_CSV, status=200):
     )
 
 
+def _patch_no_local():
+    """Patch local fallback to return unavailable."""
+    return patch(
+        "czechmedmcp.czech.mkn.stats._LOCAL_DATA_DIR",
+        __class__=type(
+            "FakePath",
+            (),
+            {"exists": lambda s: False},
+        ),
+    )
+
+
 class TestGetDiagnosisStats:
     """Test _get_diagnosis_stats() function."""
 
@@ -46,13 +62,10 @@ class TestGetDiagnosisStats:
         """Result must have content + structuredContent."""
         with (
             patch(
-                "czechmedmcp.czech.mkn.stats."
-                "get_cached_response",
+                "czechmedmcp.czech.mkn.stats.get_cached_response",
                 return_value=None,
             ),
-            patch(
-                "czechmedmcp.czech.mkn.stats.cache_response"
-            ),
+            patch("czechmedmcp.czech.mkn.stats.cache_response"),
             _patch_nzip(),
         ):
             result = await _get_diagnosis_stats("J06", 2024)
@@ -65,13 +78,10 @@ class TestGetDiagnosisStats:
         """Total cases should sum matching rows."""
         with (
             patch(
-                "czechmedmcp.czech.mkn.stats."
-                "get_cached_response",
+                "czechmedmcp.czech.mkn.stats.get_cached_response",
                 return_value=None,
             ),
-            patch(
-                "czechmedmcp.czech.mkn.stats.cache_response"
-            ),
+            patch("czechmedmcp.czech.mkn.stats.cache_response"),
             _patch_nzip(),
         ):
             result = await _get_diagnosis_stats("J06", 2024)
@@ -85,13 +95,10 @@ class TestGetDiagnosisStats:
         """Male/female counts should be aggregated."""
         with (
             patch(
-                "czechmedmcp.czech.mkn.stats."
-                "get_cached_response",
+                "czechmedmcp.czech.mkn.stats.get_cached_response",
                 return_value=None,
             ),
-            patch(
-                "czechmedmcp.czech.mkn.stats.cache_response"
-            ),
+            patch("czechmedmcp.czech.mkn.stats.cache_response"),
             _patch_nzip(),
         ):
             result = await _get_diagnosis_stats("J06", 2024)
@@ -105,13 +112,10 @@ class TestGetDiagnosisStats:
         """A00 should not be included in J06 stats."""
         with (
             patch(
-                "czechmedmcp.czech.mkn.stats."
-                "get_cached_response",
+                "czechmedmcp.czech.mkn.stats.get_cached_response",
                 return_value=None,
             ),
-            patch(
-                "czechmedmcp.czech.mkn.stats.cache_response"
-            ),
+            patch("czechmedmcp.czech.mkn.stats.cache_response"),
             _patch_nzip(),
         ):
             result = await _get_diagnosis_stats("A00", 2024)
@@ -119,21 +123,43 @@ class TestGetDiagnosisStats:
         sc = json.loads(result)["structuredContent"]
         assert sc["total_cases"] == 10
 
-    async def test_empty_when_api_fails(self):
+    async def test_unavailable_csv_shows_message(self):
+        """When CSV unavailable, show clear message."""
+        with (
+            patch(
+                "czechmedmcp.czech.mkn.stats.get_cached_response",
+                return_value=None,
+            ),
+            patch("czechmedmcp.czech.mkn.stats.cache_response"),
+            _patch_nzip(status=500),
+            patch(
+                "czechmedmcp.czech.mkn.stats._try_local_fallback",
+                return_value=_unavailable_stats("J06", 2024),
+            ),
+        ):
+            result = await _get_diagnosis_stats("J06", 2024)
+
+        parsed = json.loads(result)
+        sc = parsed["structuredContent"]
+        assert sc["total_cases"] == 0
+        assert sc["data_available"] is False
+
+        content = parsed["content"]
+        assert "Data nejsou dostupná" in content
+
+    async def test_empty_when_api_fails_with_fallback(
+        self,
+    ):
         """Should use local fallback on HTTP error."""
         with (
             patch(
-                "czechmedmcp.czech.mkn.stats."
-                "get_cached_response",
+                "czechmedmcp.czech.mkn.stats.get_cached_response",
                 return_value=None,
             ),
-            patch(
-                "czechmedmcp.czech.mkn.stats.cache_response"
-            ),
+            patch("czechmedmcp.czech.mkn.stats.cache_response"),
             _patch_nzip(status=500),
             patch(
-                "czechmedmcp.czech.mkn.stats"
-                "._try_local_fallback",
+                "czechmedmcp.czech.mkn.stats._try_local_fallback",
                 return_value={
                     "name_cs": "J06",
                     "total_cases": 0,
@@ -141,7 +167,7 @@ class TestGetDiagnosisStats:
                     "female_count": None,
                     "age_distribution": [],
                     "region_distribution": [],
-                    "data_available": False,
+                    "data_available": True,
                 },
             ),
         ):
@@ -154,13 +180,10 @@ class TestGetDiagnosisStats:
         """Content should contain Czech stats."""
         with (
             patch(
-                "czechmedmcp.czech.mkn.stats."
-                "get_cached_response",
+                "czechmedmcp.czech.mkn.stats.get_cached_response",
                 return_value=None,
             ),
-            patch(
-                "czechmedmcp.czech.mkn.stats.cache_response"
-            ),
+            patch("czechmedmcp.czech.mkn.stats.cache_response"),
             _patch_nzip(),
         ):
             result = await _get_diagnosis_stats("J06", 2024)
@@ -169,3 +192,38 @@ class TestGetDiagnosisStats:
         assert "Statistika" in content
         assert "J06" in content
         assert "3,000" in content or "3000" in content
+
+
+class TestParseCsv:
+    """Test CSV parsing edge cases."""
+
+    def test_comma_delimiter(self):
+        """Should handle comma-delimited CSV."""
+        csv_text = (
+            "mkn,nazev,pohlavi,vekova_skupina,"
+            "kraj,pocet\n"
+            "J06,Infekce,M,0-14,Praha,100\n"
+        )
+        data = _parse_csv(csv_text, "J06", 2024)
+        assert data["total_cases"] == 100
+        assert data["data_available"] is True
+
+    def test_bad_count_value(self):
+        """Non-numeric count should be treated as 0."""
+        csv_text = (
+            "mkn;nazev;pohlavi;vekova_skupina;"
+            "kraj;pocet\n"
+            "J06;Infekce;M;0-14;Praha;abc\n"
+        )
+        data = _parse_csv(csv_text, "J06", 2024)
+        assert data["total_cases"] == 0
+
+
+class TestUnavailableStats:
+    """Test unavailable stats format."""
+
+    def test_unavailable_stats_fields(self):
+        data = _unavailable_stats("X99", 2024)
+        assert data["data_available"] is False
+        assert data["total_cases"] == 0
+        assert data["name_cs"] == "X99"

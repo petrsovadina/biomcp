@@ -97,6 +97,7 @@ class DiagnosisStats(BaseModel):
     region_distribution: list[RegionStats] = Field(
         default_factory=list
     )
+    data_available: bool = True
     source: str = "NZIP"
 
 

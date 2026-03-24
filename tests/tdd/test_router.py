@@ -215,7 +215,7 @@ class TestSearchFunction:
                     query="",
                     domain="variant",
                     genes="BRAF",
-                    significance="pathogenic",
+                    variants="V600E",
                     page_size=10,
                 )
 
@@ -419,13 +419,17 @@ class TestFetchFunction:
 
     async def test_fetch_error_handling(self):
         """Test fetch error handling."""
-        with patch("czechmedmcp.articles.fetch.fetch_articles") as mock_fetch:
+        with patch(
+            "czechmedmcp.articles.fetch._article_details"
+        ) as mock_fetch:
             mock_fetch.side_effect = Exception("API Error")
 
             with pytest.raises(SearchExecutionError) as exc_info:
                 await fetch(domain="article", id="123")
 
-            assert "Failed to execute search" in str(exc_info.value)
+            assert "Failed to execute search" in str(
+                exc_info.value
+            )
 
     async def test_fetch_domain_auto_detection_pmid(self):
         """Test domain auto-detection for PMID."""

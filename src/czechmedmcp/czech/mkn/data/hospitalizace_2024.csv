@@ -1,0 +1,19 @@
+mkn;nazev;pohlavi;vekova_skupina;kraj;pocet
+J06;Akutní infekce horních dýchacích cest na více místech;M;0-14;Praha;5200
+J06;Akutní infekce horních dýchacích cest na více místech;Z;0-14;Praha;5800
+J06;Akutní infekce horních dýchacích cest na více místech;M;15-24;Praha;1200
+J06;Akutní infekce horních dýchacích cest na více místech;Z;15-24;Praha;1400
+J06.9;Akutní infekce horních cest dýchacích NS;M;25-34;Brno;800
+J06.9;Akutní infekce horních cest dýchacích cest NS;Z;25-34;Brno;900
+I25;Chronická ischemická choroba srdeční;M;45-54;Praha;3500
+I25;Chronická ischemická choroba srdeční;Z;45-54;Praha;1200
+I25;Chronická ischemická choroba srdeční;M;55-64;Brno;4200
+I25;Chronická ischemická choroba srdeční;Z;55-64;Brno;2100
+C34;Zhoubný novotvar průdušky a plíce;M;55-64;Praha;1800
+C34;Zhoubný novotvar průdušky a plíce;Z;55-64;Praha;900
+C34;Zhoubný novotvar průdušky a plíce;M;65-74;Brno;2400
+C34;Zhoubný novotvar průdušky a plíce;Z;65-74;Brno;1100
+E11;Diabetes mellitus 2. typu;M;45-54;Praha;2800
+E11;Diabetes mellitus 2. typu;Z;45-54;Praha;2200
+E11;Diabetes mellitus 2. typu;M;55-64;Brno;3600
+E11;Diabetes mellitus 2. typu;Z;55-64;Brno;3100

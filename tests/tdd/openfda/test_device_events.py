@@ -7,6 +7,7 @@ from unittest.mock import patch
 import pytest
 
 from czechmedmcp.openfda.device_events import (
+    _fetch_device_by_key,
     get_device_event,
     search_device_events,
 )
@@ -255,3 +256,120 @@ async def test_search_device_events_error():
 
         assert "Error searching device events" in result
         assert "Network timeout" in result
+
+
+# ── US8a: DeviceGetter MDR key format fixes ──
+
+
+@pytest.mark.asyncio
+async def test_get_device_event_empty_key():
+    """Empty MDR key should return clear error."""
+    result = await get_device_event("")
+    assert "Invalid MDR report key" in result
+
+
+@pytest.mark.asyncio
+async def test_get_device_event_whitespace_key():
+    """Whitespace-only MDR key should return error."""
+    result = await get_device_event("   ")
+    assert "Invalid MDR report key" in result
+
+
+@pytest.mark.asyncio
+async def test_get_device_event_numeric_key():
+    """Numeric MDR key should work (int-like string)."""
+    mock_result = {
+        "results": [
+            {
+                "mdr_report_key": "12345678",
+                "event_type": "M",
+                "device": [],
+            }
+        ]
+    }
+
+    with patch(
+        "czechmedmcp.openfda.device_events.make_openfda_request"
+    ) as mock_request:
+        mock_request.return_value = (mock_result, None)
+
+        result = await get_device_event("12345678")
+
+        assert "12345678" in result
+        # Should use unquoted key first
+        call_args = mock_request.call_args
+        assert "mdr_report_key:12345678" in (call_args[0][1]["search"])
+
+
+@pytest.mark.asyncio
+async def test_fetch_device_by_key_fallback():
+    """Should try unquoted then quoted key."""
+    mock_empty = {"results": []}
+    mock_found = {
+        "results": [
+            {
+                "mdr_report_key": "MDR999",
+                "event_type": "O",
+                "device": [],
+            }
+        ]
+    }
+
+    with patch(
+        "czechmedmcp.openfda.device_events.make_openfda_request"
+    ) as mock_request:
+        # First call (unquoted) returns empty,
+        # second call (quoted) returns result
+        mock_request.side_effect = [
+            (mock_empty, None),
+            (mock_found, None),
+        ]
+
+        result, error = await _fetch_device_by_key("MDR999")
+
+        assert error is None
+        assert result is not None
+        assert result["mdr_report_key"] == "MDR999"
+        assert mock_request.call_count == 2
+
+
+@pytest.mark.asyncio
+async def test_fetch_device_by_key_api_error():
+    """API error should be propagated."""
+    with patch(
+        "czechmedmcp.openfda.device_events.make_openfda_request"
+    ) as mock_request:
+        mock_request.return_value = (None, "API down")
+
+        result, error = await _fetch_device_by_key("MDR123")
+
+        assert result is None
+        assert error == "API down"
+
+
+@pytest.mark.asyncio
+async def test_get_device_event_not_found_message():
+    """Not-found message should suggest verifying key."""
+    with patch(
+        "czechmedmcp.openfda.device_events.make_openfda_request"
+    ) as mock_request:
+        mock_request.return_value = ({"results": []}, None)
+
+        result = await get_device_event("NONEXISTENT")
+
+        assert "not found" in result
+        assert "Verify" in result
+
+
+@pytest.mark.asyncio
+async def test_get_device_event_exception_handling():
+    """Unexpected exception should return error message."""
+    with patch(
+        "czechmedmcp.openfda.device_events.make_openfda_request"
+    ) as mock_request:
+        mock_request.side_effect = RuntimeError("boom")
+
+        result = await get_device_event("MDR111")
+
+        assert "Error retrieving" in result
+        assert "boom" in result

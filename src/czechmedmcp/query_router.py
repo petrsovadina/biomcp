@@ -1,6 +1,7 @@
 """Query router for unified search in CzechMedMCP."""
 
 import asyncio
+import logging
 from dataclasses import dataclass
 from typing import Any
 
@@ -9,6 +10,8 @@ from czechmedmcp.articles.unified import search_articles_unified
 from czechmedmcp.query_parser import ParsedQuery
 from czechmedmcp.trials.search import TrialQuery, search_trials
 from czechmedmcp.variants.search import VariantQuery, search_variants
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -243,7 +246,7 @@ class QueryRouter:
         return mapping
 
 
-async def execute_routing_plan(
+async def execute_routing_plan(  # noqa: C901
     plan: RoutingPlan, output_json: bool = True
 ) -> dict[str, Any]:
     """Execute a routing plan by calling the appropriate tools."""
@@ -271,7 +274,13 @@ async def execute_routing_plan(
             task_names.append("trials")
 
         elif tool_name == "variant_searcher":
-            variant_query = VariantQuery(**params)
+            try:
+                variant_query = VariantQuery(**params)
+            except (ValueError, Exception) as e:
+                logger.warning(
+                    f"Skipping variant search: {e}"
+                )
+                continue
             tasks.append(
                 search_variants(variant_query, output_json=output_json)
             )

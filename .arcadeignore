@@ -1,0 +1,50 @@
+# Node.js / Frontend (not needed for MCP server)
+node_modules/
+apps/
+packages/
+.next/
+.turbo/
+
+# Python build artifacts
+__pycache__/
+*.pyc
+*.pyo
+build/
+dist/
+*.egg-info/
+.venv/
+venv/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+*.swp
+
+# Git
+.git/
+
+# Specs and docs (not needed at runtime)
+specs/
+docs/
+.specify/
+
+# Test data and fixtures
+tests/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Docker (not needed for Arcade)
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Other
+*.md
+*.txt
+*.toml.bak
+spike/
+experiment/
+llms/
+vault/

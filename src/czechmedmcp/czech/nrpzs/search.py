@@ -256,10 +256,15 @@ async def _nrpzs_search(
 
 
 async def _nrpzs_get(provider_id: str) -> str:
-    """Get full provider details by facility ID.
+    """Get full provider details by ID, ICO, or name.
+
+    Cascade lookup:
+      1. Exact match on ZZ_misto_poskytovani_ID
+      2. Exact match on poskytovatel_ICO
+      3. Substring match on ZZ_nazev
 
     Args:
-        provider_id: ZZ_misto_poskytovani_ID value.
+        provider_id: Facility ID, ICO, or name fragment.
 
     Returns:
         JSON string with HealthcareProvider fields.
@@ -273,14 +278,51 @@ async def _nrpzs_get(provider_id: str) -> str:
             ensure_ascii=False,
         )
 
+    query = str(provider_id).strip()
+
+    # 1. Exact match on facility ID
     for row in providers:
-        row_id = row.get("ZZ_misto_poskytovani_ID", "")
-        if str(row_id) == str(provider_id):
-            result = _csv_to_provider(row)
-            return json.dumps(result, ensure_ascii=False)
+        row_id = str(
+            row.get("ZZ_misto_poskytovani_ID", "")
+        ).strip()
+        if row_id == query:
+            return json.dumps(
+                _csv_to_provider(row),
+                ensure_ascii=False,
+            )
+
+    # 2. Exact match on ICO
+    for row in providers:
+        row_ico = str(
+            row.get("poskytovatel_ICO", "")
+        ).strip()
+        if row_ico == query:
+            return json.dumps(
+                _csv_to_provider(row),
+                ensure_ascii=False,
+            )
+
+    # 3. Substring match on facility name
+    query_n = normalize_query(query)
+    if query_n:
+        for row in providers:
+            name_n = normalize_query(
+                row.get("ZZ_nazev", "")
+            )
+            if query_n in name_n:
+                return json.dumps(
+                    _csv_to_provider(row),
+                    ensure_ascii=False,
+                )
 
     return json.dumps(
-        {"error": f"Provider not found: {provider_id}"},
+        {
+            "error": (
+                f"Provider not found: {provider_id}. "
+                f"Searched by facility ID, ICO, "
+                f"and name."
+            ),
+        },
         ensure_ascii=False,
     )
 

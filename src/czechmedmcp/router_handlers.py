@@ -199,6 +199,7 @@ async def handle_trial_search(  # noqa: C901
 
 async def handle_variant_search(
     genes: list[str] | None = None,
+    variants: list[str] | None = None,
     significance: str | None = None,
     keywords: list[str] | None = None,
     page: int = 1,
@@ -209,6 +210,7 @@ async def handle_variant_search(
     logger.info("Executing variant search")
 
     gene = genes[0] if genes else None
+    hgvsp = variants[0] if variants else None
 
     try:
         from czechmedmcp.variants.search import (
@@ -218,6 +220,7 @@ async def handle_variant_search(
 
         variant_query = VariantQuery(
             gene=gene,
+            hgvsp=hgvsp,
             significance=significance,
             size=page_size,
             offset=compute_skip(page, page_size),

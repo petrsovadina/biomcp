@@ -199,7 +199,7 @@ class TestMCPIntegration:
 
     async def test_mcp_unified_query_integration(self):
         """Test unified query through MCP."""
-        with patch("czechmedmcp.query_router.execute_routing_plan") as mock_execute:
+        with patch("czechmedmcp.router.execute_routing_plan") as mock_execute:
             mock_execute.return_value = {
                 "articles": json.dumps([
                     {"pmid": "111", "title": "Article 1"}

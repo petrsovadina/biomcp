@@ -77,3 +77,24 @@ class ThinkingError(CzechMedMCPError):
         super().__init__(
             message, {"thought_number": thought_number, "error": error}
         )
+
+
+def format_tool_error(
+    tool_name: str,
+    message: str,
+    code: str | None = None,
+) -> str:
+    """Format a consistent error response for MCP tools.
+
+    Returns a JSON string with a standard structure so that
+    all tools report errors in the same format.
+    """
+    import json
+
+    error: dict[str, str] = {
+        "error": message,
+        "tool": tool_name,
+    }
+    if code:
+        error["code"] = code
+    return json.dumps(error, ensure_ascii=False)

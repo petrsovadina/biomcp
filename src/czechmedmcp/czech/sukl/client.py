@@ -27,6 +27,15 @@ SUKL_HTTP_TIMEOUT = CZECH_HTTP_TIMEOUT
 _DEFAULT_CACHE_TTL = DEFAULT_CACHE_TIMEOUT
 
 
+def normalize_sukl_code(code: str) -> str:
+    """Normalize a SUKL code to 7-digit zero-padded format.
+
+    Strips whitespace and pads with leading zeros so that
+    both ``"124137"`` and ``"0124137"`` resolve to ``"0124137"``.
+    """
+    return code.strip().zfill(7)
+
+
 async def fetch_drug_detail(
     sukl_code: str,
     use_cache: bool = True,
@@ -35,10 +44,11 @@ async def fetch_drug_detail(
     """Fetch drug detail from DLP API by SUKL code.
 
     Args:
-        sukl_code: The SUKL drug code.
+        sukl_code: The SUKL drug code (auto-normalized).
         use_cache: Whether to check/store in cache.
         cache_ttl: Cache TTL in seconds (default 1 week).
     """
+    sukl_code = normalize_sukl_code(sukl_code)
     url = f"{SUKL_DLP_V1}/lecive-pripravky/{sukl_code}"
     cache_key = generate_cache_key("GET", url, {})
 

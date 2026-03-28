@@ -176,7 +176,9 @@ def _format_markdown(r: DiagnosisAssistantResult) -> str:
         for i, c in enumerate(r.candidates, 1):
             match_info = ""
             mt = c.get("match_type", "")
-            if mt == "exact_map":
+            if mt == "cluster":
+                match_info = " ✓✓"
+            elif mt == "exact_map":
                 match_info = " ✓"
             elif mt == "fuzzy_map":
                 match_info = " ~"

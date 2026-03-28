@@ -7,11 +7,16 @@ all Czech tools when the package is loaded.
 All tools use ``czechmed_`` prefix per FR-024.
 """
 
+import asyncio
 import logging
 from typing import Annotated
 
 from pydantic import Field
 
+from czechmedmcp.constants import (
+    SUKL_COMPARE_TIMEOUT,
+    SUKL_TOOL_TIMEOUT,
+)
 from czechmedmcp.core import mcp_app
 from czechmedmcp.czech.mkn.search import (
     _mkn_browse,
@@ -95,7 +100,17 @@ async def czechmed_search_medicine(
 
     Supports diacritics-insensitive search.
     """
-    return await _sukl_drug_search(query, page, page_size)
+    try:
+        return await asyncio.wait_for(
+            _sukl_drug_search(query, page, page_size),
+            timeout=SUKL_TOOL_TIMEOUT,
+        )
+    except (asyncio.TimeoutError, TimeoutError):
+        return (
+            "SUKL drug index is currently building "
+            "(first-time initialization takes ~2 minutes). "
+            "Please try again shortly."
+        )
 
 
 @mcp_app.tool()
@@ -107,7 +122,16 @@ async def czechmed_get_medicine_detail(
     ],
 ) -> str:
     """Get full drug details from Czech SUKL registry."""
-    return await _sukl_drug_details(sukl_code)
+    try:
+        return await asyncio.wait_for(
+            _sukl_drug_details(sukl_code),
+            timeout=SUKL_TOOL_TIMEOUT,
+        )
+    except (asyncio.TimeoutError, TimeoutError):
+        return (
+            "SUKL drug index is currently building. "
+            "Please try again in ~2 minutes."
+        )
 
 
 @mcp_app.tool()
@@ -502,7 +526,16 @@ async def czechmed_get_drug_reimbursement(
     ],
 ) -> str:
     """Get VZP drug reimbursement — group, max price, coverage, copay."""
-    return await _get_vzp_drug_reimbursement(sukl_code)
+    try:
+        return await asyncio.wait_for(
+            _get_vzp_drug_reimbursement(sukl_code),
+            timeout=SUKL_TOOL_TIMEOUT,
+        )
+    except (asyncio.TimeoutError, TimeoutError):
+        return (
+            "VZP reimbursement lookup timed out. "
+            "Please try again shortly."
+        )
 
 
 @mcp_app.tool()
@@ -516,4 +549,14 @@ async def czechmed_compare_alternatives(
     ],
 ) -> str:
     """Compare drug price alternatives in same ATC group."""
-    return await _compare_alternatives(sukl_code)
+    try:
+        return await asyncio.wait_for(
+            _compare_alternatives(sukl_code),
+            timeout=SUKL_COMPARE_TIMEOUT,
+        )
+    except (asyncio.TimeoutError, TimeoutError):
+        return (
+            "Drug comparison timed out — SUKL index may "
+            "still be building. Please try again in "
+            "~2 minutes."
+        )

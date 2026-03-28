@@ -32,7 +32,6 @@ from czechmedmcp.metrics import track_performance
 from czechmedmcp.parameter_parser import ParameterParser
 from czechmedmcp.query_parser import QueryParser
 from czechmedmcp.query_router import QueryRouter, execute_routing_plan
-from czechmedmcp.thinking_tracker import get_thinking_reminder
 
 logger = logging.getLogger(__name__)
 
@@ -95,17 +94,6 @@ def format_results(
             logger.warning(f"Failed to format result in domain {domain}: {e}")
             # Skip malformed results
             continue
-
-    # Add thinking reminder if needed (as first result)
-    reminder = get_thinking_reminder()
-    if reminder and formatted_data:
-        reminder_result = {
-            "id": "thinking-reminder",
-            "title": "⚠️ Research Best Practice Reminder",
-            "text": reminder,
-            "url": "",
-        }
-        formatted_data.insert(0, reminder_result)
 
     # Return OpenAI MCP compliant format
     return {"results": formatted_data}

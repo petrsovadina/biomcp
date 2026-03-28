@@ -40,6 +40,36 @@ MYCHEM_QUERY_URL = f"{MYCHEM_BASE_URL}/query"
 MYCHEM_GET_URL = f"{MYCHEM_BASE_URL}/chem"
 
 
+def _extract_name_from_hit(hit: dict[str, Any]) -> str | None:
+    """Extract a drug name from a MyChem query hit.
+
+    Query hits often contain name fields that may be
+    missing from the detailed GET response.
+    """
+    # Try drugbank.name first (most reliable)
+    db = hit.get("drugbank")
+    if isinstance(db, dict) and db.get("name"):
+        return db["name"]
+
+    # Try chembl.pref_name
+    chembl = hit.get("chembl")
+    if isinstance(chembl, dict) and chembl.get("pref_name"):
+        return chembl["pref_name"]
+
+    # Try unii.display_name
+    unii = hit.get("unii")
+    if isinstance(unii, dict) and unii.get("display_name"):
+        return unii["display_name"]
+
+    # Try chebi.name
+    chebi = hit.get("chebi")
+    if isinstance(chebi, dict) and chebi.get("name"):
+        return chebi["name"]
+
+    # Try top-level name
+    return hit.get("name")
+
+
 class GeneInfo(BaseModel):
     """Gene information from MyGene.info."""
 
@@ -392,26 +422,46 @@ class BioThingsClient:
             # Check if it's an ID (starts with known prefixes)
             if any(
                 drug_id_or_name.upper().startswith(prefix)
-                for prefix in ["DRUGBANK:", "DB", "CHEMBL", "CHEBI:", "CID"]
+                for prefix in [
+                    "DRUGBANK:", "DB", "CHEMBL",
+                    "CHEBI:", "CID",
+                ]
             ):
-                return await self._get_drug_by_id(drug_id_or_name, fields)
+                return await self._get_drug_by_id(
+                    drug_id_or_name, fields
+                )
 
             # Otherwise, query by name
-            query_result = await self._query_drug(drug_id_or_name)
+            query_result = await self._query_drug(
+                drug_id_or_name
+            )
             if not query_result:
                 return None
 
             # Get the best match
-            drug_id = query_result[0].get("_id")
+            best_hit = query_result[0]
+            drug_id = best_hit.get("_id")
             if not drug_id:
                 return None
 
             # Now get full details
-            return await self._get_drug_by_id(drug_id, fields)
+            drug_info = await self._get_drug_by_id(
+                drug_id, fields
+            )
+
+            # Fall back to query hit name if GET
+            # response lacks a name
+            if drug_info and not drug_info.name:
+                hit_name = _extract_name_from_hit(best_hit)
+                if hit_name:
+                    drug_info.name = hit_name
+
+            return drug_info
 
         except Exception as e:
             self.logger.warning(
-                f"Failed to get drug info for {drug_id_or_name}: {e}"
+                "Failed to get drug info for "
+                f"{drug_id_or_name}: {e}"
             )
             return None
 
@@ -455,15 +505,39 @@ class BioThingsClient:
             if not error2 and response2:
                 hits = response2.get("hits", [])
 
-        # Sort hits to prioritize those with actual drug names
+        # Sort hits to prioritize those with matching names
+        name_lower = name.lower()
+
         def score_hit(hit):
             score = hit.get("_score", 0)
-            # Boost score if hit has drug name fields
-            if hit.get("drugbank", {}).get("name"):
+            # Large boost for exact name match
+            db = hit.get("drugbank") or {}
+            db_name = db.get("name", "")
+            chembl = hit.get("chembl") or {}
+            chembl_name = chembl.get("pref_name", "")
+            unii = hit.get("unii") or {}
+            unii_name = unii.get("display_name", "")
+            chebi = hit.get("chebi") or {}
+            chebi_name = chebi.get("name", "")
+
+            names = [
+                db_name, chembl_name,
+                unii_name, chebi_name,
+            ]
+
+            # Exact match gets highest priority
+            if any(
+                n and n.lower() == name_lower
+                for n in names
+            ):
+                score += 1000
+
+            # Boost for having drug name fields
+            if db_name:
                 score += 10
-            if hit.get("chembl", {}).get("pref_name"):
+            if chembl_name:
                 score += 5
-            if hit.get("unii", {}).get("display_name"):
+            if unii_name:
                 score += 3
             return score
 

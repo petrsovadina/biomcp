@@ -28,9 +28,7 @@ class TestFormatResults:
             }
         ]
 
-        # Mock thinking tracker to prevent reminder
-        with patch("czechmedmcp.router.get_thinking_reminder", return_value=""):
-            formatted = format_results(results, "article", 1, 10, 1)
+        formatted = format_results(results, "article", 1, 10, 1)
 
         assert "results" in formatted
         assert len(formatted["results"]) == 1
@@ -58,9 +56,7 @@ class TestFormatResults:
             }
         ]
 
-        # Mock thinking tracker to prevent reminder
-        with patch("czechmedmcp.router.get_thinking_reminder", return_value=""):
-            formatted = format_results(results, "trial", 1, 10, 1)
+        formatted = format_results(results, "trial", 1, 10, 1)
 
         assert "results" in formatted
         assert len(formatted["results"]) == 1
@@ -82,9 +78,7 @@ class TestFormatResults:
             }
         ]
 
-        # Mock thinking tracker to prevent reminder
-        with patch("czechmedmcp.router.get_thinking_reminder", return_value=""):
-            formatted = format_results(results, "trial", 1, 10, 1)
+        formatted = format_results(results, "trial", 1, 10, 1)
 
         assert "results" in formatted
         assert len(formatted["results"]) == 1
@@ -104,9 +98,7 @@ class TestFormatResults:
             }
         ]
 
-        # Mock thinking tracker to prevent reminder
-        with patch("czechmedmcp.router.get_thinking_reminder", return_value=""):
-            formatted = format_results(results, "variant", 1, 10, 1)
+        formatted = format_results(results, "variant", 1, 10, 1)
 
         assert "results" in formatted
         assert len(formatted["results"]) == 1
@@ -133,9 +125,7 @@ class TestFormatResults:
             },  # Missing required fields but won't fail (treated as preprint)
         ]
 
-        # Mock thinking tracker to prevent reminder
-        with patch("czechmedmcp.router.get_thinking_reminder", return_value=""):
-            formatted = format_results(results, "article", 1, 10, 3)
+        formatted = format_results(results, "article", 1, 10, 3)
 
         # Should skip None but include the third (treated as preprint with empty fields)
         assert len(formatted["results"]) == 2
@@ -158,15 +148,13 @@ class TestSearchFunction:
         ) as mock_search:
             mock_search.return_value = mock_result
 
-            # Mock thinking tracker to prevent reminder
-            with patch("czechmedmcp.router.get_thinking_reminder", return_value=""):
-                result = await search(
-                    query="",
-                    domain="article",
-                    genes="BRAF",
-                    diseases=["cancer"],
-                    page_size=10,
-                )
+            result = await search(
+                query="",
+                domain="article",
+                genes="BRAF",
+                diseases=["cancer"],
+                page_size=10,
+            )
 
             assert "results" in result
             assert len(result["results"]) == 1
@@ -187,15 +175,13 @@ class TestSearchFunction:
         with patch("czechmedmcp.trials.search.search_trials") as mock_search:
             mock_search.return_value = mock_result
 
-            # Mock thinking tracker to prevent reminder
-            with patch("czechmedmcp.router.get_thinking_reminder", return_value=""):
-                result = await search(
-                    query="",
-                    domain="trial",
-                    conditions=["cancer"],
-                    phase="Phase 3",
-                    page_size=20,
-                )
+            result = await search(
+                query="",
+                domain="trial",
+                conditions=["cancer"],
+                phase="Phase 3",
+                page_size=20,
+            )
 
             assert "results" in result
             mock_search.assert_called_once()
@@ -209,15 +195,13 @@ class TestSearchFunction:
         with patch("czechmedmcp.variants.search.search_variants") as mock_search:
             mock_search.return_value = mock_result
 
-            # Mock thinking tracker to prevent reminder
-            with patch("czechmedmcp.router.get_thinking_reminder", return_value=""):
-                result = await search(
-                    query="",
-                    domain="variant",
-                    genes="BRAF",
-                    variants="V600E",
-                    page_size=10,
-                )
+            result = await search(
+                query="",
+                domain="variant",
+                genes="BRAF",
+                variants="V600E",
+                page_size=10,
+            )
 
             assert "results" in result
             assert len(result["results"]) == 1

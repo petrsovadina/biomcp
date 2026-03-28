@@ -15,6 +15,10 @@ import re
 
 from czechmedmcp.czech.diacritics import normalize_query
 from czechmedmcp.czech.mkn.parser import CodeIndex, TextIndex, load_mkn10
+from czechmedmcp.czech.mkn.synonyms import (
+    get_prevalence_boost,
+    lookup_synonym,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -161,7 +165,12 @@ def _search_by_text(
         if node:
             results.append(node)
 
-    results.sort(key=lambda n: n["code"])
+    results.sort(
+        key=lambda n: (
+            -get_prevalence_boost(n["code"]),
+            n["code"],
+        ),
+    )
     return results[:max_results]
 
 
@@ -194,9 +203,28 @@ async def _mkn_search(
             stripped, code_index, max_results
         )
     else:
-        nodes = _search_by_text(
+        # Check synonym dictionary first (T045).
+        synonym_codes = lookup_synonym(stripped)
+        synonym_nodes: list[dict] = []
+        if synonym_codes:
+            for sc in synonym_codes:
+                node = code_index.get(sc)
+                if node:
+                    synonym_nodes.append(node)
+
+        text_nodes = _search_by_text(
             stripped, code_index, text_index, max_results
         )
+
+        # Merge: synonyms first, then text results.
+        seen: set[str] = {
+            n["code"] for n in synonym_nodes
+        }
+        for tn in text_nodes:
+            if tn["code"] not in seen:
+                synonym_nodes.append(tn)
+                seen.add(tn["code"])
+        nodes = synonym_nodes[:max_results]
 
     results = [
         {

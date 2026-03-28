@@ -1,23 +1,32 @@
 """Hybrid diagnosis searcher.
 
-Combines three search strategies for symptom→MKN-10 matching:
-1. Exact lookup in the symptom mapping dictionary
-2. Fuzzy/substring lookup in the symptom mapping dictionary
-3. Fallback to MKN-10 full-text search (existing _mkn_search)
+Combines four search strategies for symptom→MKN-10 matching:
+1. Symptom cluster matching (multi-keyword patterns)
+2. Exact lookup in the symptom mapping dictionary
+3. Fuzzy/substring lookup in the symptom mapping dictionary
+4. Fallback to MKN-10 full-text search (existing _mkn_search)
 
-Scores: exact map = 1.0, fuzzy = 0.7, text search = 0.4.
-Results are merged, deduplicated by code, and ranked by score.
+Scores: cluster = boost (0.80-0.95), exact map = 1.0,
+fuzzy = 0.7, text search = 0.4.
+Results are merged, deduplicated by code, and ranked.
+Oncology codes are demoted when context is metabolic.
 """
 
 import json
 import logging
 import re
 
+from czechmedmcp.czech.diacritics import normalize_query
 from czechmedmcp.czech.diagnosis_embed.symptom_map import (
     fuzzy_lookup_symptom,
     lookup_symptom,
 )
 from czechmedmcp.czech.mkn.search import _mkn_search
+from czechmedmcp.czech.mkn.synonyms import (
+    has_metabolic_context,
+    is_oncology_code,
+    match_symptom_clusters,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +67,12 @@ def _merge_candidates(
     Keeps the highest match_type priority and best name.
     """
     by_code: dict[str, dict] = {}
-    type_priority = {"exact_map": 3, "fuzzy_map": 2, "text": 1}
+    type_priority = {
+        "cluster": 4,
+        "exact_map": 3,
+        "fuzzy_map": 2,
+        "text": 1,
+    }
 
     for c in raw:
         code = c["code"]
@@ -188,14 +202,57 @@ def _validate_input(symptoms: str) -> list[str]:
     return tokens
 
 
+def _match_clusters(
+    symptoms: str,
+) -> list[dict]:
+    """Match symptom clusters on full query string."""
+    norm = normalize_query(symptoms)
+    hits = match_symptom_clusters(norm)
+    return [
+        {
+            "code": code,
+            "name_cs": "",
+            "score": score,
+            "match_type": "cluster",
+        }
+        for code, score in hits
+    ]
+
+
+def _demote_oncology(
+    candidates: list[dict],
+    symptoms: str,
+) -> list[dict]:
+    """Demote oncology codes when context is metabolic.
+
+    If the query contains metabolic keywords, any C/D0-D4
+    codes are pushed to the bottom with halved scores.
+    """
+    norm = normalize_query(symptoms)
+    if not has_metabolic_context(norm):
+        return candidates
+
+    keep: list[dict] = []
+    demoted: list[dict] = []
+    for c in candidates:
+        if is_oncology_code(c.get("code", "")):
+            c = dict(c)
+            c["score"] = c["score"] * 0.5
+            demoted.append(c)
+        else:
+            keep.append(c)
+
+    return keep + demoted
+
+
 async def search_diagnoses(
     symptoms: str,
     max_results: int = 5,
 ) -> list[dict]:
     """Search for MKN-10 diagnoses matching symptoms.
 
-    Combines symptom dictionary lookup with MKN-10
-    full-text search for best coverage.
+    Combines symptom cluster matching, dictionary lookup,
+    and MKN-10 full-text search for best coverage.
 
     Args:
         symptoms: Comma/semicolon-separated symptom text.
@@ -212,6 +269,11 @@ async def search_diagnoses(
     tokens = _validate_input(symptoms)
     raw_candidates: list[dict] = []
 
+    # Phase 1: cluster matching on full query
+    cluster_hits = _match_clusters(symptoms)
+    raw_candidates.extend(cluster_hits)
+
+    # Phase 2: per-token exact/fuzzy/text search
     for token in tokens:
         hits = _match_exact(token)
         if not hits:
@@ -221,6 +283,10 @@ async def search_diagnoses(
         raw_candidates.extend(hits)
 
     merged = _merge_candidates(raw_candidates)
+
+    # Phase 3: demote oncology codes for metabolic queries
+    merged = _demote_oncology(merged, symptoms)
+
     top = merged[:max_results]
 
     # Enrich names from MKN-10 for map-sourced entries

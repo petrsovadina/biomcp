@@ -131,7 +131,7 @@ async def handle_trial_search(  # noqa: C901
         except InvalidParameterError:
             raise
     if keywords:
-        search_params["keywords"] = keywords
+        search_params["terms"] = keywords
     if lat is not None:
         search_params["lat"] = lat
     if long is not None:
@@ -141,10 +141,10 @@ async def handle_trial_search(  # noqa: C901
 
     # Add gene support for trials
     if genes:
-        if "keywords" in search_params:
-            search_params["keywords"].extend(genes)
+        if "terms" in search_params:
+            search_params["terms"].extend(genes)
         else:
-            search_params["keywords"] = list(genes)
+            search_params["terms"] = list(genes)
 
     try:
         from czechmedmcp.trials.search import (
@@ -899,10 +899,23 @@ async def handle_mkn_diagnosis_search(
     from czechmedmcp.czech.mkn.search import _mkn_search
 
     query_str = keywords[0] if keywords else query
+    if not query_str:
+        return {"results": []}
     czech_result = await _mkn_search(
         query_str, page_size
     )
-    return {"results": [{"content": czech_result}]}
+    # Parse markdown result into structured items
+    results = []
+    if czech_result and "Nenalezeno" not in czech_result:
+        results.append(
+            {
+                "id": f"mkn-{query_str}",
+                "title": f"MKN-10: {query_str}",
+                "text": czech_result,
+                "url": "",
+            }
+        )
+    return {"results": results}
 
 
 async def handle_nrpzs_provider_search(

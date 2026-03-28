@@ -54,6 +54,8 @@ NZIP_BASE_URL = "https://nzip.cz"
 VZP_BASE_URL = "https://www.vzp.cz"
 MKN10_BROWSER_URL = "https://mkn10.uzis.cz"
 CZECH_HTTP_TIMEOUT = 30.0  # Default timeout for Czech API calls
+SUKL_TOOL_TIMEOUT = 10.0  # Max wait for SUKL tool response (seconds)
+SUKL_COMPARE_TIMEOUT = 30.0  # Max wait for compare_alternatives
 BULK_DOWNLOAD_TIMEOUT = 120.0  # Timeout for large data downloads (CSV, Excel, bulk API)
 
 # Czech Healthcare APIs — Extensions (CzechMedMCP)

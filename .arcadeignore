@@ -15,14 +15,23 @@ dist/
 .venv/
 venv/
 
+# Caches
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.cache/
+.playwright-mcp/
+
 # IDE / OS
 .vscode/
 .idea/
 .DS_Store
 *.swp
+.claude/
 
 # Git
 .git/
+.github/
 
 # Specs and docs (not needed at runtime)
 specs/
@@ -31,7 +40,6 @@ docs/
 
 # Test data and fixtures
 tests/
-.pytest_cache/
 .coverage
 htmlcov/
 
@@ -48,3 +56,6 @@ spike/
 experiment/
 llms/
 vault/
+uv.lock
+package-lock.json
+turbo.json

@@ -416,9 +416,13 @@ class BioThingsClient:
             return None
 
     async def _query_drug(self, name: str) -> list[dict[str, Any]] | None:
-        """Query MyChem.info for a drug name."""
+        """Query MyChem.info for a drug name.
+
+        Tries exact name first; if no hits, retries with
+        drugbank.name field prefix for better matching.
+        """
         params = {
-            "q": name,  # Don't pre-encode; httpx will handle URL encoding
+            "q": name,
             "fields": "_id,name,drugbank.name,chebi.name,chembl.pref_name,unii.display_name",
             "size": 10,
         }
@@ -434,6 +438,22 @@ class BioThingsClient:
             return None
 
         hits = response.get("hits", [])
+
+        # Retry with field-specific query if no hits
+        if not hits:
+            field_params = {
+                "q": f'drugbank.name:"{name}"',
+                "fields": "_id,name,drugbank.name,chebi.name,chembl.pref_name,unii.display_name",
+                "size": 10,
+            }
+            response2, error2 = await http_client.request_api(
+                url=MYCHEM_QUERY_URL,
+                request=field_params,
+                method="GET",
+                domain="mychem",
+            )
+            if not error2 and response2:
+                hits = response2.get("hits", [])
 
         # Sort hits to prioritize those with actual drug names
         def score_hit(hit):

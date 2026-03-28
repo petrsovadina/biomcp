@@ -14,6 +14,7 @@ import logging
 import httpx
 
 from czechmedmcp.constants import (
+    BULK_DOWNLOAD_TIMEOUT,
     CACHE_TTL_DAY,
     CZECH_HTTP_TIMEOUT,
     compute_skip,
@@ -24,6 +25,7 @@ from czechmedmcp.http_client import (
     generate_cache_key,
     get_cached_response,
 )
+from czechmedmcp.utils.retry import async_retry
 
 logger = logging.getLogger(__name__)
 
@@ -45,13 +47,18 @@ async def _download_csv() -> str:
     if cached:
         return cached
 
-    async with httpx.AsyncClient(
-        timeout=CZECH_HTTP_TIMEOUT,
-        follow_redirects=True,
-    ) as client:
-        resp = await client.get(_NRPZS_CSV_URL)
-        resp.raise_for_status()
-        content = resp.text
+    async def _do_download() -> str:
+        async with httpx.AsyncClient(
+            timeout=BULK_DOWNLOAD_TIMEOUT,
+            follow_redirects=True,
+        ) as client:
+            resp = await client.get(_NRPZS_CSV_URL)
+            resp.raise_for_status()
+            return resp.text
+
+    content = await async_retry(
+        _do_download, max_retries=3, initial_delay=2.0
+    )
 
     cache_response(cache_key, content, _CSV_CACHE_TTL)
     return content

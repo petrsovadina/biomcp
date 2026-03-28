@@ -1,5 +1,6 @@
 import asyncio
 import json
+import logging
 from collections.abc import Generator
 from typing import Annotated, Any, get_args
 
@@ -10,6 +11,8 @@ from ..constants import PUBTATOR3_SEARCH_URL, SYSTEM_PAGE_SIZE, compute_skip
 from ..core import PublicationState
 from .autocomplete import Concept, EntityRequest, autocomplete
 from .fetch import call_pubtator_api
+
+logger = logging.getLogger(__name__)
 
 concepts: list[Concept] = sorted(get_args(Concept))
 fields: list[str] = [concept + "s" for concept in concepts]
@@ -122,15 +125,23 @@ async def convert_request(
         autocomplete_tasks.append(task)
         concept_values.append((concept, value))
 
-    # Execute all autocomplete calls in parallel
+    # Execute all autocomplete calls in parallel (graceful degradation)
     if autocomplete_tasks:
-        entities = await asyncio.gather(*autocomplete_tasks)
+        entities = await asyncio.gather(
+            *autocomplete_tasks, return_exceptions=True
+        )
 
-        # Process results
+        # Process results — use raw value as fallback if autocomplete fails
         for (_concept, value), entity in zip(
             concept_values, entities, strict=False
         ):
-            if entity:
+            if isinstance(entity, BaseException):
+                logger.warning(
+                    "Autocomplete failed for %s — using raw value",
+                    value,
+                )
+                query_parts.append(value)
+            elif entity:
                 query_parts.append(entity.entity_id)
             else:
                 query_parts.append(value)

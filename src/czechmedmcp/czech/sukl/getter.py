@@ -144,6 +144,18 @@ def _build_doc_url(
     )
 
 
+async def _url_is_reachable(url: str) -> bool:
+    """Check if a URL returns 200 via HEAD request."""
+    try:
+        async with httpx.AsyncClient(
+            timeout=SUKL_HTTP_TIMEOUT
+        ) as client:
+            resp = await client.head(url)
+            return resp.status_code == 200
+    except httpx.HTTPError:
+        return False
+
+
 async def _fetch_substance_name(
     substance_code: int,
 ) -> str | None:
@@ -268,20 +280,31 @@ async def _sukl_drug_details(sukl_code: str) -> str:
     if spc_docs:
         spc_url = _build_doc_url(sukl_code, "spc")
     else:
-        spc_note = (
-            "SPC dokument není dostupný v SÚKL "
-            "databázi pro tento přípravek"
-        )
+        # Fallback: try direct DLP document URL even without
+        # metadata — some drugs have documents not listed in
+        # metadata endpoint.
+        fallback = _build_doc_url(sukl_code, "spc")
+        if await _url_is_reachable(fallback):
+            spc_url = fallback
+        else:
+            spc_note = (
+                "SPC dokument není dostupný v SÚKL "
+                "databázi pro tento přípravek"
+            )
 
     pil_url: str | None = None
     pil_note: str | None = None
     if pil_docs:
         pil_url = _build_doc_url(sukl_code, "pil")
     else:
-        pil_note = (
-            "PIL dokument není dostupný v SÚKL "
-            "databázi pro tento přípravek"
-        )
+        fallback = _build_doc_url(sukl_code, "pil")
+        if await _url_is_reachable(fallback):
+            pil_url = fallback
+        else:
+            pil_note = (
+                "PIL dokument není dostupný v SÚKL "
+                "databázi pro tento přípravek"
+            )
 
     active_substances = (
         await _composition_to_substances(composition)

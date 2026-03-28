@@ -14,8 +14,8 @@ import httpx
 import openpyxl
 
 from czechmedmcp.constants import (
+    BULK_DOWNLOAD_TIMEOUT,
     CACHE_TTL_DAY,
-    CZECH_HTTP_TIMEOUT,
     DEFAULT_CACHE_TIMEOUT,
 )
 from czechmedmcp.czech.diacritics import normalize_query
@@ -24,6 +24,7 @@ from czechmedmcp.http_client import (
     generate_cache_key,
     get_cached_response,
 )
+from czechmedmcp.utils.retry import async_retry
 
 logger = logging.getLogger(__name__)
 
@@ -49,14 +50,19 @@ async def _download_excel() -> list[dict]:
     if cached:
         return json.loads(cached)
 
-    try:
+    async def _do_download() -> bytes:
         async with httpx.AsyncClient(
-            timeout=CZECH_HTTP_TIMEOUT,
+            timeout=BULK_DOWNLOAD_TIMEOUT,
             follow_redirects=True,
         ) as client:
             resp = await client.get(_SZV_EXPORT_URL)
             resp.raise_for_status()
-            content = resp.content
+            return resp.content
+
+    try:
+        content = await async_retry(
+            _do_download, max_retries=3, initial_delay=2.0
+        )
     except httpx.TimeoutException:
         logger.error(
             "SZV Excel download timed out: %s",

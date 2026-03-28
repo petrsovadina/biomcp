@@ -104,22 +104,45 @@ async def _fetch_and_aggregate(code: str, year: int) -> dict:
 
 
 def _try_local_fallback(code: str, year: int) -> dict:
-    """Try local CSV fallback data."""
-    fallback_path = _LOCAL_DATA_DIR / f"hospitalizace_{year}.csv"
-    if fallback_path.exists():
-        try:
-            text = fallback_path.read_text(encoding="utf-8")
-            if text.strip():
-                logger.info(
-                    "Using local NZIP fallback for %d",
-                    year,
+    """Try local CSV fallback data.
+
+    If the exact year file is missing, try the closest
+    available year (±5 years) so that *some* data is
+    returned even when the remote API is down.
+    """
+    # Try exact year first, then neighbours
+    candidates = [year]
+    for delta in range(1, 6):
+        candidates.append(year + delta)
+        candidates.append(year - delta)
+
+    for y in candidates:
+        fallback_path = (
+            _LOCAL_DATA_DIR / f"hospitalizace_{y}.csv"
+        )
+        if fallback_path.exists():
+            try:
+                text = fallback_path.read_text(
+                    encoding="utf-8"
                 )
-                return _parse_csv(text, code, year)
-        except OSError as exc:
-            logger.warning(
-                "Local NZIP fallback read error: %s",
-                exc,
-            )
+                if text.strip():
+                    if y != year:
+                        logger.info(
+                            "Using local NZIP fallback "
+                            "for %d (requested %d)",
+                            y, year,
+                        )
+                    else:
+                        logger.info(
+                            "Using local NZIP fallback "
+                            "for %d", year,
+                        )
+                    return _parse_csv(text, code, y)
+            except OSError as exc:
+                logger.warning(
+                    "Local NZIP fallback read error: %s",
+                    exc,
+                )
 
     return _unavailable_stats(code, year)
 

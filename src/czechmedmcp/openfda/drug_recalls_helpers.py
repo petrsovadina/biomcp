@@ -4,10 +4,15 @@ Helper functions for drug recall search to reduce complexity.
 
 
 def build_drug_search_query(drug: str) -> str:
-    """Build search query for drug name."""
+    """Build search query for drug name.
+
+    Searches brand name, generic name, substance name,
+    and product description to maximise recall matches.
+    """
     return (
         f'(openfda.brand_name:"{drug}" OR '
         f'openfda.generic_name:"{drug}" OR '
+        f'openfda.substance_name:"{drug}" OR '
         f'product_description:"{drug}")'
     )
 
@@ -83,11 +88,10 @@ def build_recall_search_params(
     skip: int,
 ) -> dict:
     """Build search parameters for recall API."""
-    # Build search query
+    # Build search query (no default product_type filter —
+    # the enforcement API uses openfda.product_type which
+    # is not always populated)
     search_parts = []
-
-    # Default to human drugs only (exclude veterinary)
-    search_parts.append('product_type:"Human"')
 
     if drug:
         search_parts.append(build_drug_search_query(drug))

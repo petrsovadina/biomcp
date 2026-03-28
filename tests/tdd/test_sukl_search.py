@@ -1,7 +1,7 @@
 """Unit tests for SUKL SearchMedicine / DrugIndex."""
 
 import json
-from unittest.mock import AsyncMock, patch
+from unittest.mock import patch
 
 import pytest
 

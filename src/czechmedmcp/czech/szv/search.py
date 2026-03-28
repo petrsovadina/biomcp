@@ -36,7 +36,7 @@ _DETAIL_CACHE_TTL = DEFAULT_CACHE_TIMEOUT
 _PROCEDURES: list[dict] | None = None
 
 
-async def _download_excel() -> list[dict]:
+async def _download_excel() -> list[dict]:  # noqa: C901
     """Download SZV Excel export and parse procedures.
 
     Raises:

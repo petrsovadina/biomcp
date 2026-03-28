@@ -16,7 +16,6 @@ import httpx
 from czechmedmcp.constants import (
     BULK_DOWNLOAD_TIMEOUT,
     CACHE_TTL_DAY,
-    CZECH_HTTP_TIMEOUT,
     compute_skip,
 )
 from czechmedmcp.czech.diacritics import normalize_query

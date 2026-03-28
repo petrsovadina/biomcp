@@ -154,6 +154,19 @@ class TestSearchIndex:
 
 
 class TestDrugIndex:
+    @pytest.fixture(autouse=True)
+    def _no_disk_cache(self):
+        """Ensure disk cache is bypassed in all tests."""
+        with patch(
+            "czechmedmcp.czech.sukl.drug_index."
+            "get_cached_response",
+            return_value=None,
+        ), patch(
+            "czechmedmcp.czech.sukl.drug_index."
+            "cache_response",
+        ):
+            yield
+
     @patch(
         "czechmedmcp.czech.sukl.drug_index._fetch_drug_list",
         new_callable=AsyncMock,

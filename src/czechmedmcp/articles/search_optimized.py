@@ -3,13 +3,16 @@
 import hashlib
 
 from .. import ensure_list
+from ..constants import ARTICLE_SEARCH_CACHE_TTL
 from ..shared_context import get_search_context
 from ..utils.request_cache import get_cache
 from .search import PubmedRequest
 from .unified import search_articles_unified
 
-# Cache for article search results (5 minute TTL)
-_search_cache = get_cache("article_search", ttl_seconds=300)
+# Cache for article search results (1 hour TTL)
+_search_cache = get_cache(
+    "article_search", ttl_seconds=ARTICLE_SEARCH_CACHE_TTL
+)
 
 
 def _get_search_cache_key(
@@ -85,7 +88,9 @@ async def article_searcher_optimized(
         include_cbioportal=include_cbioportal,
     )
 
-    # Cache the result (5 minute TTL)
-    await _search_cache.set(cache_key, result, ttl=300)
+    # Cache the result
+    await _search_cache.set(
+        cache_key, result, ttl=ARTICLE_SEARCH_CACHE_TTL
+    )
 
     return result

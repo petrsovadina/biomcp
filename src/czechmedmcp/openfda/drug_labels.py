@@ -57,6 +57,36 @@ async def search_drug_labels(
             "- Search by section: --section 'contraindications'"
         )
 
+    # Validate/map section name before search
+    if section:
+        from .drug_labels_helpers import (
+            SECTION_ALIASES,
+            VALID_LABEL_SECTIONS,
+        )
+
+        section_lower = section.lower().strip()
+        if section_lower in SECTION_ALIASES:
+            original = section_lower
+            section = SECTION_ALIASES[section_lower]
+            logger.info(
+                "Mapped section '%s' -> '%s'",
+                original,
+                section,
+            )
+        elif (
+            section_lower not in VALID_LABEL_SECTIONS
+        ):
+            valid_list = ", ".join(
+                sorted(VALID_LABEL_SECTIONS)
+            )
+            return (
+                f"Invalid section: '{section}'.\n\n"
+                f"Valid sections: {valid_list}\n\n"
+                f"Common aliases: warnings -> "
+                f"boxed_warning, "
+                f"side_effects -> adverse_reactions"
+            )
+
     # Build and execute search
     search_query = build_label_search_query(
         name, indication, boxed_warning, section

@@ -7,6 +7,49 @@ from typing import Any
 from .input_validation import sanitize_input
 from .utils import clean_text, extract_drug_names, truncate_text
 
+VALID_LABEL_SECTIONS = {
+    "contraindications",
+    "adverse_reactions",
+    "boxed_warning",
+    "indications_and_usage",
+    "dosage_and_administration",
+    "drug_interactions",
+    "pregnancy",
+    "pediatric_use",
+    "geriatric_use",
+    "overdosage",
+    "description",
+    "clinical_pharmacology",
+    "mechanism_of_action",
+    "pharmacodynamics",
+    "pharmacokinetics",
+    "nonclinical_toxicology",
+    "how_supplied",
+    "storage_and_handling",
+    "patient_counseling_information",
+    "warnings_and_precautions",
+    "use_in_specific_populations",
+    "clinical_studies",
+    "nursing_mothers",
+}
+
+SECTION_ALIASES: dict[str, str] = {
+    "warnings": "boxed_warning",
+    "warnings_and_precautions": (
+        "warnings_and_precautions"
+    ),
+    "side_effects": "adverse_reactions",
+    "interactions": "drug_interactions",
+    "dosage": "dosage_and_administration",
+    "usage": "indications_and_usage",
+    "indications": "indications_and_usage",
+    "adverse": "adverse_reactions",
+    "pregnancy_info": "pregnancy",
+    "pediatric": "pediatric_use",
+    "geriatric": "geriatric_use",
+    "overdose": "overdosage",
+}
+
 
 def build_label_search_query(
     name: str | None,

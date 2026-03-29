@@ -126,6 +126,15 @@ CACHE_TTL_DAY = 60 * 60 * 24  # 24 hours
 CACHE_TTL_HOUR = 60 * 60  # 1 hour
 CACHE_TTL_MONTH = 60 * 60 * 24 * 30  # 30 days
 
+# Article Search Performance (014-fix-tool-bugs-iter5)
+PUBTATOR_TIMEOUT = 10.0  # Max seconds per PubTator3 API call
+ARTICLE_SEARCH_CACHE_TTL = 3600  # 1 hour cache for article search
+ARTICLE_SEARCH_CACHE_MAX = 500  # Max entries in article search LRU
+ARTICLE_SEARCH_HARD_TIMEOUT = 30.0  # Max seconds for entire search
+
+# SUKL Persistent Index
+SUKL_INDEX_DB_PATH = "sukl_drug_index"  # Relative to cache dir
+
 # Pagination
 SYSTEM_PAGE_SIZE = (
     10  # Default page size for all searches (reduced for token efficiency)

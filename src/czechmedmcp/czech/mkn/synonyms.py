@@ -162,30 +162,97 @@ CZ_MEDICAL_SYNONYMS: dict[str, list[str]] = {
 # Prevalence-based boost for common diagnosis codes.
 # Higher = more common in population → ranked higher.
 PREVALENCE_BOOST: dict[str, float] = {
-    "E11": 10.0,   # T2DM — ~10x more common than T1DM
-    "E10": 1.0,    # T1DM
-    "I10": 8.0,    # Essential hypertension
-    "J06": 7.0,    # Upper respiratory infection
-    "J45": 5.0,    # Asthma
-    "E66": 5.0,    # Obesity
-    "F32": 4.0,    # Depressive episode
-    "M54": 6.0,    # Dorsalgia (back pain)
-    "I25": 4.0,    # Chronic ischaemic heart disease
-    "E78": 5.0,    # Hyperlipidaemia
-    "J20": 4.0,    # Acute bronchitis
-    "K29": 3.0,    # Gastritis
-    "I48": 3.0,    # Atrial fibrillation
-    "I50": 3.0,    # Heart failure
-    "G43": 3.0,    # Migraine
-    "L40": 2.0,    # Psoriasis
-    "N39": 4.0,    # UTI
-    "I21": 3.0,    # Acute MI
-    "J18": 3.0,    # Pneumonia
-    "I64": 2.0,    # Stroke
-    "C50": 2.0,    # Breast cancer
-    "C34": 2.0,    # Lung cancer
-    "C18": 2.0,    # Colon cancer
+    "E11": 10.0,  # T2DM — ~10x more common than T1DM
+    "E10": 1.0,  # T1DM
+    "I10": 8.0,  # Essential hypertension
+    "J06": 7.0,  # Upper respiratory infection
+    "J45": 5.0,  # Asthma
+    "E66": 5.0,  # Obesity
+    "F32": 4.0,  # Depressive episode
+    "M54": 6.0,  # Dorsalgia (back pain)
+    "I25": 4.0,  # Chronic ischaemic heart disease
+    "E78": 5.0,  # Hyperlipidaemia
+    "J20": 4.0,  # Acute bronchitis
+    "K29": 3.0,  # Gastritis
+    "I48": 3.0,  # Atrial fibrillation
+    "I50": 3.0,  # Heart failure
+    "G43": 3.0,  # Migraine
+    "L40": 2.0,  # Psoriasis
+    "N39": 4.0,  # UTI
+    "I21": 3.0,  # Acute MI
+    "J18": 3.0,  # Pneumonia
+    "I64": 2.0,  # Stroke
+    "C50": 2.0,  # Breast cancer
+    "C34": 2.0,  # Lung cancer
+    "C18": 2.0,  # Colon cancer
 }
+
+
+DIRECT_DIAGNOSIS_KEYWORDS: dict[str, str] = {
+    "hypertenze": "I10",
+    "diabetes": "E11",
+    "diabetes mellitus": "E11",
+    "astma": "J45",
+    "epilepsie": "G40",
+    "deprese": "F32",
+    "pneumonie": "J18",
+    "anemie": "D64",
+    "angina pectoris": "I20",
+    "infarkt": "I21",
+    "cukrovka": "E11",
+    "ischemie": "I25",
+    "fibrilace": "I48",
+    "artritida": "M13",
+    "osteoporoza": "M81",
+    "demence": "F03",
+    "parkinson": "G20",
+    "alzheimer": "G30",
+    "skleroza": "G35",
+    "migréna": "G43",
+    "migrena": "G43",
+    "glaukom": "H40",
+    "karcinom": "C80",
+    "leukemie": "C95",
+    "lymfom": "C85",
+    "obezita": "E66",
+    "tyreopatie": "E03",
+    "hypothyreoza": "E03",
+    "hyperthyreoza": "E05",
+    "cirhoza": "K74",
+    "hepatitida": "K73",
+    "gastritida": "K29",
+    "pankreatitida": "K85",
+    "bronchitida": "J40",
+    "sinusitida": "J32",
+    "tonzilitida": "J03",
+    "otitida": "H66",
+    "dermatitida": "L30",
+    "ekzem": "L30",
+    "psoriaza": "L40",
+    "varixy": "I83",
+    "tromboza": "I82",
+    "embolie": "I26",
+}
+
+# Pre-built normalized lookup for direct keywords.
+_NORMALIZED_DIRECT: dict[str, str] = {
+    normalize_query(k): v for k, v in DIRECT_DIAGNOSIS_KEYWORDS.items()
+}
+
+
+def lookup_direct_keyword(
+    token: str,
+) -> str | None:
+    """Look up a direct diagnosis keyword.
+
+    Args:
+        token: Single token (normalized or raw).
+
+    Returns:
+        ICD-10 code or None.
+    """
+    normalized = normalize_query(token)
+    return _NORMALIZED_DIRECT.get(normalized)
 
 
 def lookup_synonym(query: str) -> list[str] | None:
@@ -214,9 +281,7 @@ def get_prevalence_boost(code: str) -> float:
 # Values: list of (ICD-10 code, boost score).
 # At least 2 keywords from a cluster must appear in the
 # query for the cluster to match.
-SYMPTOM_CLUSTER_MAP: dict[
-    tuple[str, ...], list[tuple[str, float]]
-] = {
+SYMPTOM_CLUSTER_MAP: dict[tuple[str, ...], list[tuple[str, float]]] = {
     # --- Metabolické / Metabolic ---
     ("zizen", "moceni", "cukr"): [
         ("E11", 0.95),
@@ -335,9 +400,16 @@ _ONCOLOGY_PREFIXES = ("C", "D0", "D1", "D2", "D3", "D4")
 
 # Metabolic symptom keywords for demotion heuristic.
 _METABOLIC_KEYWORDS = frozenset({
-    "zizen", "cukr", "moceni", "thirst",
-    "urination", "sugar", "diabetes",
-    "glykemie", "inzulin", "insulin",
+    "zizen",
+    "cukr",
+    "moceni",
+    "thirst",
+    "urination",
+    "sugar",
+    "diabetes",
+    "glykemie",
+    "inzulin",
+    "insulin",
 })
 
 
@@ -357,10 +429,7 @@ def match_symptom_clusters(
     seen_codes: set[str] = set()
 
     for keywords, codes in SYMPTOM_CLUSTER_MAP.items():
-        matched = sum(
-            1 for kw in keywords
-            if kw in query_normalized
-        )
+        matched = sum(1 for kw in keywords if kw in query_normalized)
         if matched >= 2:
             for code, score in codes:
                 if code not in seen_codes:
@@ -375,16 +444,11 @@ def match_symptom_clusters(
 def is_oncology_code(code: str) -> bool:
     """Check if code belongs to oncology chapters C/D."""
     upper = code.upper().strip()
-    return any(
-        upper.startswith(p) for p in _ONCOLOGY_PREFIXES
-    )
+    return any(upper.startswith(p) for p in _ONCOLOGY_PREFIXES)
 
 
 def has_metabolic_context(
     query_normalized: str,
 ) -> bool:
     """Check if query contains metabolic symptom keywords."""
-    return any(
-        kw in query_normalized
-        for kw in _METABOLIC_KEYWORDS
-    )
+    return any(kw in query_normalized for kw in _METABOLIC_KEYWORDS)

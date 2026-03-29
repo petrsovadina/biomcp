@@ -7,7 +7,12 @@ from typing import Annotated, Any, get_args
 from pydantic import BaseModel, Field, computed_field
 
 from .. import http_client, render
-from ..constants import PUBTATOR3_SEARCH_URL, SYSTEM_PAGE_SIZE, compute_skip
+from ..constants import (
+    PUBTATOR3_SEARCH_URL,
+    PUBTATOR_TIMEOUT,
+    SYSTEM_PAGE_SIZE,
+    compute_skip,
+)
 from ..core import PublicationState
 from .autocomplete import Concept, EntityRequest, autocomplete
 from .fetch import call_pubtator_api
@@ -179,20 +184,35 @@ async def search_articles(
     total_needed = page * limit
     pubtator_request = await convert_request(request, limit=total_needed)
 
-    # Start the search request
-    search_task = http_client.request_api(
-        url=PUBTATOR3_SEARCH_URL,
-        request=pubtator_request,
-        response_model_type=SearchResponse,
-        domain="article",
-    )
-
-    # Execute search first
-    response, error = await search_task
+    # Execute search with timeout
+    try:
+        response, error = await asyncio.wait_for(
+            http_client.request_api(
+                url=PUBTATOR3_SEARCH_URL,
+                request=pubtator_request,
+                response_model_type=SearchResponse,
+                domain="article",
+            ),
+            timeout=PUBTATOR_TIMEOUT,
+        )
+    except asyncio.TimeoutError:
+        logger.warning(
+            "PubTator3 search timed out after %.0fs",
+            PUBTATOR_TIMEOUT,
+        )
+        response, error = None, None
 
     if response:
-        # Now fetch abstracts (still sequential but could be parallelized with other operations)
-        await add_abstracts(response)
+        # Fetch abstracts with timeout
+        try:
+            await asyncio.wait_for(
+                add_abstracts(response),
+                timeout=PUBTATOR_TIMEOUT,
+            )
+        except asyncio.TimeoutError:
+            logger.warning(
+                "PubTator3 abstract fetch timed out"
+            )
         # Add source field to PubMed results
         for result in response.results:
             result.source = "PubMed"

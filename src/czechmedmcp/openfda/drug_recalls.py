@@ -184,12 +184,13 @@ async def get_drug_recall(
     Get detailed drug recall information.
 
     Args:
-        recall_number: FDA recall number
+        recall_number: FDA recall number or event ID
         api_key: Optional OpenFDA API key
 
     Returns:
         Formatted string with detailed recall info
     """
+    # Try recall_number first
     search_params = {
         "search": f'recall_number:"{recall_number}"',
         "limit": 1,
@@ -205,13 +206,40 @@ async def get_drug_recall(
             f"{error}"
         )
 
-    if not response or not response.get("results"):
+    results = (
+        response.get("results") if response else None
+    )
+
+    # Validate the returned recall_number matches
+    if results:
+        actual = results[0].get("recall_number", "")
+        if actual.upper() != recall_number.upper():
+            logger.warning(
+                "Recall mismatch: requested '%s', "
+                "got '%s'",
+                recall_number, actual,
+            )
+            results = None
+
+    # Fallback: try as event_id
+    if not results:
+        fallback_params = {
+            "search": f'event_id:"{recall_number}"',
+            "limit": 1,
+        }
+        fb_resp, fb_err = await _safe_recall_request(
+            fallback_params, api_key, "getter-event-id"
+        )
+        if not fb_err and fb_resp:
+            results = fb_resp.get("results")
+
+    if not results:
         return (
             f"No recall record found for "
             f"{recall_number}"
         )
 
-    recall = response["results"][0]
+    recall = results[0]
 
     # Format detailed recall information
     output = [

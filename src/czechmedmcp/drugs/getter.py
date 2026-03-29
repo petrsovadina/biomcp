@@ -2,8 +2,12 @@
 
 import json
 import logging
+import re
 
 from ..integrations import BioThingsClient
+from ..integrations.biothings_client import (
+    search_drug_by_name,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -113,6 +117,15 @@ async def get_drug(drug_id_or_name: str, output_json: bool = False) -> str:
     try:
         client = BioThingsClient()
         drug_info = await client.get_drug_info(drug_id_or_name)
+
+        # Fallback: if result has name "Unknown" and input
+        # looks like a common name (not a DB/CHEMBL ID),
+        # search by name to get a proper ID and retry.
+        _is_id = re.match(r"^(DB\d+|CHEMBL\d+)", drug_id_or_name, re.I)
+        if not _is_id and (not drug_info or not drug_info.name):
+            resolved_id = await search_drug_by_name(drug_id_or_name)
+            if resolved_id:
+                drug_info = await client.get_drug_info(resolved_id)
 
         if not drug_info:
             error_msg = f"Drug '{drug_id_or_name}' not found in MyChem.info"

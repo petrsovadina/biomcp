@@ -164,7 +164,7 @@ class TestFindPharmacies:
         assert "error" in data
 
     async def test_api_failure(self):
-        """Empty results on HTTP error."""
+        """Informative message on HTTP error."""
         from czechmedmcp.czech.sukl.search import (
             _find_pharmacies,
         )
@@ -199,8 +199,8 @@ class TestFindPharmacies:
             raw = await _find_pharmacies(city="Praha")
 
         sc = json.loads(raw)["structuredContent"]
-        assert sc["total"] == 0
-        assert sc["results"] == []
+        assert sc["total"] == 1
+        assert "nedostupný" in sc["results"][0]["name"]
 
     async def test_markdown_output(self):
         """Markdown contains pharmacy names."""
@@ -230,8 +230,8 @@ class TestFindPharmacies:
         sc = json.loads(raw)["structuredContent"]
         assert sc["total"] == 3
 
-    async def test_504_returns_empty_results(self):
-        """504 Gateway Timeout returns empty list."""
+    async def test_504_returns_informative_message(self):
+        """504 Gateway Timeout returns informative message."""
         from czechmedmcp.czech.sukl.search import (
             _find_pharmacies,
         )
@@ -266,5 +266,5 @@ class TestFindPharmacies:
             raw = await _find_pharmacies(city="Praha")
 
         sc = json.loads(raw)["structuredContent"]
-        assert sc["total"] == 0
-        assert sc["results"] == []
+        assert sc["total"] == 1
+        assert "nedostupný" in sc["results"][0]["name"]

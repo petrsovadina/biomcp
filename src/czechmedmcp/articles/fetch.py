@@ -174,6 +174,38 @@ async def call_pubtator_api(
     return response, error
 
 
+async def _fetch_abstract_efetch(
+    pmid: int,
+) -> str | None:
+    """Fetch abstract from PubMed E-utilities as fallback."""
+    url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
+    params = {
+        "db": "pubmed",
+        "id": str(pmid),
+        "rettype": "abstract",
+        "retmode": "text",
+    }
+    cache_key = generate_cache_key("GET", url, params)
+    cached = get_cached_response(cache_key)
+    if cached:
+        return cached
+
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            resp = await client.get(url, params=params)
+            resp.raise_for_status()
+            text = resp.text.strip()
+            if text and len(text) > 50:
+                cache_response(cache_key, text, CACHE_TTL_MONTH)
+                return text
+    except Exception:
+        logger.debug(
+            "E-utilities abstract fetch failed for %s",
+            pmid,
+        )
+    return None
+
+
 async def fetch_articles(
     pmids: list[int],
     full: bool,
@@ -200,6 +232,15 @@ async def fetch_articles(
             )
             for article in (response.articles if response else [])
         ]
+
+    # Patch articles that have placeholder abstracts
+    for item in data:
+        abstract = item.get("abstract", "")
+        pmid_val = item.get("pmid")
+        if pmid_val and abstract.startswith("Article: "):
+            real_abstract = await _fetch_abstract_efetch(pmid_val)
+            if real_abstract:
+                item["abstract"] = real_abstract
 
     if data and not output_json:
         return render.to_markdown(data)
@@ -306,9 +347,7 @@ async def _article_details(  # noqa: C901
         from .preprints import fetch_europe_pmc_article
 
         try:
-            return await fetch_europe_pmc_article(
-                identifier, output_json=True
-            )
+            return await fetch_europe_pmc_article(identifier, output_json=True)
         except Exception as exc:
             logger.error(
                 "Europe PMC fetch failed for DOI %s: %s",
@@ -369,9 +408,7 @@ async def _article_details(  # noqa: C901
         if result is not None:
             try:
                 parsed = json.loads(result)
-                if parsed and not any(
-                    "error" in item for item in parsed
-                ):
+                if parsed and not any("error" in item for item in parsed):
                     return result
             except (json.JSONDecodeError, TypeError):
                 return result
@@ -384,9 +421,7 @@ async def _article_details(  # noqa: C901
                 identifier, output_json=True
             )
             parsed_fb = json.loads(fallback)
-            if parsed_fb and not any(
-                "error" in item for item in parsed_fb
-            ):
+            if parsed_fb and not any("error" in item for item in parsed_fb):
                 return fallback
         except Exception:
             logger.debug(

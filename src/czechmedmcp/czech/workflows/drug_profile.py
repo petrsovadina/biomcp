@@ -73,13 +73,19 @@ async def _drug_profile(query: str) -> str:
 
 async def _resolve_sukl_code(query: str) -> str | None:
     """Search SUKL to resolve query to sukl_code."""
+    # Direct SUKL code (7 digits) — no search needed
+    if query.isdigit() and len(query) == 7:
+        return query
     try:
         from czechmedmcp.czech.sukl.search import (
             _sukl_drug_search,
         )
 
-        raw = await _sukl_drug_search(
-            query, page=1, page_size=1
+        raw = await asyncio.wait_for(
+            _sukl_drug_search(
+                query, page=1, page_size=1
+            ),
+            timeout=10.0,
         )
         data = json.loads(raw)
         results = data.get("results", [])
@@ -92,6 +98,12 @@ async def _resolve_sukl_code(query: str) -> str | None:
             return code
         logger.info(
             "No SUKL results for query '%s'", query
+        )
+    except asyncio.TimeoutError:
+        logger.warning(
+            "SUKL search timed out for '%s' "
+            "— index may be building",
+            query,
         )
     except Exception as exc:
         logger.warning(

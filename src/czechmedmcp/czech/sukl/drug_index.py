@@ -64,6 +64,8 @@ class DrugIndex:
         self._entries: list[DrugIndexEntry] = []
         self._built_at: float = 0.0
         self._lock = asyncio.Lock()
+        self._rebuilding = False
+        self._rebuild_task: asyncio.Task | None = None
 
     @property
     def is_expired(self) -> bool:
@@ -79,11 +81,40 @@ class DrugIndex:
         """Build or rebuild the index if needed."""
         if not self.is_expired:
             return
+        # Stale entries exist — serve them, rebuild bg
+        if self._entries:
+            self._schedule_background_rebuild()
+            return
+        # No entries at all — must block
         async with self._lock:
             # Double-check after acquiring lock
             if not self.is_expired:
                 return
             await self._build()
+
+    def _schedule_background_rebuild(self) -> None:
+        """Trigger non-blocking background rebuild."""
+        if self._rebuilding:
+            return
+        self._rebuilding = True
+        self._rebuild_task = asyncio.create_task(
+            self._background_rebuild()
+        )
+
+    async def _background_rebuild(self) -> None:
+        """Rebuild index in background."""
+        try:
+            async with self._lock:
+                if not self.is_expired:
+                    return
+                await self._build()
+        except Exception:
+            logger.error(
+                "Background SUKL index rebuild failed",
+                exc_info=True,
+            )
+        finally:
+            self._rebuilding = False
 
     async def _build(self) -> None:
         """Fetch all drug codes and build index.

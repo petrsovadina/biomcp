@@ -181,15 +181,29 @@ async def _fetch_pharmacies(
             )
             if resp.status_code == 504:
                 logger.warning(
-                    "SUKL pharmacy API returned 504"
+                    "SUKL pharmacy API returned 504 "
+                    "— endpoint may be unavailable"
                 )
-                return []
+                return _pharmacy_unavailable_result(
+                    city, postal_code
+                )
             if not resp.is_success:
-                return []
+                logger.warning(
+                    "SUKL pharmacy API HTTP %d",
+                    resp.status_code,
+                )
+                return _pharmacy_unavailable_result(
+                    city, postal_code
+                )
             data = resp.json()
-    except httpx.HTTPError:
-        logger.warning("Failed to fetch pharmacies")
-        return []
+    except (httpx.HTTPError, httpx.TimeoutException):
+        logger.warning(
+            "Failed to fetch pharmacies — "
+            "SUKL API unreachable"
+        )
+        return _pharmacy_unavailable_result(
+            city, postal_code
+        )
 
     result = _parse_pharmacies(
         data if isinstance(data, list) else []
@@ -200,6 +214,29 @@ async def _fetch_pharmacies(
         _DRUG_LIST_CACHE_TTL,
     )
     return result
+
+
+def _pharmacy_unavailable_result(
+    city: str | None,
+    postal_code: str | None,
+) -> list[dict]:
+    """Return informative placeholder when API is down."""
+    loc = city or postal_code or "?"
+    return [{
+        "pharmacy_id": "",
+        "name": (
+            f"SUKL lékárenský registr pro '{loc}' "
+            f"je dočasně nedostupný. "
+            f"Zkuste https://prehledy.sukl.cz nebo "
+            f"https://www.lfrb.cz pro vyhledání "
+            f"lékáren."
+        ),
+        "city": loc,
+        "postal_code": "",
+        "address": "",
+        "phone": None,
+        "nonstop": False,
+    }]
 
 
 def _parse_pharmacies(raw_list: list) -> list[dict]:

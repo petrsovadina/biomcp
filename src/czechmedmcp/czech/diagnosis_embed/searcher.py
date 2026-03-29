@@ -25,6 +25,7 @@ from czechmedmcp.czech.mkn.search import _mkn_search
 from czechmedmcp.czech.mkn.synonyms import (
     has_metabolic_context,
     is_oncology_code,
+    lookup_direct_keyword,
     match_symptom_clusters,
 )
 
@@ -37,6 +38,7 @@ _CODE_RE = re.compile(
     re.IGNORECASE,
 )
 
+_SCORE_DIRECT = 1.5
 _SCORE_EXACT = 1.0
 _SCORE_FUZZY = 0.7
 _SCORE_TEXT = 0.4
@@ -68,6 +70,7 @@ def _merge_candidates(
     """
     by_code: dict[str, dict] = {}
     type_priority = {
+        "direct": 5,
         "cluster": 4,
         "exact_map": 3,
         "fuzzy_map": 2,
@@ -109,14 +112,33 @@ async def _enrich_with_names(
             data = json.loads(raw)
             results = data.get("results", [])
             if results:
-                c["name_cs"] = results[0].get(
-                    "name_cs", ""
-                )
+                c["name_cs"] = results[0].get("name_cs", "")
         except Exception:
-            logger.debug(
-                "Failed to enrich name for %s", code
-            )
+            logger.debug("Failed to enrich name for %s", code)
     return candidates
+
+
+def _match_direct_keywords(
+    tokens: list[str],
+) -> list[dict]:
+    """Match tokens against direct diagnosis keywords.
+
+    Returns candidates with high score for direct name
+    matches (e.g. 'hypertenze' -> I10).
+    """
+    results: list[dict] = []
+    seen: set[str] = set()
+    for token in tokens:
+        code = lookup_direct_keyword(token)
+        if code and code not in seen:
+            results.append({
+                "code": code,
+                "name_cs": "",
+                "score": _SCORE_DIRECT,
+                "match_type": "direct",
+            })
+            seen.add(code)
+    return results
 
 
 def _match_exact(token: str) -> list[dict]:
@@ -168,9 +190,7 @@ async def _match_text(token: str) -> list[dict]:
             for r in results
         ]
     except Exception:
-        logger.warning(
-            "MKN search failed for token: %s", token
-        )
+        logger.warning("MKN search failed for token: %s", token)
         return []
 
 
@@ -182,8 +202,7 @@ def _validate_input(symptoms: str) -> list[str]:
     stripped = symptoms.strip()
     if not stripped:
         raise ValueError(
-            "Zadejte popis symptomů (např. "
-            "'bolest hlavy, horečka')."
+            "Zadejte popis symptomů (např. 'bolest hlavy, horečka')."
         )
 
     if _is_mkn_code(stripped):
@@ -196,8 +215,7 @@ def _validate_input(symptoms: str) -> list[str]:
     tokens = _split_symptoms(stripped)
     if not tokens:
         raise ValueError(
-            "Zadejte popis symptomů (např. "
-            "'bolest hlavy, horečka')."
+            "Zadejte popis symptomů (např. 'bolest hlavy, horečka')."
         )
     return tokens
 
@@ -268,6 +286,10 @@ async def search_diagnoses(
     """
     tokens = _validate_input(symptoms)
     raw_candidates: list[dict] = []
+
+    # Phase 0: direct diagnosis keyword matching
+    direct_hits = _match_direct_keywords(tokens)
+    raw_candidates.extend(direct_hits)
 
     # Phase 1: cluster matching on full query
     cluster_hits = _match_clusters(symptoms)

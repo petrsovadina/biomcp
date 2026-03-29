@@ -18,6 +18,39 @@ from ..render import to_markdown
 
 logger = logging.getLogger(__name__)
 
+_ISOFORM_LIMIT = 3
+
+
+def _truncate_isoforms(
+    result: dict,
+) -> dict:
+    """Truncate refseq/ensembl transcript lists.
+
+    Shows only the first few isoforms and adds a
+    summary count for the rest.
+    """
+    for key in ("refseq", "ensembl"):
+        section = result.get(key)
+        if not isinstance(section, dict):
+            continue
+        for field in ("transcript", "translation",
+                      "rna", "protein"):
+            items = section.get(field)
+            if not isinstance(items, list):
+                continue
+            total = len(items)
+            if total > _ISOFORM_LIMIT:
+                section[field] = items[
+                    :_ISOFORM_LIMIT
+                ]
+                extra = total - _ISOFORM_LIMIT
+                section[f"{field}_note"] = (
+                    f"Showing {_ISOFORM_LIMIT} of "
+                    f"{total} {field}s "
+                    f"({extra} more omitted)"
+                )
+    return result
+
 
 async def get_gene(
     gene_id_or_symbol: str,
@@ -55,6 +88,9 @@ async def get_gene(
 
         # Convert to dict for rendering
         result = gene_info.model_dump(exclude_none=True)
+
+        # Truncate isoform/transcript data
+        result = _truncate_isoforms(result)
 
         # Add helpful links
         if gene_info.entrezgene:

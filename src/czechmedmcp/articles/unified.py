@@ -7,7 +7,7 @@ from collections.abc import Coroutine
 from typing import Any
 
 from .. import render
-from ..constants import compute_skip
+from ..constants import ARTICLE_SEARCH_HARD_TIMEOUT, compute_skip
 from .preprints import search_preprints
 from .search import PubmedRequest, search_articles
 
@@ -183,8 +183,18 @@ async def search_articles_unified(  # noqa: C901
         if not tasks:
             return json.dumps([]) if output_json else render.to_markdown([])
 
-        # Run all operations in parallel
-        results = await asyncio.gather(*tasks, return_exceptions=True)
+        # Run all operations in parallel with hard timeout
+        try:
+            results = await asyncio.wait_for(
+                asyncio.gather(*tasks, return_exceptions=True),
+                timeout=ARTICLE_SEARCH_HARD_TIMEOUT,
+            )
+        except asyncio.TimeoutError:
+            logger.warning(
+                "Article search timed out after %.0fs",
+                ARTICLE_SEARCH_HARD_TIMEOUT,
+            )
+            results = [asyncio.TimeoutError() for _ in tasks]
 
         # Create result map for easier processing
         result_map = dict(zip(task_labels, results, strict=False))
@@ -206,13 +216,16 @@ async def search_articles_unified(  # noqa: C901
         all_articles = _parse_search_results(article_results)
         unique_articles = _deduplicate_articles(all_articles)
 
-        # Sort by publication state (peer-reviewed first) and then by date
+        # Sort by publication state (peer-reviewed first)
+        # then by date (newest first).
+        # With reverse=True, higher values sort first:
+        # peer_reviewed=1 > preprint=0, newer date > older.
         unique_articles.sort(
             key=lambda x: (
-                0
+                1
                 if x.get("publication_state", "peer_reviewed")
                 == "peer_reviewed"
-                else 1,
+                else 0,
                 x.get("date", "0000-00-00"),
             ),
             reverse=True,

@@ -17,6 +17,7 @@ import logging
 from typing import Any
 from urllib.parse import quote
 
+import httpx
 from pydantic import BaseModel, Field
 
 from .. import http_client
@@ -423,18 +424,17 @@ class BioThingsClient:
             if any(
                 drug_id_or_name.upper().startswith(prefix)
                 for prefix in [
-                    "DRUGBANK:", "DB", "CHEMBL",
-                    "CHEBI:", "CID",
+                    "DRUGBANK:",
+                    "DB",
+                    "CHEMBL",
+                    "CHEBI:",
+                    "CID",
                 ]
             ):
-                return await self._get_drug_by_id(
-                    drug_id_or_name, fields
-                )
+                return await self._get_drug_by_id(drug_id_or_name, fields)
 
             # Otherwise, query by name
-            query_result = await self._query_drug(
-                drug_id_or_name
-            )
+            query_result = await self._query_drug(drug_id_or_name)
             if not query_result:
                 return None
 
@@ -445,9 +445,7 @@ class BioThingsClient:
                 return None
 
             # Now get full details
-            drug_info = await self._get_drug_by_id(
-                drug_id, fields
-            )
+            drug_info = await self._get_drug_by_id(drug_id, fields)
 
             # Fall back to query hit name if GET
             # response lacks a name
@@ -460,8 +458,7 @@ class BioThingsClient:
 
         except Exception as e:
             self.logger.warning(
-                "Failed to get drug info for "
-                f"{drug_id_or_name}: {e}"
+                f"Failed to get drug info for {drug_id_or_name}: {e}"
             )
             return None
 
@@ -521,15 +518,14 @@ class BioThingsClient:
             chebi_name = chebi.get("name", "")
 
             names = [
-                db_name, chembl_name,
-                unii_name, chebi_name,
+                db_name,
+                chembl_name,
+                unii_name,
+                chebi_name,
             ]
 
             # Exact match gets highest priority
-            if any(
-                n and n.lower() == name_lower
-                for n in names
-            ):
+            if any(n and n.lower() == name_lower for n in names):
                 score += 1000
 
             # Boost for having drug name fields
@@ -672,3 +668,51 @@ class BioThingsClient:
             return None
 
         return response
+
+
+def _extract_nested(data: dict, path: str):
+    """Extract a value from nested dict using dot notation."""
+    keys = path.split(".")
+    current = data
+    for key in keys:
+        if isinstance(current, dict):
+            current = current.get(key)
+        else:
+            return None
+    return current
+
+
+async def search_drug_by_name(
+    name: str,
+) -> str | None:
+    """Search MyChem.info for a drug by common name.
+
+    Returns the best matching drug ID (DrugBank or ChEMBL),
+    or None if no match found.
+    """
+    url = "https://mychem.info/v1/query"
+    params = {
+        "q": name,
+        "fields": ("drugbank.id,chembl.molecule_chembl_id,drugbank.name"),
+        "size": 1,
+    }
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            resp = await client.get(url, params=params)
+            resp.raise_for_status()
+            data = resp.json()
+    except Exception:
+        return None
+
+    hits = data.get("hits", [])
+    if not hits:
+        return None
+
+    hit = hits[0]
+    # Prefer DrugBank ID
+    db_id = _extract_nested(hit, "drugbank.id")
+    if db_id:
+        return db_id
+    # Fallback to ChEMBL ID
+    chembl_id = _extract_nested(hit, "chembl.molecule_chembl_id")
+    return chembl_id

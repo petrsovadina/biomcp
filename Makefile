@@ -58,16 +58,13 @@ help:
 .DEFAULT_GOAL := help
 
 .PHONY: deploy
-deploy: ## Deploy production stack (Docker + Caddy HTTPS)
-	docker compose -f docker-compose.prod.yml up -d --build
-
-.PHONY: deploy-stop
-deploy-stop: ## Stop production stack
-	docker compose -f docker-compose.prod.yml down
+deploy: docker-build ## Deploy via Railway (production)
+	@echo "🚀 Production deploy is handled by Railway CI/CD on push to main"
+	@echo "   Manual: railway up --service czechmedmcp-server"
 
 .PHONY: deploy-logs
-deploy-logs: ## Show production logs
-	docker compose -f docker-compose.prod.yml logs -f
+deploy-logs: ## Show Railway production logs
+	railway logs --service czechmedmcp-server
 
 .PHONY: docker-build
 docker-build: ## Build Docker image

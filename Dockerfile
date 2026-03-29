@@ -8,15 +8,17 @@ RUN apt-get update \
        gcc build-essential libxml2-dev libxslt1-dev \
     && rm -rf /var/lib/apt/lists/*
 
+# Install uv for fast dependency resolution
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+
 # Install Python package
-COPY pyproject.toml README.md LICENSE ./
+COPY pyproject.toml README.md LICENSE uv.lock ./
 COPY src ./src
-RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir ".[worker]"
+RUN uv pip install --system --no-cache ".[worker]"
 
 ENV MCP_MODE=streamable_http
 ENV PORT=8000
 ENV PYTHONUNBUFFERED=1
 
-# Railway nastaví PORT automaticky
+# Railway sets PORT automatically
 CMD ["sh", "-c", "czechmedmcp run --mode streamable_http --host 0.0.0.0 --port ${PORT}"]

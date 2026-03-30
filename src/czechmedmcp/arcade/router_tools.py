@@ -184,7 +184,7 @@ async def search(
 
 @arcade_app.tool
 async def fetch(
-    id: Annotated[  # noqa: A002
+    id: Annotated[
         str,
         "PMID / NCT ID / Variant ID / DOI / Gene ID / Drug ID / Disease ID / NCI Organization ID / NCI Intervention ID / NCI Disease ID / FDA Report ID / FDA Set ID / FDA MDR Key / FDA Application Number / FDA Recall Number",
     ],

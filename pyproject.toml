@@ -184,6 +184,9 @@ ignore = [
 [tool.ruff.format]
 preview = true
 
+[tool.ruff.lint.flake8-builtins]
+builtins-ignorelist = ["id"]
+
 [tool.ruff.lint.flake8-bugbear]
 extend-immutable-calls = [
     "fastapi.Depends",

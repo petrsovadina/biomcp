@@ -400,7 +400,7 @@ async def search(
 @mcp_app.tool()
 @track_performance("czechmedmcp.fetch")
 async def fetch(
-    id: Annotated[  # noqa: A002
+    id: Annotated[
         str,
         "PMID / NCT ID / Variant ID / DOI / Gene ID / Drug ID / Disease ID / NCI Organization ID / NCI Intervention ID / NCI Disease ID / FDA Report ID / FDA Set ID / FDA MDR Key / FDA Application Number / FDA Recall Number",
     ],
@@ -635,7 +635,7 @@ async def fetch(
         raise InvalidDomainError(domain, VALID_DOMAINS)
 
     return await handler(
-        id=id,
+        identifier=id,
         detail=detail,
         api_key=api_key,
         call_benefit=call_benefit,

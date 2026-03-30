@@ -1,16 +1,26 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "globalDependencies": ["**/.env.*local"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [".next/**", "!.next/cache/**", "out/**"]
+      "inputs": ["src/**", "app/**", "pages/**", "components/**", "lib/**", "public/**", "package.json", "tsconfig.json", "next.config.*", "tailwind.config.*", "postcss.config.*", "theme.config.*"],
+      "outputs": [".next/**", "!.next/cache/**", "out/**", "dist/**"]
     },
     "dev": {
       "cache": false,
       "persistent": true
     },
     "lint": {
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build"],
+      "outputs": []
+    },
+    "type-check": {
+      "dependsOn": ["^build"],
+      "outputs": []
+    },
+    "clean": {
+      "cache": false
     }
   }
 }

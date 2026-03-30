@@ -8,7 +8,9 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "type-check": "tsc --noEmit",
+    "lint": "next lint"
   },
   "dependencies": {
     "clsx": "^2",
@@ -19,6 +21,7 @@
     "tailwind-merge": "^3"
   },
   "devDependencies": {
+    "@czechmedmcp/tsconfig": "*",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^22",
     "@types/react": "^19",

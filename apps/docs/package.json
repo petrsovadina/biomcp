@@ -8,18 +8,23 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "type-check": "tsc --noEmit"
+  },
+  "optionalDependencies": {
+    "@napi-rs/simple-git-linux-x64-gnu": "0.1.19"
   },
   "dependencies": {
-    "@napi-rs/simple-git-linux-x64-gnu": "0.1.19",
     "next": "^15",
     "nextra": "^4.6.1",
     "nextra-theme-docs": "^4.6.1",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4"
+    "react": "^19",
+    "react-dom": "^19"
   },
   "devDependencies": {
-    "@types/node": "25.3.5",
-    "@types/react": "19.2.14"
+    "@czechmedmcp/tsconfig": "*",
+    "@types/node": "^22",
+    "@types/react": "^19",
+    "typescript": "^5"
   }
 }

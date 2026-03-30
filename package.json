@@ -9,6 +9,8 @@
     "dev": "turbo dev",
     "build": "turbo build",
     "lint": "turbo lint",
+    "type-check": "turbo type-check",
+    "clean": "turbo clean && rm -rf node_modules",
     "dev:web": "turbo dev --filter=web",
     "dev:docs": "turbo dev --filter=czechmedmcp-docs",
     "build:web": "turbo build --filter=web",

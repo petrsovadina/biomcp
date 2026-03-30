@@ -133,11 +133,32 @@ jobs:
         run: |
           uv run python -m pytest tests/tdd/test_mcp_integration.py -v
 
+  # Frontend build and type check
+  frontend:
+    runs-on: ubuntu-latest
+    name: Frontend Build & Type Check
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npm run type-check
+
+      - name: Build
+        run: npm run build
+
   # Deploy to Railway on push to main (after tests pass)
   deploy-railway:
     runs-on: ubuntu-latest
     name: Deploy to Railway
-    needs: [quality, tests-and-type-check, build-package, test-mcp]
+    needs: [quality, tests-and-type-check, build-package, test-mcp, frontend]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v6

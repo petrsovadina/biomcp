@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 async def handle_article_fetch(
-    id: str,  # noqa: A002
+    identifier: str,
     call_benefit: str | None = None,
     **_: Any,
 ) -> dict:
@@ -30,7 +30,7 @@ async def handle_article_fetch(
         result_str = await _article_details(
             call_benefit=call_benefit
             or "Fetching article details via MCP tool",
-            pmid=id,
+            pmid=identifier,
         )
     except Exception as e:
         logger.error(f"Article fetch failed: {e}")
@@ -59,12 +59,12 @@ async def handle_article_fetch(
     text_content = full_text if full_text else abstract
 
     return {
-        "id": str(article.get("pmid", id)),
+        "id": str(article.get("pmid", identifier)),
         "title": article.get("title", DEFAULT_TITLE),
         "text": text_content,
         "url": article.get(
             "url",
-            f"https://pubmed.ncbi.nlm.nih.gov/{id}/",
+            f"https://pubmed.ncbi.nlm.nih.gov/{identifier}/",
         ),
         "metadata": {
             "pmid": article.get("pmid"),
@@ -80,7 +80,7 @@ async def handle_article_fetch(
 
 
 async def handle_trial_fetch(  # noqa: C901
-    id: str,  # noqa: A002
+    identifier: str,
     detail: str | None = None,
     **_: Any,
 ) -> dict:
@@ -98,7 +98,7 @@ async def handle_trial_fetch(  # noqa: C901
 
     try:
         protocol_json = await trial_getter.get_trial(
-            nct_id=id,
+            nct_id=identifier,
             module=trial_getter.Module.PROTOCOL,
             output_json=True,
         )
@@ -106,29 +106,38 @@ async def handle_trial_fetch(  # noqa: C901
         try:
             protocol_data = json.loads(protocol_json)
         except json.JSONDecodeError as e:
-            logger.error(f"Failed to parse protocol JSON for {id}: {e}")
+            logger.error(
+                "Failed to parse protocol JSON"
+                f" for {identifier}: {e}"
+            )
             return {
-                "id": id,
-                "title": f"Clinical Trial {id}",
+                "id": identifier,
+                "title": f"Clinical Trial {identifier}",
                 "text": f"Error parsing trial data: {e}",
-                "url": (f"https://clinicaltrials.gov/study/{id}"),
+                "url": (
+                    "https://clinicaltrials.gov"
+                    f"/study/{identifier}"
+                ),
                 "metadata": {
-                    "nct_id": id,
+                    "nct_id": identifier,
                     "error": f"JSON parse error: {e}",
                 },
             }
 
         if "error" in protocol_data:
             return {
-                "id": id,
-                "title": f"Clinical Trial {id}",
+                "id": identifier,
+                "title": f"Clinical Trial {identifier}",
                 "text": protocol_data.get(
                     "details",
                     protocol_data.get("error", "Trial not found"),
                 ),
-                "url": (f"https://clinicaltrials.gov/study/{id}"),
+                "url": (
+                    "https://clinicaltrials.gov"
+                    f"/study/{identifier}"
+                ),
                 "metadata": {
-                    "nct_id": id,
+                    "nct_id": identifier,
                     "error": protocol_data.get("error"),
                 },
             }
@@ -143,7 +152,9 @@ async def handle_trial_fetch(  # noqa: C901
         design_module = protocol_section.get("designModule", {})
         arms_module = protocol_section.get("armsInterventionsModule", {})
 
-        title = id_module.get("briefTitle", f"Clinical Trial {id}")
+        title = id_module.get(
+            "briefTitle", f"Clinical Trial {identifier}"
+        )
         text_parts.append(f"Study Title: {title}")
 
         conditions = conditions_module.get("conditions", [])
@@ -167,7 +178,7 @@ async def handle_trial_fetch(  # noqa: C901
         text_parts.append(f"\nSummary: {brief_summary}")
 
         metadata: dict[str, Any] = {
-            "nct_id": id,
+            "nct_id": identifier,
             "protocol": protocol_data,
         }
 
@@ -180,7 +191,7 @@ async def handle_trial_fetch(  # noqa: C901
             if detail in ("all", "locations"):
                 try:
                     locations_json = await trial_getter.get_trial(
-                        nct_id=id,
+                        nct_id=identifier,
                         module=trial_getter.Module.LOCATIONS,
                         output_json=True,
                     )
@@ -201,13 +212,16 @@ async def handle_trial_fetch(  # noqa: C901
                                 " study sites"
                             )
                 except Exception as e:
-                    logger.warning(f"Failed to fetch locations for {id}: {e}")
+                    logger.warning(
+                        "Failed to fetch locations"
+                        f" for {identifier}: {e}"
+                    )
                     metadata["locations"] = []
 
             if detail in ("all", "outcomes"):
                 try:
                     outcomes_json = await trial_getter.get_trial(
-                        nct_id=id,
+                        nct_id=identifier,
                         module=trial_getter.Module.OUTCOMES,
                         output_json=True,
                     )
@@ -231,13 +245,16 @@ async def handle_trial_fetch(  # noqa: C901
                                 " measures"
                             )
                 except Exception as e:
-                    logger.warning(f"Failed to fetch outcomes for {id}: {e}")
+                    logger.warning(
+                        "Failed to fetch outcomes"
+                        f" for {identifier}: {e}"
+                    )
                     metadata["outcomes"] = {}
 
             if detail in ("all", "references"):
                 try:
                     references_json = await trial_getter.get_trial(
-                        nct_id=id,
+                        nct_id=identifier,
                         module=(trial_getter.Module.REFERENCES),
                         output_json=True,
                     )
@@ -257,14 +274,20 @@ async def handle_trial_fetch(  # noqa: C901
                                 " publications"
                             )
                 except Exception as e:
-                    logger.warning(f"Failed to fetch references for {id}: {e}")
+                    logger.warning(
+                        "Failed to fetch references"
+                        f" for {identifier}: {e}"
+                    )
                     metadata["references"] = []
 
         return {
-            "id": id,
+            "id": identifier,
             "title": title,
             "text": "\n".join(text_parts),
-            "url": (f"https://clinicaltrials.gov/study/{id}"),
+            "url": (
+                "https://clinicaltrials.gov"
+                f"/study/{identifier}"
+            ),
             "metadata": metadata,
         }
 
@@ -274,7 +297,7 @@ async def handle_trial_fetch(  # noqa: C901
 
 
 async def handle_variant_fetch(  # noqa: C901
-    id: str,  # noqa: A002
+    identifier: str,
     **_: Any,
 ) -> dict:
     """Handle variant domain fetch."""
@@ -283,7 +306,7 @@ async def handle_variant_fetch(  # noqa: C901
         from czechmedmcp.variants.getter import get_variant
 
         result_str = await get_variant(
-            variant_id=id,
+            variant_id=identifier,
             output_json=True,
             include_external=True,
         )
@@ -309,7 +332,9 @@ async def handle_variant_fetch(  # noqa: C901
         return {"error": "Variant not found"}
 
     text_parts = []
-    text_parts.append(f"Variant: {variant_data.get('_id', id)}")
+    text_parts.append(
+        f"Variant: {variant_data.get('_id', identifier)}"
+    )
 
     if variant_data.get("gene"):
         gene_info = variant_data["gene"]
@@ -361,11 +386,16 @@ async def handle_variant_fetch(  # noqa: C901
             f"https://www.ncbi.nlm.nih.gov/snp/{variant_data['dbsnp']['rsid']}"
         )
     elif not url:
-        url = f"https://myvariant.info/v1/variant/{id}"
+        url = (
+            "https://myvariant.info/v1"
+            f"/variant/{identifier}"
+        )
 
     return {
-        "id": variant_data.get("_id", id),
-        "title": (f"Variant {variant_data.get('_id', id)}"),
+        "id": variant_data.get("_id", identifier),
+        "title": (
+            f"Variant {variant_data.get('_id', identifier)}"
+        ),
         "text": "\n".join(text_parts),
         "url": url,
         "metadata": variant_data,
@@ -373,7 +403,7 @@ async def handle_variant_fetch(  # noqa: C901
 
 
 async def handle_gene_fetch(
-    id: str,  # noqa: A002
+    identifier: str,
     **_: Any,
 ) -> dict:
     """Handle gene domain fetch."""
@@ -384,10 +414,10 @@ async def handle_gene_fetch(
         )
 
         client = BioThingsClient()
-        gene_info = await client.get_gene_info(id)
+        gene_info = await client.get_gene_info(identifier)
 
         if not gene_info:
-            return {"error": f"Gene {id} not found"}
+            return {"error": f"Gene {identifier} not found"}
 
         text_parts = []
         text_parts.append(f"Gene: {gene_info.symbol} ({gene_info.name})")
@@ -430,7 +460,7 @@ async def handle_gene_fetch(
 
 
 async def handle_drug_fetch(  # noqa: C901
-    id: str,  # noqa: A002
+    identifier: str,
     **_: Any,
 ) -> dict:
     """Handle drug domain fetch."""
@@ -441,10 +471,10 @@ async def handle_drug_fetch(  # noqa: C901
         )
 
         client = BioThingsClient()
-        drug_info = await client.get_drug_info(id)
+        drug_info = await client.get_drug_info(identifier)
 
         if not drug_info:
-            return {"error": f"Drug {id} not found"}
+            return {"error": f"Drug {identifier} not found"}
 
         text_parts = []
         text_parts.append(f"Drug: {drug_info.name}")
@@ -494,7 +524,7 @@ async def handle_drug_fetch(  # noqa: C901
 
 
 async def handle_disease_fetch(  # noqa: C901
-    id: str,  # noqa: A002
+    identifier: str,
     **_: Any,
 ) -> dict:
     """Handle disease domain fetch."""
@@ -505,10 +535,12 @@ async def handle_disease_fetch(  # noqa: C901
         )
 
         client = BioThingsClient()
-        disease_info = await client.get_disease_info(id)
+        disease_info = await client.get_disease_info(identifier)
 
         if not disease_info:
-            return {"error": f"Disease {id} not found"}
+            return {
+                "error": f"Disease {identifier} not found"
+            }
 
         text_parts = []
         text_parts.append(f"Disease: {disease_info.name}")
@@ -557,7 +589,7 @@ async def handle_disease_fetch(  # noqa: C901
 
 
 async def handle_nci_organization_fetch(
-    id: str,  # noqa: A002
+    identifier: str,
     api_key: str | None = None,
     **_: Any,
 ) -> dict:
@@ -570,15 +602,17 @@ async def handle_nci_organization_fetch(
         )
 
         org_data = await get_organization(
-            org_id=id,
+            org_id=identifier,
             api_key=api_key,
         )
 
         formatted_text = format_organization_details(org_data)
 
         return {
-            "id": id,
-            "title": org_data.get("name", "Unknown Organization"),
+            "id": identifier,
+            "title": org_data.get(
+                "name", "Unknown Organization"
+            ),
             "text": formatted_text,
             "url": "",
             "metadata": org_data,
@@ -590,7 +624,7 @@ async def handle_nci_organization_fetch(
 
 
 async def handle_nci_intervention_fetch(
-    id: str,  # noqa: A002
+    identifier: str,
     api_key: str | None = None,
     **_: Any,
 ) -> dict:
@@ -603,15 +637,17 @@ async def handle_nci_intervention_fetch(
         )
 
         intervention_data = await get_intervention(
-            intervention_id=id,
+            intervention_id=identifier,
             api_key=api_key,
         )
 
         formatted_text = format_intervention_details(intervention_data)
 
         return {
-            "id": id,
-            "title": intervention_data.get("name", "Unknown Intervention"),
+            "id": identifier,
+            "title": intervention_data.get(
+                "name", "Unknown Intervention"
+            ),
             "text": formatted_text,
             "url": "",
             "metadata": intervention_data,
@@ -623,7 +659,7 @@ async def handle_nci_intervention_fetch(
 
 
 async def handle_nci_disease_fetch(
-    id: str,  # noqa: A002
+    identifier: str,
     api_key: str | None = None,
     **_: Any,
 ) -> dict:
@@ -633,7 +669,7 @@ async def handle_nci_disease_fetch(
         from czechmedmcp.diseases import get_disease_by_id
 
         disease_data = await get_disease_by_id(
-            disease_id=id,
+            disease_id=identifier,
             api_key=api_key,
         )
 
@@ -662,7 +698,7 @@ async def handle_nci_disease_fetch(
                     text_parts.append(f"\nCodes: {', '.join(code_items)}")
 
         return {
-            "id": id,
+            "id": identifier,
             "title": disease_data.get(
                 "name",
                 disease_data.get(
@@ -681,127 +717,139 @@ async def handle_nci_disease_fetch(
 
 
 async def handle_fda_adverse_fetch(
-    id: str,  # noqa: A002
+    identifier: str,
     api_key: str | None = None,
     **_: Any,
 ) -> dict:
     """Handle FDA adverse event domain fetch."""
     from czechmedmcp.openfda import get_adverse_event
 
-    result = await get_adverse_event(id, api_key=api_key)
+    result = await get_adverse_event(
+        identifier, api_key=api_key
+    )
     return {
-        "title": f"FDA Adverse Event Report {id}",
+        "title": f"FDA Adverse Event Report {identifier}",
         "text": result,
         "url": "",
         "metadata": {
-            "report_id": id,
+            "report_id": identifier,
             "domain": "fda_adverse",
         },
     }
 
 
 async def handle_fda_label_fetch(
-    id: str,  # noqa: A002
+    identifier: str,
     api_key: str | None = None,
     **_: Any,
 ) -> dict:
     """Handle FDA drug label domain fetch."""
     from czechmedmcp.openfda import get_drug_label
 
-    result = await get_drug_label(id, api_key=api_key)
+    result = await get_drug_label(
+        identifier, api_key=api_key
+    )
     return {
-        "title": f"FDA Drug Label {id}",
+        "title": f"FDA Drug Label {identifier}",
         "text": result,
         "url": "",
         "metadata": {
-            "set_id": id,
+            "set_id": identifier,
             "domain": "fda_label",
         },
     }
 
 
 async def handle_fda_device_fetch(
-    id: str,  # noqa: A002
+    identifier: str,
     api_key: str | None = None,
     **_: Any,
 ) -> dict:
     """Handle FDA device event domain fetch."""
     from czechmedmcp.openfda import get_device_event
 
-    result = await get_device_event(id, api_key=api_key)
+    result = await get_device_event(
+        identifier, api_key=api_key
+    )
     return {
-        "title": f"FDA Device Event {id}",
+        "title": f"FDA Device Event {identifier}",
         "text": result,
         "url": "",
         "metadata": {
-            "mdr_report_key": id,
+            "mdr_report_key": identifier,
             "domain": "fda_device",
         },
     }
 
 
 async def handle_fda_approval_fetch(
-    id: str,  # noqa: A002
+    identifier: str,
     api_key: str | None = None,
     **_: Any,
 ) -> dict:
     """Handle FDA drug approval domain fetch."""
     from czechmedmcp.openfda import get_drug_approval
 
-    result = await get_drug_approval(id, api_key=api_key)
+    result = await get_drug_approval(
+        identifier, api_key=api_key
+    )
     return {
-        "title": f"FDA Drug Approval {id}",
+        "title": f"FDA Drug Approval {identifier}",
         "text": result,
         "url": "",
         "metadata": {
-            "application_number": id,
+            "application_number": identifier,
             "domain": "fda_approval",
         },
     }
 
 
 async def handle_fda_recall_fetch(
-    id: str,  # noqa: A002
+    identifier: str,
     api_key: str | None = None,
     **_: Any,
 ) -> dict:
     """Handle FDA drug recall domain fetch."""
     from czechmedmcp.openfda import get_drug_recall
 
-    result = await get_drug_recall(id, api_key=api_key)
+    result = await get_drug_recall(
+        identifier, api_key=api_key
+    )
     return {
-        "title": f"FDA Drug Recall {id}",
+        "title": f"FDA Drug Recall {identifier}",
         "text": result,
         "url": "",
         "metadata": {
-            "recall_number": id,
+            "recall_number": identifier,
             "domain": "fda_recall",
         },
     }
 
 
 async def handle_fda_shortage_fetch(
-    id: str,  # noqa: A002
+    identifier: str,
     api_key: str | None = None,
     **_: Any,
 ) -> dict:
     """Handle FDA drug shortage domain fetch."""
     from czechmedmcp.openfda import get_drug_shortage
 
-    result = await get_drug_shortage(id, api_key=api_key)
+    result = await get_drug_shortage(
+        identifier, api_key=api_key
+    )
     return {
-        "title": f"FDA Drug Shortage - {id}",
+        "title": f"FDA Drug Shortage - {identifier}",
         "text": result,
         "url": "",
         "metadata": {
-            "drug": id,
+            "drug": identifier,
             "domain": "fda_shortage",
         },
     }
 
 
 async def handle_sukl_drug_fetch(
-    id: str,  # noqa: A002
+    identifier: str,
     **_: Any,
 ) -> dict:
     """Handle SUKL drug domain fetch."""
@@ -809,83 +857,85 @@ async def handle_sukl_drug_fetch(
         _sukl_drug_details,
     )
 
-    result = await _sukl_drug_details(id)
+    result = await _sukl_drug_details(identifier)
     return {
-        "id": id,
-        "title": f"SUKL Drug - {id}",
+        "id": identifier,
+        "title": f"SUKL Drug - {identifier}",
         "text": result,
         "url": (
-            f"https://www.sukl.cz/modules/medication/detail.php?code={id}"
+            "https://www.sukl.cz/modules"
+            "/medication/detail.php"
+            f"?code={identifier}"
         ),
         "metadata": {
-            "sukl_code": id,
+            "sukl_code": identifier,
             "domain": "sukl_drug",
         },
     }
 
 
 async def handle_mkn_diagnosis_fetch(
-    id: str,  # noqa: A002
+    identifier: str,
     **_: Any,
 ) -> dict:
     """Handle MKN diagnosis domain fetch."""
     from czechmedmcp.czech.mkn.search import _mkn_get
 
-    result = await _mkn_get(id)
+    result = await _mkn_get(identifier)
     return {
-        "id": id,
-        "title": f"MKN-10 Diagnosis - {id}",
+        "id": identifier,
+        "title": f"MKN-10 Diagnosis - {identifier}",
         "text": result,
         "url": "",
         "metadata": {
-            "code": id,
+            "code": identifier,
             "domain": "mkn_diagnosis",
         },
     }
 
 
 async def handle_nrpzs_provider_fetch(
-    id: str,  # noqa: A002
+    identifier: str,
     **_: Any,
 ) -> dict:
     """Handle NRPZS provider domain fetch."""
     from czechmedmcp.czech.nrpzs.search import _nrpzs_get
 
-    result = await _nrpzs_get(id)
+    result = await _nrpzs_get(identifier)
     return {
-        "id": id,
-        "title": f"NRPZS Provider - {id}",
+        "id": identifier,
+        "title": f"NRPZS Provider - {identifier}",
         "text": result,
         "url": "",
         "metadata": {
-            "provider_id": id,
+            "provider_id": identifier,
             "domain": "nrpzs_provider",
         },
     }
 
 
 async def handle_szv_procedure_fetch(
-    id: str,  # noqa: A002
+    identifier: str,
     **_: Any,
 ) -> dict:
     """Handle SZV procedure domain fetch."""
     from czechmedmcp.czech.szv.search import _szv_get
 
-    result = await _szv_get(id)
+    result = await _szv_get(identifier)
     return {
-        "id": id,
-        "title": f"SZV Procedure - {id}",
+        "id": identifier,
+        "title": f"SZV Procedure - {identifier}",
         "text": result,
         "url": "",
         "metadata": {
-            "code": id,
+            "code": identifier,
             "domain": "szv_procedure",
         },
     }
 
 
 async def handle_vzp_reimbursement_fetch(
-    id: str,  # noqa: A002
+    identifier: str,
     **_: Any,
 ) -> dict:
     """Handle VZP reimbursement domain fetch."""
@@ -893,14 +943,14 @@ async def handle_vzp_reimbursement_fetch(
         _get_vzp_drug_reimbursement,
     )
 
-    result = await _get_vzp_drug_reimbursement(id)
+    result = await _get_vzp_drug_reimbursement(identifier)
     return {
-        "id": id,
-        "title": f"VZP Reimbursement - {id}",
+        "id": identifier,
+        "title": f"VZP Reimbursement - {identifier}",
         "text": result,
         "url": "",
         "metadata": {
-            "sukl_code": id,
+            "sukl_code": identifier,
             "domain": "vzp_reimbursement",
         },
     }

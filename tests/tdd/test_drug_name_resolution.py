@@ -278,7 +278,7 @@ class TestDrugFetchHandler:
             mock_api,
         )
 
-        result = await handle_drug_fetch(id="metformin")
+        result = await handle_drug_fetch(identifier="metformin")
 
         assert result["title"] == "Metformin"
         assert "Drug: Metformin" in result["text"]
@@ -297,7 +297,7 @@ class TestDrugFetchHandler:
         )
 
         result = await handle_drug_fetch(
-            id="xyznonexistent123",
+            identifier="xyznonexistent123",
         )
 
         assert "error" in result
